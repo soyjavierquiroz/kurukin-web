@@ -32,11 +32,11 @@ export function SocialProof() {
   ];
 
   return (
-    <section id="social-proof" className="relative py-24 px-6 overflow-hidden">
+    <section id="social-proof" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Casos reales.{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -48,7 +48,7 @@ export function SocialProof() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {testimonials.map((t, index) => (
             <div
               key={index}
@@ -89,7 +89,7 @@ export function SocialProof() {
         </div>
 
         {/* Bloque inferior sin métricas inventadas */}
-        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-12 text-center">
+        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-10 text-center">
           <h3 className="text-3xl font-bold text-white mb-4">
             La diferencia es simple: responder a tiempo.
           </h3>

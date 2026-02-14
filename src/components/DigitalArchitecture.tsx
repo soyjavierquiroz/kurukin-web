@@ -25,11 +25,11 @@ export function DigitalArchitecture() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-24 px-6 overflow-hidden bg-slate-950">
+    <section id="how-it-works" className="relative py-20 px-6 overflow-hidden bg-slate-950">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Cómo funciona{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -38,7 +38,7 @@ export function DigitalArchitecture() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {steps.map((step, index) => (
             <div
               key={index}
@@ -54,10 +54,10 @@ export function DigitalArchitecture() {
           ))}
         </div>
 
-        <div className="relative bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-12">
+        <div className="relative bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-10">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-500/20 via-transparent to-transparent rounded-2xl"></div>
 
-          <div className="relative grid md:grid-cols-2 gap-8 items-center">
+          <div className="relative grid md:grid-cols-2 gap-6 items-center">
             <div>
               <h3 className="text-3xl font-bold text-white mb-4">Pruébalo ahora (en vivo)</h3>
               <p className="text-xl text-slate-300 mb-6">

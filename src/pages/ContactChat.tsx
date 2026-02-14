@@ -55,7 +55,7 @@ export function ContactChat() {
           </h1>
 
           <p className="text-slate-400 text-base md:text-xl mb-5 max-w-2xl mx-auto">
-            En 30 segundos puedes ver cómo sería tener un asistente que responde por ti.
+            En menos de 30 segundos puedes ver cómo sería tener un asistente que responde por ti 24/7.
           </p>
 
           <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
@@ -89,34 +89,40 @@ export function ContactChat() {
         <section className="py-6 md:py-8 max-w-3xl mx-auto text-center">
           <p className="text-sm text-cyan-400 mb-4">Así empieza la conversación…</p>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl shadow-cyan-900/20 max-w-sm mx-auto text-left">
-            <div className="opacity-100 translate-y-0 animate-fade-in animate-slide-up transition-all duration-500">
-              <div className="max-w-[85%] bg-slate-800 rounded-2xl rounded-bl-md px-3 py-2">
-                <p className="text-white text-sm">Antes de empezar, ¿qué tipo de negocio tienes?</p>
-              </div>
-              <p className="text-slate-500 text-[11px] mt-1">23:47</p>
+          <div className="max-w-md mx-auto bg-[#0b141a]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-cyan-900/20 overflow-hidden mb-6 text-left">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
+              <div className="w-3 h-3 rounded-full bg-red-500/90"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500/90"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500/90"></div>
             </div>
 
-            <div
-              className={[
-                'mt-3 flex flex-col items-end transition-all duration-500',
-                showMessage2 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
-              ].join(' ')}
-            >
-              <div className="max-w-[75%] bg-cyan-700 rounded-2xl rounded-br-md px-3 py-2">
-                <p className="text-white text-sm">Vendo servicios</p>
+            <div className="flex flex-col gap-4 p-5">
+              <div className="opacity-100 translate-y-0 animate-fade-in animate-slide-up transition-all duration-500">
+                <div className="self-start mr-auto w-fit max-w-[85%] bg-[#202c33] text-slate-100 p-3.5 rounded-2xl rounded-tl-sm shadow-md text-[15px] leading-relaxed">
+                  <p className="text-slate-100 text-[15px] leading-relaxed">Antes de empezar, ¿qué tipo de negocio tienes?</p>
+                </div>
               </div>
-              <p className="text-slate-500 text-[11px] mt-1">23:47</p>
-            </div>
 
-            <div
-              className={[
-                'mt-3 transition-all duration-500',
-                showMessage3 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
-              ].join(' ')}
-            >
-              <div className="max-w-[90%] bg-slate-800 rounded-2xl rounded-bl-md px-3 py-2">
-                <p className="text-white text-sm">Perfecto. Entonces responderé como tu asistente comercial.</p>
+              <div
+                className={[
+                  'transition-all duration-500',
+                  showMessage2 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
+                ].join(' ')}
+              >
+                <div className="self-end ml-auto w-fit max-w-[85%] bg-cyan-700 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-md text-[15px] leading-relaxed">
+                  <p className="text-white text-[15px] leading-relaxed">Vendo servicios</p>
+                </div>
+              </div>
+
+              <div
+                className={[
+                  'transition-all duration-500',
+                  showMessage3 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
+                ].join(' ')}
+              >
+                <div className="self-start mr-auto w-fit max-w-[85%] bg-[#202c33] text-slate-100 p-3.5 rounded-2xl rounded-tl-sm shadow-md text-[15px] leading-relaxed">
+                  <p className="text-slate-100 text-[15px] leading-relaxed">Perfecto. Entonces responderé como tu asistente comercial.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -178,7 +184,7 @@ export function ContactChat() {
             onClick={redirectToWhatsApp}
             className="w-full md:w-auto h-14 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-lg text-white px-8 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300"
           >
-            Hablar con Kurukin
+            Presiona para ir a WhatsApp
           </button>
         </section>
 
@@ -197,7 +203,7 @@ export function ContactChat() {
             onClick={redirectToWhatsApp}
             className="w-full md:w-auto h-14 md:h-16 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-lg md:text-xl text-white px-10 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300"
           >
-            Hablar con Kurukin ahora
+            Chatear con Kurukin ahora
           </button>
           <p className="text-slate-400 text-sm mt-3">Disponible 24/7.</p>
         </section>

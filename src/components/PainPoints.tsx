@@ -21,11 +21,11 @@ export function PainPoints() {
   ];
 
   return (
-    <section id="pain-points" className="relative py-24 px-6 overflow-hidden">
+    <section id="pain-points" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Tu negocio no necesita más mensajes.{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">

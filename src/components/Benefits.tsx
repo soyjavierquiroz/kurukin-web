@@ -11,7 +11,7 @@ export function Benefits() {
   ];
 
   return (
-    <section id="benefits" className="relative py-24 px-6 overflow-hidden">
+    <section id="benefits" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
 
       <div className="relative max-w-7xl mx-auto">

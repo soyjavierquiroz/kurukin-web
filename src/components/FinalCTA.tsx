@@ -37,7 +37,7 @@ export function FinalCTA() {
   ];
 
   return (
-    <section id="final-cta" className="relative py-24 px-6 overflow-hidden">
+    <section id="final-cta" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/25 via-slate-900 to-slate-950"></div>
 
       <div className="absolute inset-0">
@@ -46,7 +46,7 @@ export function FinalCTA() {
 
       <div className="relative max-w-6xl mx-auto">
         {/* 6) DEMO */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Pruébalo ahora{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -81,7 +81,7 @@ export function FinalCTA() {
         </div>
 
         {/* 7) PARA QUIÉN ES / NO ES */}
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
           <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6">¿Kurukin es para ti?</h3>
             <ul className="space-y-4">
@@ -108,7 +108,7 @@ export function FinalCTA() {
         </div>
 
         {/* 8) FAQ */}
-        <div className="mb-20">
+        <div className="mb-16">
           <div className="text-center mb-12">
             <h3 className="text-3xl md:text-4xl font-bold text-white">
               Preguntas frecuentes
@@ -139,17 +139,10 @@ export function FinalCTA() {
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 blur-3xl"></div>
 
-          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-12 text-center">
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              Tu trabajo no es responder WhatsApp.{' '}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Tu trabajo es vender.
-              </span>
+          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-10 text-center">
+            <h3 className="text-3xl md:text-4xl font-bold text-white mb-8 leading-tight">
+              Mientras tú respondes mensajes, alguien más está cerrando ventas.
             </h3>
-
-            <p className="text-xl text-slate-300 mb-10 max-w-3xl mx-auto">
-              Prueba el sistema ahora. Si te gusta cómo responde, lo dejamos funcionando para tu negocio.
-            </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch">
               <div className="flex flex-col items-center">
@@ -157,7 +150,7 @@ export function FinalCTA() {
                   href={WHATSAPP_LINK}
                   className="group bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-12 py-5 rounded-lg font-bold text-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-3"
                 >
-                  Probar Kurukin en WhatsApp
+                  Probar en WhatsApp
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                 </a>
                 <p className="text-slate-400 text-sm mt-2">Demostración en vivo. Sin registro.</p>

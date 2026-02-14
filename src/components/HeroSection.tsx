@@ -53,7 +53,7 @@ export function HeroSection() {
             <li className="flex gap-3">
               <span className="mt-1 text-cyan-400">•</span>
               <span>Agenda, deriva o cierra: según lo que tú definas.</span>
-            </li>
+            </li>            
           </ul>
         </div>
 
