@@ -9,6 +9,9 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { ContactChat } from './pages/ContactChat';
 import { ArrowRight, Bot, Check } from 'lucide-react';
 
+// IMPORTACIÓN AÑADIDA: Tu nueva página de pruebas del reproductor
+import { VideoTestPage } from './pages/VideoTestPage';
+
 function HomePage() {
   const chatRef = useRef<HTMLDivElement | null>(null);
   const lastYRef = useRef(0);
@@ -95,12 +98,12 @@ function HomePage() {
             Deja de ser el secretario de tu negocio:
             <br />
             <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              vende mientras WhatsApp responde.
+              vende mientras Kurukin responde.
             </span>
           </h1>
 
           <p className="text-base md:text-2xl text-slate-300 mb-6 max-w-4xl mx-auto">
-            Kurukin atiende tus consultas por WhatsApp 24/7 y te entrega conversaciones listas para cerrar y hacer dinero.
+            Este poderoso agente convierte cada mensaje de WhatsApp en una oportunidad real de ganar dinero, las 24 horas del día.
           </p>
 
           <div className="max-w-2xl mx-auto mb-6 grid sm:grid-cols-3 gap-2">
@@ -177,7 +180,7 @@ function HomePage() {
               )}
             </div>
           </div>
-          <p className="text-sm text-cyan-400 text-center mt-4">Y eso es solo el inicio. ¡Imagina las posibiliddes!</p>
+          <p className="text-sm text-cyan-400 text-center mt-4">Y eso es solo el inicio. ¡Imagina las posibilidades!</p>
         </div>
       </section>
 
@@ -208,6 +211,9 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/contactar/chatear" element={<ContactChat />} />
+      
+      {/* RUTA AÑADIDA: Tu laboratorio de pruebas */}
+      <Route path="/video" element={<VideoTestPage />} />
     </Routes>
   );
 }
