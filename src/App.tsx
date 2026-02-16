@@ -7,6 +7,7 @@ import { SocialProof } from './components/SocialProof';
 import { FinalCTA } from './components/FinalCTA';
 import { Link, Route, Routes } from 'react-router-dom';
 import { ContactChat } from './pages/ContactChat';
+import { ContactForm } from './pages/ContactForm';
 import { ArrowRight, Bot, Check } from 'lucide-react';
 
 // IMPORTACIÓN AÑADIDA: Tu nueva página de pruebas del reproductor
@@ -211,6 +212,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/contactar/chatear" element={<ContactChat />} />
+      <Route path="/contactar/formulario" element={<ContactForm />} />
       
       {/* RUTA AÑADIDA: Tu laboratorio de pruebas */}
       <Route path="/video" element={<VideoTestPage />} />

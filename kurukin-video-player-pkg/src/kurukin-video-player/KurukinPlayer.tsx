@@ -53,7 +53,7 @@ export function KurukinPlayer({
   } = usePlayerStore();
 
   useEffect(() => {
-    const lazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !Boolean(mutedPreview.enabled);
+    const lazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !mutedPreview.enabled;
 
     setShouldLoadPlayer(!lazyMode);
     setShouldAutoplay(false);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
 import { ExternalLink, Play, Volume2, X } from 'lucide-react';
@@ -51,13 +51,8 @@ export function KurukinPlayer({
     setShowCta,
   } = usePlayerStore();
 
-  const previewButtonLabel = useMemo(
-    () => mutedPreview.buttonText || 'Haz clic para escuchar',
-    [mutedPreview.buttonText],
-  );
-
   useEffect(() => {
-    const lazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !Boolean(mutedPreview.enabled);
+    const lazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !mutedPreview.enabled;
 
     setShouldLoadPlayer(!lazyMode);
     setShouldAutoplay(false);
