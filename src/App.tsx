@@ -9,6 +9,7 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { ContactChat } from './pages/ContactChat';
 import { ContactForm } from './pages/ContactForm';
 import { ArrowRight, Bot, Check } from 'lucide-react';
+import { LinkRedirector } from './components/LinkRedirector';
 
 // IMPORTACIÓN AÑADIDA: Tu nueva página de pruebas del reproductor
 import { VideoTestPage } from './pages/VideoTestPage';
@@ -211,6 +212,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/l/:slug" element={<LinkRedirector />} />
       <Route path="/contactar/chatear" element={<ContactChat />} />
       <Route path="/contactar/formulario" element={<ContactForm />} />
       

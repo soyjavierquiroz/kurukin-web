@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
 import { KurukinPlayer } from '../components/kurukin-video-player/KurukinPlayer';
 import { PricingCard } from '../components/PricingCard';
 import { SmartPhoneInput } from '../components/SmartPhoneInput';
+import { SmartLinkManager } from '../components/SmartLinkManager';
 import { useVisitor } from '../context/VisitorContext';
 import { useHotmartPrices } from '../hooks/useHotmartPrices';
 import { getFriendlyCurrencyName } from '../utils/currency';
@@ -284,6 +285,10 @@ export const VideoTestPage = () => {
           checkoutUrl="https://pay.hotmart.com/Y43592026T"
           scrapedData={scrapedData}
         />
+
+        <div className="mt-12">
+          <SmartLinkManager />
+        </div>
       </div>
     </div>
   );
