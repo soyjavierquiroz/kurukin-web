@@ -1,8 +1,9 @@
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
 import { KurukinPlayer } from '../components/kurukin-video-player/KurukinPlayer';
-import { PricingCard, type PricingScrapedData } from '../components/PricingCard';
+import { PricingCard } from '../components/PricingCard';
 import { SmartPhoneInput } from '../components/SmartPhoneInput';
 import { useVisitor } from '../context/VisitorContext';
+import { useHotmartPrices } from '../hooks/useHotmartPrices';
 import { getFriendlyCurrencyName } from '../utils/currency';
 
 interface FormErrors {
@@ -43,21 +44,10 @@ export const VideoTestPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [lastPayload, setLastPayload] = useState<VideoLeadPayload | null>(null);
+  const { scrapedData } = useHotmartPrices('Y43592026T');
 
   const clickFunnelsButtonImage = '/assets/images/activar-sonido.png';
-  const mockScrapedData: PricingScrapedData = {
-    AR: {
-      total: '873.450',
-      tax: '376.250',
-    },
-    MX: {
-      total: '9,490',
-    },
-    BO: {
-      total: '3.450', // Agregamos un precio simulado para Bolivia
-    },
-  };
-  
+
   const dynamicHeadline = useMemo(() => {
     if (!isLoading && visitorData?.city && visitorData?.currency) {
       const friendlyCurrency = getFriendlyCurrencyName(visitorData.currency);
@@ -292,7 +282,7 @@ export const VideoTestPage = () => {
           productName="Kurukin"
           basePriceUSD={497}
           checkoutUrl="https://pay.hotmart.com/Y43592026T"
-          scrapedData={mockScrapedData}
+          scrapedData={scrapedData}
         />
       </div>
     </div>
