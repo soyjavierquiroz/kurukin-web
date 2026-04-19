@@ -15,6 +15,7 @@ export default defineConfig({
       name: 'KurukinVideoPlayer',
       formats: ['es', 'umd'],
       fileName: (format) => `kurukin-video-player.${format}.js`,
+      cssFileName: 'style',
     },
     rollupOptions: {
       // Excluimos React del paquete final para que no pese el doble

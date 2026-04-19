@@ -1,22 +1,38 @@
 import { create } from 'zustand';
 import type { PlayerState } from './types';
 
-export const usePlayerStore = create<PlayerState>((set) => ({
+interface PlayerStore extends PlayerState {
+  setIsReady: (ready: boolean) => void;
+  setIsPlaying: (playing: boolean) => void;
+  setIsMuted: (muted: boolean) => void;
+  setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
+  setInMutedPreview: (inPreview: boolean) => void;
+  setShowPoster: (show: boolean) => void;
+  setShowCta: (show: boolean) => void;
+  setAutoplayBlocked: (blocked: boolean) => void;
+  setIsSticky: (sticky: boolean) => void;
+}
+
+export const usePlayerStore = create<PlayerStore>((set) => ({
   isReady: false,
   isPlaying: false,
   isMuted: false,
   currentTime: 0,
+  duration: 0,
   inMutedPreview: false,
-  showLazyCover: false,
+  showPoster: false,
   showCta: false,
+  autoplayBlocked: false,
   isSticky: false,
-  // ¡AQUÍ ESTÁ LA SOLUCIÓN!: Tipado explícito de 'val'
-  setIsReady: (val: boolean) => set({ isReady: val }),
-  setIsPlaying: (val: boolean) => set({ isPlaying: val }),
-  setIsMuted: (val: boolean) => set({ isMuted: val }),
-  setCurrentTime: (val: number) => set({ currentTime: val }),
-  setInMutedPreview: (val: boolean) => set({ inMutedPreview: val }),
-  setShowLazyCover: (val: boolean) => set({ showLazyCover: val }),
-  setShowCta: (val: boolean) => set({ showCta: val }),
-  setIsSticky: (val: boolean) => set({ isSticky: val }),
+  setIsReady: (ready) => set({ isReady: ready }),
+  setIsPlaying: (playing) => set({ isPlaying: playing }),
+  setIsMuted: (muted) => set({ isMuted: muted }),
+  setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (duration) => set({ duration }),
+  setInMutedPreview: (inPreview) => set({ inMutedPreview: inPreview }),
+  setShowPoster: (show) => set({ showPoster: show }),
+  setShowCta: (show) => set({ showCta: show }),
+  setAutoplayBlocked: (blocked) => set({ autoplayBlocked: blocked }),
+  setIsSticky: (sticky) => set({ isSticky: sticky }),
 }));

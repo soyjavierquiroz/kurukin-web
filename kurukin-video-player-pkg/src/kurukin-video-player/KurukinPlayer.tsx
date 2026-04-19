@@ -1,301 +1,609 @@
-import { useEffect, useRef, useState } from 'react';
-import Plyr from 'plyr';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import 'plyr/dist/plyr.css';
-import { ExternalLink, Play, Volume2, X } from 'lucide-react';
-import { usePlayerStore } from './store';
-// SOLUCIÓN TS: Añadimos la palabra "type"
-import type { KurukinPlayerProps, OverlayPosition } from './types'; 
+import { Play } from 'lucide-react';
+import { CallToActionOverlay } from './components/CallToActionOverlay';
+import { FakeProgressBar } from './components/FakeProgressBar';
+import { MutedOverlay } from './components/MutedOverlay';
+import { PlayerControls } from './components/PlayerControls';
+import { SmartPoster } from './components/SmartPoster';
+import { useVideoProviderController } from './providers/useVideoProviderController';
+import type { IVideoProvider } from './providers/IVideoProvider';
+import type { KurukinPlayerProps } from './types';
 
-const POSITION_CLASSES: Record<OverlayPosition, string> = {
-  center: 'items-center justify-center',
-  'top-left': 'items-start justify-start p-6',
-  'top-right': 'items-start justify-end p-6',
-  'bottom-left': 'items-end justify-start p-6',
-  'bottom-right': 'items-end justify-end p-6',
-};
+function formatClassName(...classNames: Array<string | false | null | undefined>) {
+  return classNames.filter(Boolean).join(' ');
+}
 
 export function KurukinPlayer({
   provider,
   videoId,
+  vslMode = false,
+  autoplay,
+  muted,
+  idleHideControls = false,
+  allowFullscreen = false,
+  vslProgressBarColor,
   mutedPreview = { enabled: false, overlayPosition: 'center' },
   lazyLoadYoutube,
+  stickyOnScroll,
+  stickyScroll,
+  resumePlayback = false,
+  onTimeUpdate,
   callToAction,
   hideYoutubeUi,
+  smartPoster,
+  className,
 }: KurukinPlayerProps) {
-  const mediaRef = useRef<HTMLElement | null>(null);
-  const playerRef = useRef<Plyr | null>(null);
-
-  const isMutedPreviewEnabled = Boolean(mutedPreview.enabled);
-  const isYoutubeLazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !isMutedPreviewEnabled;
+  const isVslMode = Boolean(vslMode);
+  const isMutedPreviewEnabled = Boolean(mutedPreview.enabled) && !isVslMode;
+  const shouldAutoPlay = autoplay ?? (isVslMode || isMutedPreviewEnabled);
+  const isYoutubeLazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !shouldAutoPlay;
   const shouldApplyYoutubeUiHack = provider === 'youtube' && Boolean(hideYoutubeUi);
-  const overlayPosition = mutedPreview.overlayPosition || 'center';
+  const isProviderImplemented = provider === 'youtube' || provider === 'bunnynet' || provider === 'html5';
+  const isStickyEnabled = Boolean(stickyOnScroll ?? stickyScroll);
+  const controlsVariant = isVslMode ? 'vsl' : 'standard';
+  const resumeStorageKey = `kurukin-player:resume:${provider}:${videoId}`;
+  const initialMutedState = muted ?? shouldAutoPlay;
+  const initialVslMutedState = isVslMode && initialMutedState;
 
   const [shouldLoadPlayer, setShouldLoadPlayer] = useState(!isYoutubeLazyMode);
-  const [shouldAutoplay, setShouldAutoplay] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(initialMutedState);
+  const [isVslMuted, setIsVslMuted] = useState(initialVslMutedState);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [inMutedPreview, setInMutedPreview] = useState(isMutedPreviewEnabled);
   const [showMutedPreviewOverlay, setShowMutedPreviewOverlay] = useState(isMutedPreviewEnabled);
+  const [showPoster, setShowPoster] = useState(isYoutubeLazyMode);
   const [ctaTriggered, setCtaTriggered] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [showCta, setShowCta] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
+  const pendingPlayIntentRef = useRef<'autoplay' | 'user' | null>(shouldAutoPlay ? 'autoplay' : null);
+  const hasRestoredPlaybackRef = useRef(false);
+  const lastPersistedSecondRef = useRef(-1);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const {
-    isReady,
-    isPlaying,
-    inMutedPreview,
-    showLazyCover: shouldShowLazyCover,
-    currentTime,
-    showCta,
-    setIsReady,
-    setIsPlaying,
-    setIsMuted,
-    setCurrentTime,
-    setInMutedPreview,
-    setShowLazyCover,
-    setShowCta,
-  } = usePlayerStore();
+  const handleProviderReady = useCallback((activeProvider: IVideoProvider) => {
+    setIsReady(true);
+    setIsMuted(activeProvider.isMuted());
+    setDuration(activeProvider.getDuration());
+  }, []);
 
-  useEffect(() => {
-    const lazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !mutedPreview.enabled;
+  const handleProviderPlay = useCallback(() => {
+    setIsPlaying(true);
+    setIsIdle(false);
+    setShowPoster(false);
+    setAutoplayBlocked(false);
+  }, []);
 
-    setShouldLoadPlayer(!lazyMode);
-    setShouldAutoplay(false);
-    setShowMutedPreviewOverlay(Boolean(mutedPreview.enabled));
-    setCtaTriggered(false);
-
-    setShowLazyCover(lazyMode);
-    setInMutedPreview(Boolean(mutedPreview.enabled));
-    setShowCta(false);
-    setCurrentTime(0);
-    setIsReady(false);
+  const handleProviderPause = useCallback(() => {
     setIsPlaying(false);
-    setIsMuted(Boolean(mutedPreview.enabled));
-  }, [
-    provider,
-    videoId,
-    lazyLoadYoutube,
-    mutedPreview.enabled,
-    setCurrentTime,
-    setInMutedPreview,
-    setIsMuted,
-    setIsPlaying,
-    setIsReady,
-    setShowCta,
-    setShowLazyCover,
-  ]);
+    setIsIdle(false);
+  }, []);
 
-  useEffect(() => {
-    setImageError(false);
-  }, [mutedPreview.overlayImageUrl]);
+  const handleProviderProgress = useCallback((seconds: number) => {
+    setCurrentTime(seconds);
+    onTimeUpdate?.(seconds);
 
-  useEffect(() => {
-    if (!shouldLoadPlayer || !mediaRef.current) {
+    if (!resumePlayback || isVslMode) {
       return;
     }
 
-    if (playerRef.current) {
-      playerRef.current.destroy();
-      playerRef.current = null;
+    const roundedSecond = Math.floor(seconds);
+
+    if (roundedSecond <= 0 || roundedSecond === lastPersistedSecondRef.current || typeof window === 'undefined') {
+      return;
     }
 
-    const options: Plyr.Options = {
-      autoplay: shouldAutoplay || isMutedPreviewEnabled,
-      muted: isMutedPreviewEnabled,
-      clickToPlay: true,
-      loop: {
-        active: isMutedPreviewEnabled,
-      },
-      controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-      youtube: {
-        noCookie: true,
-        rel: 0,
-        showinfo: 0,
-        playsinline: 1,
-        modestbranding: hideYoutubeUi ? 1 : 0,
-        iv_load_policy: hideYoutubeUi ? 3 : 1,
-      },
-    };
+    try {
+      window.localStorage.setItem(resumeStorageKey, String(roundedSecond));
+      lastPersistedSecondRef.current = roundedSecond;
+    } catch (error) {
+      console.warn('[KurukinPlayer] No se pudo persistir el progreso del video.', error);
+    }
+  }, [isVslMode, onTimeUpdate, resumePlayback, resumeStorageKey]);
 
-    const player = new Plyr(mediaRef.current, options);
-    playerRef.current = player;
+  const handleProviderEnded = useCallback(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
 
-    player.on('ready', () => {
-      setIsReady(true);
-      setIsMuted(player.muted);
+    if (!resumePlayback || typeof window === 'undefined') {
+      return;
+    }
 
-      if (isMutedPreviewEnabled) {
-        player.muted = true;
-        void Promise.resolve(player.play()).catch(() => undefined);
+    try {
+      window.localStorage.removeItem(resumeStorageKey);
+      lastPersistedSecondRef.current = -1;
+    } catch (error) {
+      console.warn('[KurukinPlayer] No se pudo limpiar el progreso guardado.', error);
+    }
+  }, [resumePlayback, resumeStorageKey]);
+
+  const handleProviderMuteChange = useCallback((nextMuted: boolean) => {
+    setIsMuted(nextMuted);
+  }, []);
+
+  const handleAutoplayBlocked = useCallback(() => {
+    setAutoplayBlocked(true);
+    setIsIdle(false);
+    setShowPoster(!isVslMode);
+    setShowMutedPreviewOverlay(false);
+    setIsPlaying(false);
+  }, [isVslMode]);
+
+  const controller = useVideoProviderController({
+    provider,
+    enabled: shouldLoadPlayer,
+    videoId,
+    autoPlay: shouldAutoPlay,
+    muted: isMuted,
+    loop: inMutedPreview,
+    hideNativeUi: hideYoutubeUi,
+    controlsVariant,
+    onReady: handleProviderReady,
+    onPlay: handleProviderPlay,
+    onPause: handleProviderPause,
+    onProgress: handleProviderProgress,
+    onEnded: handleProviderEnded,
+    onMuteChange: handleProviderMuteChange,
+    onAutoplayBlocked: handleAutoplayBlocked,
+  });
+
+  const runPendingPlay = useCallback(async (activeProvider: IVideoProvider) => {
+    const intent = pendingPlayIntentRef.current;
+
+    if (!intent) {
+      return;
+    }
+
+    pendingPlayIntentRef.current = null;
+
+    try {
+      await activeProvider.play();
+      setShowPoster(false);
+      setAutoplayBlocked(false);
+    } catch (error) {
+      activeProvider.pause();
+      setShowPoster(!isVslMode);
+      setShowMutedPreviewOverlay(false);
+
+      if (intent === 'autoplay') {
+        setAutoplayBlocked(true);
       }
-
-      if (shouldAutoplay) {
-        void Promise.resolve(player.play()).catch(() => undefined);
-      }
-    });
-
-    player.on('playing', () => {
-      setIsPlaying(true);
-    });
-
-    player.on('pause', () => {
-      setIsPlaying(false);
-    });
-
-    player.on('timeupdate', () => {
-      setCurrentTime(player.currentTime);
-    });
-
-    player.on('ended', () => {
-      player.currentTime = 0;
-      player.pause();
-    });
-
-    player.on('volumechange', () => {
-      setIsMuted(player.muted);
-    });
-
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-    };
-  }, [
-    hideYoutubeUi,
-    isMutedPreviewEnabled,
-    setCurrentTime,
-    setIsMuted,
-    setIsPlaying,
-    setIsReady,
-    shouldAutoplay,
-    shouldLoadPlayer,
-  ]);
+    }
+  }, [isVslMode]);
 
   useEffect(() => {
-    if (!callToAction?.enabled || ctaTriggered || showCta || showMutedPreviewOverlay) {
+    const nextVslMode = Boolean(vslMode);
+    const nextMutedPreviewEnabled = Boolean(mutedPreview.enabled) && !nextVslMode;
+    const nextShouldAutoplay = autoplay ?? (nextVslMode || nextMutedPreviewEnabled);
+    const lazyMode = provider === 'youtube' && Boolean(lazyLoadYoutube) && !nextShouldAutoplay;
+    const nextMutedState = muted ?? nextShouldAutoplay;
+    const nextVslMutedState = nextVslMode && nextMutedState;
+
+    setShouldLoadPlayer(!lazyMode);
+    setIsReady(false);
+    setIsPlaying(false);
+    setIsMuted(nextMutedState);
+    setIsVslMuted(nextVslMutedState);
+    setCurrentTime(0);
+    setDuration(0);
+    setInMutedPreview(nextMutedPreviewEnabled);
+    setShowMutedPreviewOverlay(nextMutedPreviewEnabled);
+    setShowPoster(lazyMode);
+    setAutoplayBlocked(false);
+    setIsIdle(false);
+    setCtaTriggered(false);
+    setShowCta(false);
+    hasRestoredPlaybackRef.current = false;
+    lastPersistedSecondRef.current = -1;
+    pendingPlayIntentRef.current = nextShouldAutoplay ? 'autoplay' : null;
+  }, [autoplay, lazyLoadYoutube, muted, mutedPreview.enabled, provider, videoId, vslMode]);
+
+  const clearIdleTimer = useCallback(() => {
+    if (!idleTimerRef.current) {
+      return;
+    }
+
+    clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = null;
+  }, []);
+
+  const resetIdleTimer = useCallback(() => {
+    setIsIdle(false);
+    clearIdleTimer();
+
+    if (!idleHideControls || !isPlaying) {
+      return;
+    }
+
+    idleTimerRef.current = setTimeout(() => {
+      setIsIdle(true);
+    }, 2500);
+  }, [clearIdleTimer, idleHideControls, isPlaying]);
+
+  useEffect(() => {
+    if (!idleHideControls) {
+      clearIdleTimer();
+      setIsIdle(false);
+      return;
+    }
+
+    if (isPlaying) {
+      resetIdleTimer();
+      return;
+    }
+
+    clearIdleTimer();
+    setIsIdle(false);
+  }, [clearIdleTimer, idleHideControls, isPlaying, resetIdleTimer]);
+
+  useEffect(() => () => {
+    clearIdleTimer();
+  }, [clearIdleTimer]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreenElement = document.fullscreenElement;
+      setIsFullscreen(Boolean(fullscreenElement && fullscreenElement === containerRef.current));
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoadPlayer || !isReady || !controller.providerRef.current) {
+      return;
+    }
+
+    void runPendingPlay(controller.providerRef.current);
+  }, [controller.providerRef, isReady, runPendingPlay, shouldLoadPlayer]);
+
+  useEffect(() => {
+    if (!isReady || duration > 0) {
+      return;
+    }
+
+    const nextDuration = controller.providerRef.current?.getDuration() ?? 0;
+
+    if (nextDuration > 0) {
+      setDuration(nextDuration);
+    }
+  }, [controller.providerRef, currentTime, duration, isReady]);
+
+  useEffect(() => {
+    if (!resumePlayback || isVslMode || !isReady || hasRestoredPlaybackRef.current || typeof window === 'undefined') {
+      return;
+    }
+
+    const activeProvider = controller.providerRef.current;
+
+    if (!activeProvider) {
+      return;
+    }
+
+    try {
+      const savedTime = Number(window.localStorage.getItem(resumeStorageKey));
+
+      if (!Number.isFinite(savedTime) || savedTime <= 0) {
+        hasRestoredPlaybackRef.current = true;
+        return;
+      }
+
+      const boundedTime = duration > 2 ? Math.min(savedTime, duration - 2) : savedTime;
+
+      if (boundedTime <= 0) {
+        hasRestoredPlaybackRef.current = true;
+        return;
+      }
+
+      activeProvider.seek(boundedTime);
+      setCurrentTime(boundedTime);
+      lastPersistedSecondRef.current = Math.floor(boundedTime);
+      hasRestoredPlaybackRef.current = true;
+    } catch (error) {
+      hasRestoredPlaybackRef.current = true;
+      console.warn('[KurukinPlayer] No se pudo restaurar el progreso guardado.', error);
+    }
+  }, [controller.providerRef, duration, isReady, isVslMode, resumePlayback, resumeStorageKey]);
+
+  useEffect(() => {
+    if (!callToAction?.enabled || ctaTriggered || showCta || showMutedPreviewOverlay || isVslMuted) {
       return;
     }
 
     if (currentTime >= callToAction.displayAtSeconds) {
       setCtaTriggered(true);
       setShowCta(true);
-      playerRef.current?.pause();
+      controller.providerRef.current?.pause();
     }
-  }, [callToAction, ctaTriggered, currentTime, setShowCta, showCta, showMutedPreviewOverlay]);
+  }, [callToAction, controller.providerRef, ctaTriggered, currentTime, isVslMuted, showCta, showMutedPreviewOverlay]);
 
-  const handleLoadYoutube = () => {
-    setShouldLoadPlayer(true);
-    setShouldAutoplay(true);
-    setShowLazyCover(false);
-  };
+  const requestPlay = useCallback(
+    async (intent: 'autoplay' | 'user', options?: { unmute: boolean; restartFromZero?: boolean }) => {
+      pendingPlayIntentRef.current = intent;
 
-  const handleExitMutedPreview = () => {
-    const player = playerRef.current;
-    if (!player) {
+      if (options?.restartFromZero) {
+        setCurrentTime(0);
+        controller.providerRef.current?.seek(0);
+      }
+
+      if (options?.unmute) {
+        setIsMuted(false);
+        setIsVslMuted(false);
+        setInMutedPreview(false);
+        setShowMutedPreviewOverlay(false);
+        controller.providerRef.current?.mute(false);
+        controller.providerRef.current?.setLoop(false);
+      }
+
+      if (!shouldLoadPlayer) {
+        setShouldLoadPlayer(true);
+        return;
+      }
+
+      if (!controller.providerRef.current) {
+        return;
+      }
+
+      await runPendingPlay(controller.providerRef.current);
+    },
+    [controller.providerRef, runPendingPlay, shouldLoadPlayer],
+  );
+
+  const handlePosterPlay = useCallback(() => {
+    const shouldUnmuteOnManualStart = autoplayBlocked || !isMutedPreviewEnabled || isVslMode;
+    void requestPlay('user', { unmute: shouldUnmuteOnManualStart });
+  }, [autoplayBlocked, isMutedPreviewEnabled, isVslMode, requestPlay]);
+
+  const handleDismissCta = useCallback(() => {
+    setShowCta(false);
+    void requestPlay('user');
+  }, [requestPlay]);
+
+  const handleExitMutedPreview = useCallback(() => {
+    controller.providerRef.current?.seek(0);
+    setCurrentTime(0);
+    void requestPlay('user', { unmute: true });
+  }, [controller.providerRef, requestPlay]);
+
+  const handleUnmute = useCallback(() => {
+    setIsMuted(false);
+    setIsVslMuted(false);
+    setInMutedPreview(false);
+    setShowMutedPreviewOverlay(false);
+    setCurrentTime(0);
+    controller.providerRef.current?.seek(0);
+    controller.providerRef.current?.mute(false);
+    controller.providerRef.current?.setLoop(false);
+    void controller.providerRef.current?.play().catch(() => undefined);
+  }, [controller.providerRef]);
+
+  const handleResumeFromPauseOverlay = useCallback(() => {
+    void requestPlay('user');
+  }, [requestPlay]);
+
+  const handleGlobalClick = useCallback(() => {
+    const activeProvider = controller.providerRef.current;
+
+    if (isVslMuted || showPoster || showCta) {
       return;
     }
 
-    player.currentTime = 0;
-    player.muted = false;
-    player.loop = false;
+    if (isPlaying) {
+      activeProvider?.pause();
+      return;
+    }
 
-    setShowMutedPreviewOverlay(false);
-    setInMutedPreview(false);
-    setIsMuted(false);
+    if (activeProvider) {
+      void activeProvider.play().catch(() => {
+        void requestPlay('user');
+      });
+      return;
+    }
 
-    void Promise.resolve(player.play()).catch(() => undefined);
-  };
+    void requestPlay('user');
+  }, [controller.providerRef, isPlaying, isVslMuted, requestPlay, showCta, showPoster]);
 
-  const handleDismissCta = () => {
-    setShowCta(false);
-    void Promise.resolve(playerRef.current?.play()).catch(() => undefined);
-  };
+  const handleTogglePlay = useCallback(() => {
+    if (isPlaying) {
+      controller.providerRef.current?.pause();
+      return;
+    }
 
-  const handleResumeFromPauseOverlay = () => {
-    void Promise.resolve(playerRef.current?.play()).catch(() => undefined);
-  };
+    void requestPlay('user');
+  }, [controller.providerRef, isPlaying, requestPlay]);
+
+  const handleToggleMute = useCallback(() => {
+    const nextMuted = !isMuted;
+
+    setIsMuted(nextMuted);
+    controller.providerRef.current?.mute(nextMuted);
+
+    if (!nextMuted) {
+      setInMutedPreview(false);
+      setShowMutedPreviewOverlay(false);
+      controller.providerRef.current?.setLoop(false);
+    }
+  }, [controller.providerRef, isMuted]);
+
+  const handleSeek = useCallback(
+    (seconds: number) => {
+      setCurrentTime(seconds);
+      controller.providerRef.current?.seek(seconds);
+    },
+    [controller.providerRef],
+  );
+
+  const handleRestart = useCallback(() => {
+    handleSeek(0);
+    void requestPlay('user');
+  }, [handleSeek, requestPlay]);
+
+  const handleToggleFullscreen = useCallback(async () => {
+    const containerElement = containerRef.current;
+
+    if (!containerElement) {
+      return;
+    }
+
+    try {
+      if (document.fullscreenElement === containerElement) {
+        await document.exitFullscreen();
+        return;
+      }
+
+      await containerElement.requestFullscreen();
+    } catch (error) {
+      console.warn('[KurukinPlayer] No se pudo alternar pantalla completa.', error);
+    }
+  }, []);
+
+  const posterTitle = autoplayBlocked
+    ? smartPoster?.title || 'El navegador bloqueó el autoplay'
+    : smartPoster?.title || 'Video listo para reproducir';
+
+  const posterDescription = autoplayBlocked
+    ? smartPoster?.description || 'Haz click para iniciar la reproducción manualmente.'
+    : smartPoster?.description || 'Pulsa play para ver el video con nuestra experiencia premium.';
+
+  const shouldShowPauseOverlay = !isVslMode && !isPlaying && isReady && !inMutedPreview && !isVslMuted && !showCta && !showPoster;
+  const shouldShowControls = shouldLoadPlayer && isReady && !showPoster && !showCta && !showMutedPreviewOverlay && !isVslMuted;
+  const shouldRenderCustomControls = !isVslMode && shouldShowControls;
+  const shouldRenderFakeProgress = shouldLoadPlayer && isVslMode && !showPoster;
+  const shouldRenderGlobalClickLayer = shouldLoadPlayer && isVslMode && !showPoster && !showCta;
+  const shouldRenderVslPauseIndicator = isVslMode && !isVslMuted && !isPlaying && !showPoster && !showCta;
+  const shouldHidePlaybackChrome = idleHideControls && isPlaying && isIdle;
+  const videoRef = controller.surface === 'video' ? controller.mountRef : undefined;
 
   return (
     <div
-      className={`relative aspect-video w-full overflow-hidden rounded-2xl bg-black ${
-        shouldApplyYoutubeUiHack ? '[&_iframe]:scale-[1.45] [&_iframe]:origin-center' : ''
-      }`}
+      ref={containerRef}
+      className={formatClassName(
+        'relative aspect-video w-full overflow-hidden rounded-2xl bg-black',
+        shouldApplyYoutubeUiHack && '[&_iframe]:scale-[1.45] [&_iframe]:origin-center',
+        className,
+      )}
+      data-provider={provider}
+      data-vsl-mode={isVslMode ? 'true' : 'false'}
+      data-sticky-enabled={isStickyEnabled ? 'true' : undefined}
+      onMouseMove={idleHideControls ? resetIdleTimer : undefined}
+      onTouchStart={idleHideControls ? resetIdleTimer : undefined}
+      onMouseLeave={
+        idleHideControls
+          ? () => {
+              clearIdleTimer();
+              setIsIdle(isPlaying);
+            }
+          : undefined
+      }
     >
-      {isYoutubeLazyMode && !shouldLoadPlayer ? (
-        <button
-          type="button"
-          onClick={handleLoadYoutube}
-          className="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-800 transition hover:from-zinc-800 hover:to-zinc-700"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent_65%)]" />
-          <div className="relative z-10 flex flex-col items-center gap-3 text-white">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/30 backdrop-blur">
-              <Play className="h-10 w-10 fill-white" />
-            </span>
-            <span className="text-base font-semibold tracking-wide">Cargar video</span>
-          </div>
-        </button>
-      ) : (
-        <div className="h-full w-full">
-          {provider === 'html5' ? (
+      {shouldLoadPlayer ? (
+        <div className={formatClassName('h-full w-full', isVslMode && 'pointer-events-none')}>
+          {controller.surface === 'video' ? (
             <video
-              ref={(node) => {
-                mediaRef.current = node;
-              }}
-              className="h-full w-full"
-              controls
+              ref={videoRef}
+              className={formatClassName('w-full h-full object-cover', isVslMode && 'pointer-events-none')}
               playsInline
-            >
-              <source src={videoId} />
-            </video>
+              controls={false}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              controlsList={isVslMode ? 'nodownload noplaybackrate noremoteplayback' : undefined}
+              disablePictureInPicture={isVslMode}
+              muted={isMuted}
+              autoPlay={shouldAutoPlay}
+            />
           ) : (
             <div
-              ref={(node) => {
-                mediaRef.current = node;
-              }}
-              data-plyr-provider={provider}
-              data-plyr-embed-id={videoId}
+              ref={controller.mountRef}
+              className={formatClassName('w-full h-full object-cover', isVslMode && 'pointer-events-none')}
             />
           )}
         </div>
+      ) : (
+        <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_35%),linear-gradient(135deg,#0a0a0b,#111827)]" />
       )}
 
-      {shouldLoadPlayer && isMutedPreviewEnabled && showMutedPreviewOverlay && (
+      <SmartPoster
+        visible={showPoster}
+        imageUrl={smartPoster?.imageUrl}
+        eyebrow={
+          autoplayBlocked
+            ? smartPoster?.eyebrow || 'Autoplay bloqueado'
+            : smartPoster?.eyebrow || (isYoutubeLazyMode ? 'Smart Poster' : 'Universal Video Engine')
+        }
+        title={posterTitle}
+        description={posterDescription}
+        buttonText={smartPoster?.buttonText || 'Reproducir video'}
+        onPlay={handlePosterPlay}
+      />
+
+      {shouldLoadPlayer && isMutedPreviewEnabled && showMutedPreviewOverlay ? (
+        <MutedOverlay config={mutedPreview} onActivateSound={handleExitMutedPreview} />
+      ) : null}
+
+      {shouldLoadPlayer && isVslMode && isVslMuted && !showPoster ? (
+        <div
+          className="absolute inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/30 backdrop-blur-sm"
+          onClick={handleUnmute}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleUnmute();
+            }
+          }}
+          aria-label="Activar sonido"
+        >
+          <button
+            type="button"
+            className="pointer-events-none px-6 py-3 bg-black/60 backdrop-blur-md text-white font-medium rounded-full animate-pulse border border-white/20 shadow-xl"
+          >
+            🔊 Haz clic para escuchar
+          </button>
+        </div>
+      ) : null}
+
+      {shouldRenderGlobalClickLayer ? (
         <button
           type="button"
-          onClick={handleExitMutedPreview}
-          className={`absolute inset-0 z-20 flex bg-black/30 ${POSITION_CLASSES[overlayPosition]}`}
-        >
-          {mutedPreview.overlayImageUrl && !imageError ? (
-            <img
-              src={mutedPreview.overlayImageUrl}
-              alt="Activar sonido"
-              className="h-auto w-auto max-h-full max-w-full object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-105"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            // NUESTRO DISEÑO CLICKFUNNELS PARAMETRIZABLE
-            <div className="flex items-center gap-3 bg-black/40 p-2 md:p-3 rounded-xl backdrop-blur-md border border-white/10 drop-shadow-2xl">
-                <div 
-                  className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full animate-pulse"
-                  style={{ 
-                    backgroundColor: mutedPreview.fallbackColor || '#f39c12', 
-                    boxShadow: `0 0 15px ${mutedPreview.fallbackColor || '#f39c12'}80` 
-                  }}
-                >
-                    <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" />
-                </div>
-                <div className="flex flex-col text-left">
-                    <span className="text-white font-extrabold text-sm md:text-base leading-none drop-shadow-md tracking-wide">
-                        {mutedPreview.fallbackText1 || 'CLICK PARA'}
-                    </span>
-                    <span className="text-white font-extrabold text-sm md:text-base leading-none mt-1 drop-shadow-md tracking-wide">
-                        {mutedPreview.fallbackText2 || 'ACTIVAR SONIDO'}
-                    </span>
-                </div>
-            </div>
-          )}
-        </button>
-      )}
+          className="absolute inset-0 z-40 cursor-pointer bg-transparent"
+          onClick={handleGlobalClick}
+          aria-label={isPlaying ? 'Pausar video' : 'Reproducir video'}
+        />
+      ) : null}
 
-      {!isPlaying && isReady && !inMutedPreview && !showCta && !shouldShowLazyCover && (
+      {shouldRenderFakeProgress ? (
+        <div
+          className={formatClassName(
+            'transition-opacity duration-500 ease-in-out',
+            isVslMode ? 'opacity-100' : shouldHidePlaybackChrome ? 'opacity-0 pointer-events-none' : 'opacity-100',
+          )}
+        >
+          <FakeProgressBar color={vslProgressBarColor} currentTime={currentTime} duration={duration} />
+        </div>
+      ) : null}
+
+      {shouldRenderVslPauseIndicator ? (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-[2px] pointer-events-none transition-all">
+          <div className="rounded-full bg-black/40 p-6 md:p-8">
+            <svg className="ml-2 h-12 w-12 text-white/70 md:h-16 md:w-16" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
+      ) : null}
+
+      {shouldShowPauseOverlay ? (
         <div
           className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 backdrop-blur-md"
           onClick={handleResumeFromPauseOverlay}
@@ -312,34 +620,45 @@ export function KurukinPlayer({
             <Play className="h-10 w-10 fill-white text-white" />
           </span>
         </div>
-      )}
+      ) : null}
 
-      {callToAction?.enabled && showCta && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-6">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/15 bg-zinc-950/95 p-6 text-center text-white shadow-2xl">
-            {callToAction.isDismissible && (
-              <button
-                type="button"
-                onClick={handleDismissCta}
-                className="absolute right-3 top-3 rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
-                aria-label="Cerrar"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-            <h3 className="text-2xl font-bold leading-tight">{callToAction.headline}</h3>
-            <a
-              href={callToAction.buttonUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-black transition hover:bg-emerald-400"
-            >
-              {callToAction.buttonText}
-              <ExternalLink className="h-4 w-4" />
-            </a>
+      {shouldRenderCustomControls ? (
+        <div
+          className={formatClassName(
+            'transition-opacity duration-500 ease-in-out',
+            shouldHidePlaybackChrome ? 'opacity-0 pointer-events-none' : 'opacity-100',
+          )}
+        >
+          <PlayerControls
+            currentTime={currentTime}
+            duration={duration}
+            isFullscreen={isFullscreen}
+            isMuted={isMuted}
+            isPlaying={isPlaying}
+            onToggleFullscreen={!isVslMode && allowFullscreen ? handleToggleFullscreen : undefined}
+            onRestart={handleRestart}
+            onSeek={handleSeek}
+            onToggleMute={handleToggleMute}
+            onTogglePlay={handleTogglePlay}
+            variant={controlsVariant === 'vsl' ? 'standard' : controlsVariant}
+          />
+        </div>
+      ) : null}
+
+      {!isProviderImplemented ? (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-6 text-center text-white">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-300">Provider pendiente</p>
+            <p className="mt-2 text-sm text-white/80">
+              {provider} quedó preparado en la factory, pero su adapter aún no está implementado.
+            </p>
           </div>
         </div>
-      )}
+      ) : null}
+
+      {callToAction?.enabled && showCta ? (
+        <CallToActionOverlay callToAction={callToAction} onDismiss={handleDismissCta} />
+      ) : null}
     </div>
   );
 }
