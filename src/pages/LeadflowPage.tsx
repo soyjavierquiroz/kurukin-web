@@ -3,7 +3,7 @@ import { ArrowRight, ShieldCheck, XCircle } from 'lucide-react';
 import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
 
-const LEADFLOW_VIDEO_URL = 'https://www.youtube.com/shorts/MxZAaLQZWLo';
+const LEADFLOW_VIDEO_URL = 'MxZAaLQZWLo';
 
 const ctaBaseClassName = [
   'group inline-flex w-full min-h-[64px] items-center justify-center gap-3 rounded-2xl',
