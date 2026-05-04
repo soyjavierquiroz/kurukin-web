@@ -325,7 +325,7 @@ export default function LeadflowPage() {
                 <ShieldCheck className="h-16 w-16 text-blue-500" />
                 <h2 className="mt-6 text-3xl font-bold md:text-5xl">Si en 30 días tu equipo no está teniendo conversaciones diarias con prospectos reales, seguimos trabajando contigo hasta lograrlo.</h2>
                 <div className="mt-10">
-                  <LeadflowCta text="Quiero implementar el sistema" onClick={() => setIsFormOpen(true)} />
+                  <LeadflowCta text="Quiero aplicar para LEADFLOW" onClick={() => setIsFormOpen(true)} />
                 </div>
               </div>
             </div>
