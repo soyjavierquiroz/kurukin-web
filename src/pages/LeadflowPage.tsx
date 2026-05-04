@@ -133,31 +133,42 @@ export default function LeadflowPage() {
               </p>
             </div>
 
-            <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
-              <div className="absolute -inset-6 bg-white/5 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
-                <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
-                  <KurukinPlayer
-                    provider="bunnynet"
-                    videoId={LEADFLOW_VIDEO_URL}
-                    mutedPreview={{
-                      enabled: true,
-                      overlayPosition: 'center',
-                      buttonText: 'Escuchar ahora',
-                      fallbackText1: 'MENSAJE URGENTE',
-                      fallbackText2: 'ACTIVA EL AUDIO',
-                    }}
-                    smartPoster={{
-                      eyebrow: 'Mensaje Urgente',
-                      title: 'Haz clic para ver por qué tu equipo no crece',
-                      description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
-                      buttonText: 'Ver mensaje',
-                    }}
-                    className="h-full rounded-[1.5rem] [&_video]:origin-center [&_video]:scale-[1.02] [&_video]:transform-gpu"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* Columna del Video: Formato 3:4 con Motor Pro */}
+<div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+  <div className="absolute -inset-6 bg-white/5 blur-3xl" />
+  <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+    
+    {/* Contenedor 3:4 real */}
+    <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
+      <KurukinPlayer
+        provider="bunnynet"
+        videoId={LEADFLOW_VIDEO_URL}
+        
+        // CONFIGURACIÓN MOTOR PRO (VSL)
+        vslMode={true}           // Oculta los comandos y activa la barra dummy
+        resumePlayback={true}    // Recuerda donde se quedó el usuario
+        
+        mutedPreview={{
+          enabled: true,
+          overlayPosition: 'center',
+          buttonText: 'MENSAJE URGENTE - ACTIVA EL AUDIO',
+          fallbackText1: 'MENSAJE URGENTE',
+          fallbackText2: 'ACTIVA EL AUDIO',
+        }}
+        
+        smartPoster={{
+          eyebrow: 'Mensaje Urgente',
+          title: 'Haz clic para ver por qué tu equipo no crece',
+          description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
+          buttonText: 'Ver mensaje',
+        }}
+
+        // Clase para asegurar que el video llene el 3:4 sin franjas negras
+        className="h-full w-full [&_video]:object-cover" 
+      />
+    </div>
+  </div>
+</div>
           </div>
         </section>
 
