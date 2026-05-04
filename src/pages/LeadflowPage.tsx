@@ -124,7 +124,7 @@ export default function LeadflowPage() {
 
       <div className="mt-8">
         <LeadflowCta
-          text="Quiero que mi equipo genere prospectos ahora"
+          text="Quiero ver si califico para obtener LEDFLOW"
           microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar."
           onClick={() => setIsFormOpen(true)}
         />
