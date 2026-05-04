@@ -142,26 +142,25 @@ export default function LeadflowPage() {
         
         {/* Cambio a aspect-[3/4] */}
         <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
-          <KurukinPlayer
-            provider="bunnynet"
-            videoId={LEADFLOW_VIDEO_URL}
-            mutedPreview={{
-              enabled: true,
-              overlayPosition: 'center',
-              buttonText: 'Escuchar ahora',
-              fallbackText1: 'MENSAJE URGENTE',
-              fallbackText2: 'ACTIVA EL AUDIO',
-            }}
-            smartPoster={{
-              eyebrow: 'Mensaje Urgente',
-              title: 'Haz clic para ver por qué tu equipo no crece',
-              description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
-              buttonText: 'Ver mensaje',
-            }}
-            {/* Ajuste de escala para que llene bien el frame vertical */}
-            className="rounded-[1.5rem] [&_video]:origin-center [&_video]:scale-[1.02] [&_video]:transform-gpu"
-          />
-        </div>
+  <KurukinPlayer
+    provider="bunnynet"
+    videoId={LEADFLOW_VIDEO_URL}
+    mutedPreview={{
+      enabled: true,
+      overlayPosition: 'center',
+      buttonText: 'Escuchar ahora',
+      fallbackText1: 'MENSAJE URGENTE',
+      fallbackText2: 'ACTIVA EL AUDIO',
+    }}
+    smartPoster={{
+      eyebrow: 'Mensaje Urgente',
+      title: 'Haz clic para ver por qué tu equipo no crece',
+      description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
+      buttonText: 'Ver mensaje',
+    }}
+    className="rounded-[1.5rem] [&_video]:origin-center [&_video]:scale-[1.02] [&_video]:transform-gpu"
+  />
+</div>
       </div>
     </div>
   </div>
