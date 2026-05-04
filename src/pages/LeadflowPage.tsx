@@ -103,62 +103,69 @@ export default function LeadflowPage() {
       <main>
         {/* HERO SECTION */}
         <section id="hero" className="relative overflow-hidden bg-black">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
 
-          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(440px,620px)] lg:items-center lg:gap-14">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
-                ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
-              </p>
+  {/* Ajuste en lg:grid-cols para dar más espacio al copy (1.2fr vs 0.8fr) */}
+  <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
+    
+    {/* Columna del Copy: eliminamos el max-w-3xl para que aproveche el nuevo espacio */}
+    <div className="max-w-none">
+      <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
+        ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
+      </p>
 
-              <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-[1.02] text-white md:text-6xl">
-                Si tu equipo no genera conversasiones diarias sin ti... <span className="text-cyan-300">tienes un empleo disfrazado.</span>
-              </h1>
+      <h1 className="mt-5 text-4xl font-bold leading-[1.02] text-white md:text-6xl">
+        Si tu equipo no genera conversaciones diarias sin ti... <span className="text-cyan-300">tienes un empleo disfrazado.</span>
+      </h1>
 
-              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
-                Genera entre 3 a 10 conversaciones diarias por miembro en 7 días — sin crear contenido, sin perseguir prospectos y sin depender de algoritmos.
-              </p>
+      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
+        Genera entre 3 a 10 conversaciones diarias por miembro en 7 días — sin crear contenido, sin perseguir prospectos y sin depender de algoritmos.
+      </p>
 
-              <div className="mt-8">
-                <LeadflowCta
-                  text="Quiero que mi equipo genere prospectos ahora"
-                  microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar."
-                  onClick={() => setIsFormOpen(true)}
-                />
-              </div>
+      <div className="mt-8">
+        <LeadflowCta
+          text="Quiero que mi equipo genere prospectos ahora"
+          microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar."
+          onClick={() => setIsFormOpen(true)}
+        />
+      </div>
 
-              <p className="mt-5 text-center text-base font-medium text-slate-300 sm:text-left">
-                Hemos ayudado a varios equipos MLM hispanos a generar prospectos y crecer sus negocios de manera consistente y predecible.
-              </p>
-            </div>
+      <p className="mt-5 text-center text-base font-medium text-slate-300 sm:text-left">
+        Hemos ayudado a varios equipos MLM hispanos a generar prospectos y crecer sus negocios de manera consistente y predecible.
+      </p>
+    </div>
 
-            <div className="relative mx-auto max-w-md lg:max-w-none">
-              <div className="absolute -inset-6 bg-white/5 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
-                <div className="aspect-video overflow-hidden rounded-[1.5rem] bg-black">
-                  <KurukinPlayer
-                    provider="bunnynet"
-                    videoId={LEADFLOW_VIDEO_URL}
-                    mutedPreview={{
-                      enabled: true,
-                      overlayPosition: 'center',
-                      buttonText: 'Escuchar ahora',
-                      fallbackText1: 'MENSAJE URGENTE',
-                      fallbackText2: 'ACTIVA EL AUDIO',
-                    }}
-                    smartPoster={{
-                      eyebrow: 'Mensaje Urgente',
-                      title: 'Haz clic para ver por qué tu equipo no crece',
-                      description: 'Haz clic y escucha el punto exacto que esta frenando la duplicacion.',
-                      buttonText: 'Ver mensaje',
-                    }}
-                    className="rounded-[1.5rem] [&_video]:origin-center [&_video]:scale-[1.08] [&_video]:transform-gpu"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+    {/* Columna del Video: Formato 3:4 */}
+    <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+      <div className="absolute -inset-6 bg-white/5 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+        
+        {/* Cambio a aspect-[3/4] */}
+        <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
+          <KurukinPlayer
+            provider="bunnynet"
+            videoId={LEADFLOW_VIDEO_URL}
+            mutedPreview={{
+              enabled: true,
+              overlayPosition: 'center',
+              buttonText: 'Escuchar ahora',
+              fallbackText1: 'MENSAJE URGENTE',
+              fallbackText2: 'ACTIVA EL AUDIO',
+            }}
+            smartPoster={{
+              eyebrow: 'Mensaje Urgente',
+              title: 'Haz clic para ver por qué tu equipo no crece',
+              description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
+              buttonText: 'Ver mensaje',
+            }}
+            {/* Ajuste de escala para que llene bien el frame vertical */}
+            className="rounded-[1.5rem] [&_video]:origin-center [&_video]:scale-[1.02] [&_video]:transform-gpu"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* FRANJA DE VALIDACIÓN (LOGOS MLM) */}
         <section className="border-y border-white/5 bg-black py-10 overflow-hidden">
