@@ -143,7 +143,7 @@ export default function LeadflowPage() {
         {/* Cambio a aspect-[3/4] */}
         <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
   <KurukinPlayer
-    provider="bunnynet"
+    provider="youtube"
     videoId={LEADFLOW_VIDEO_URL}
     mutedPreview={{
       enabled: true,
