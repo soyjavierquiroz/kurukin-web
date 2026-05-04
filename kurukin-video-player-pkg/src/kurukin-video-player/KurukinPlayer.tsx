@@ -488,7 +488,7 @@ export function KurukinPlayer({
     <div
       ref={containerRef}
       className={formatClassName(
-        'relative aspect-video w-full overflow-hidden rounded-2xl bg-black',
+        'relative h-full w-full overflow-hidden rounded-2xl bg-black',
         shouldApplyYoutubeUiHack && '[&_iframe]:scale-[1.45] [&_iframe]:origin-center',
         className,
       )}
