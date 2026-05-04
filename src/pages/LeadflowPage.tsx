@@ -19,21 +19,6 @@ const problemBullets = [
   'No hay duplicación real',
 ];
 
-const socialProofCards = [
-  {
-    metric: '327',
-    detail: 'prospectos en 30 días',
-  },
-  {
-    metric: '10',
-    detail: 'miembros activos en 14 días',
-  },
-  {
-    metric: '80%',
-    detail: 'menos tiempo hasta la primera firma',
-  },
-];
-
 const filterBullets = [
   '✔ Tienes un equipo de al menos 10 miembros activos y dispuestos',
   '✔ Junto a tu equipo pueden invertir al menos $ 1,000 USD en publicidad',
@@ -101,9 +86,13 @@ export default function LeadflowPage() {
       </div>
 
       <main>
+        {/* HERO SECTION */}
         <section id="hero" className="relative overflow-hidden bg-black">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
+          
           <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
+            
+            {/* COLUMNA 1: COPY */}
             <div className="max-w-none">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
                 ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
@@ -126,52 +115,46 @@ export default function LeadflowPage() {
                   onClick={() => setIsFormOpen(true)}
                 />
               </div>
-
-              <p className="mt-5 text-center text-base font-medium text-slate-300 sm:text-left">
-                Hemos ayudado a varios equipos MLM hispanos a generar prospectos y crecer sus negocios de manera
-                consistente y predecible.
-              </p>
             </div>
 
-            {/* Columna del Video: Formato 3:4 con Motor Pro */}
-<div className="relative mx-auto w-full max-w-sm lg:max-w-none">
-  <div className="absolute -inset-6 bg-white/5 blur-3xl" />
-  <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
-    
-    {/* Contenedor 3:4 real */}
-    <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
-      <KurukinPlayer
-        provider="bunnynet"
-        videoId={LEADFLOW_VIDEO_URL}
-        
-        // CONFIGURACIÓN MOTOR PRO (VSL)
-        vslMode={true}           // Oculta los comandos y activa la barra dummy
-        resumePlayback={true}    // Recuerda donde se quedó el usuario
-        
-        mutedPreview={{
-          enabled: true,
-          overlayPosition: 'center',
-          buttonText: 'MENSAJE URGENTE - ACTIVA EL AUDIO',
-          fallbackText1: 'MENSAJE URGENTE',
-          fallbackText2: 'ACTIVA EL AUDIO',
-        }}
-        
-        smartPoster={{
-          eyebrow: 'Mensaje Urgente',
-          title: 'Haz clic para ver por qué tu equipo no crece',
-          description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
-          buttonText: 'Ver mensaje',
-        }}
+            {/* COLUMNA 2: VIDEO */}
+            <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+              <div className="absolute -inset-6 bg-white/5 blur-3xl" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+                <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
+                  <KurukinPlayer
+                    provider="bunnynet"
+                    videoId={LEADFLOW_VIDEO_URL}
+                    vslMode={true}
+                    resumePlayback={true}
+                    mutedPreview={{
+                      enabled: true,
+                      overlayPosition: 'center',
+                      buttonText: 'MENSAJE URGENTE - ACTIVA EL AUDIO',
+                      fallbackText1: 'MENSAJE URGENTE',
+                      fallbackText2: 'ACTIVA EL AUDIO',
+                    }}
+                    smartPoster={{
+                      eyebrow: 'Mensaje Urgente',
+                      title: 'Haz clic para ver por qué tu equipo no crece',
+                      description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
+                      buttonText: 'Ver mensaje',
+                    }}
+                    className="h-full w-full [&_video]:object-cover" 
+                  />
+                </div>
+              </div>
+            </div>
 
-        // Clase para asegurar que el video llene el 3:4 sin franjas negras
-        className="h-full w-full [&_video]:object-cover" 
-      />
-    </div>
-  </div>
-</div>
+            {/* TEXTO CENTRADO DEBAJO (Ocupa ambas columnas) */}
+            <p className="mt-8 w-full text-center text-base font-medium text-slate-300 lg:col-span-2">
+              Hemos ayudado a varios equipos MLM hispanos a generar prospectos y crecer sus negocios de manera
+              consistente y predecible.
+            </p>
           </div>
         </section>
 
+        {/* RESTO DE LAS SECCIONES... */}
         <section className="border-y border-white/5 bg-black py-10 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <p className="mb-8 text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
