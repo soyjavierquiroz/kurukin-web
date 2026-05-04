@@ -16,7 +16,7 @@ export function useHotmartPrices(productId: string) {
   useEffect(() => {
     const loadPrices = async () => {
       try {
-        const response = await fetch('https://hotprices.kurukin.com/api/v1/catalog');
+        const response = await fetch(import.meta.env.VITE_HOTPRICES_API_URL);
 
         if (!response.ok) {
           return;

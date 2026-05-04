@@ -12,6 +12,8 @@ import { ArrowRight, Bot, Check } from 'lucide-react';
 import { LinkRedirector } from './components/LinkRedirector';
 
 // IMPORTACIÓN AÑADIDA: Tu nueva página de pruebas del reproductor
+import { DemoPage } from './pages/DemoPage';
+import LeadflowPage from './pages/LeadflowPage';
 import { VideoTestPage } from './pages/VideoTestPage';
 
 function HomePage() {
@@ -215,9 +217,11 @@ function App() {
       <Route path="/l/:slug" element={<LinkRedirector />} />
       <Route path="/contactar/chatear" element={<ContactChat />} />
       <Route path="/contactar/formulario" element={<ContactForm />} />
+      <Route path="/leadflow" element={<LeadflowPage />} />
       
       {/* RUTA AÑADIDA: Tu laboratorio de pruebas */}
       <Route path="/video" element={<VideoTestPage />} />
+      <Route path="/demo" element={<DemoPage />} />
     </Routes>
   );
 }

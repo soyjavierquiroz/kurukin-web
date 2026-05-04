@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
-const API_URL = 'https://kuruk.in/yourls-api.php';
-const SIGNATURE = '0eb5a147eb';
+const API_URL = import.meta.env.VITE_YOURLS_API_URL?.trim() || 'https://kuruk.in/yourls-api.php';
+const SIGNATURE = import.meta.env.VITE_YOURLS_SIGNATURE?.trim() || '0eb5a147eb';
 
 type YourlsStatus = 'success' | 'fail';
 

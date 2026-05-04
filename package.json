@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
+    "hls.js": "^1.6.2",
+    "kurukin-video-player": "file:./kurukin-video-player-pkg",
     "libphonenumber-js": "^1.12.36",
     "lucide-react": "^0.344.0",
     "plyr": "^3.8.4",

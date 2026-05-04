@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
-import { KurukinPlayer } from '../components/kurukin-video-player/KurukinPlayer';
+import { KurukinPlayer } from 'kurukin-video-player';
 import { PricingCard } from '../components/PricingCard';
 import { SmartPhoneInput } from '../components/SmartPhoneInput';
 import { SmartLinkManager } from '../components/SmartLinkManager';
@@ -37,6 +37,7 @@ function isValidEmail(value: string): boolean {
 export const VideoTestPage = () => {
   const { visitorData, isLoading } = useVisitor();
 
+  const [videoTime, setVideoTime] = useState(0);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -46,8 +47,6 @@ export const VideoTestPage = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [lastPayload, setLastPayload] = useState<VideoLeadPayload | null>(null);
   const { scrapedData } = useHotmartPrices('Y43592026T');
-
-  const clickFunnelsButtonImage = '/assets/images/activar-sonido.png';
 
   const dynamicHeadline = useMemo(() => {
     if (!isLoading && visitorData?.city && visitorData?.currency) {
@@ -149,25 +148,27 @@ export const VideoTestPage = () => {
           <p className="text-slate-400">Prueba de video inteligente + formulario enriquecido con contexto global.</p>
         </div>
 
-        <div className="w-full overflow-hidden rounded-2xl border border-slate-800 bg-black shadow-[0_0_50px_rgba(59,130,246,0.1)]">
-          <KurukinPlayer
-            provider="youtube"
-            videoId="bTqVqk7FSmY"
-            lazyLoadYoutube
-            hideYoutubeUi
-            mutedPreview={{
-              enabled: true,
-              overlayImageUrl: clickFunnelsButtonImage,
-              overlayPosition: 'top-left',
-            }}
-            callToAction={{
-              enabled: true,
-              displayAtSeconds: 15,
-              headline: 'Aumenta tus ventas con Kurukin hoy',
-              buttonText: 'Probar Kurukin en WhatsApp',
-              buttonUrl: 'https://kurukin.com',
-            }}
-          />
+        <div className="grid w-full max-w-7xl grid-cols-1 gap-8 mx-auto lg:grid-cols-2">
+          <div>
+            <h3 className="mb-2 text-xl font-bold text-white">Motor Legacy (YouTube Plyr)</h3>
+            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
+              <KurukinPlayer provider="youtube" videoId="bTqVqk7FSmY" />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-xl font-bold text-blue-400">Motor Kurukin Pro (Bunny HLS)</h3>
+            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
+              <KurukinPlayer
+                provider="bunnynet"
+                videoId="https://vz-1623229a-088.b-cdn.net/050dc885-438e-4715-a1d6-6790f5afc451/playlist.m3u8"
+                vslMode={true}
+                resumePlayback={true}
+                onTimeUpdate={(time) => setVideoTime(time)}
+              />
+            </div>
+            <div className="mt-4 text-center font-mono text-green-400">Tiempo actual del VSL: {Math.floor(videoTime)}s</div>
+          </div>
         </div>
 
         <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 shadow-xl backdrop-blur md:p-7">

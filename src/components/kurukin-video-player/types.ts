@@ -1,3 +1,5 @@
+import type { VideoProvider } from './providers/IVideoProvider';
+
 export type OverlayPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
 
 export interface MutedPreviewConfig {
@@ -5,11 +7,9 @@ export interface MutedPreviewConfig {
   overlayImageUrl?: string;
   overlayPosition?: OverlayPosition;
   buttonText?: string;
-  
-  // Opciones de personalización del diseño ClickFunnels
-  fallbackColor?: string; 
-  fallbackText1?: string; 
-  fallbackText2?: string; 
+  fallbackColor?: string;
+  fallbackText1?: string;
+  fallbackText2?: string;
 }
 
 export interface CallToActionConfig {
@@ -21,14 +21,25 @@ export interface CallToActionConfig {
   isDismissible?: boolean;
 }
 
+export interface SmartPosterConfig {
+  enabled?: boolean;
+  imageUrl?: string;
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  buttonText?: string;
+}
+
 export interface KurukinPlayerProps {
-  provider: 'youtube' | 'vimeo' | 'html5';
+  provider: VideoProvider;
   videoId: string;
   mutedPreview?: MutedPreviewConfig;
   lazyLoadYoutube?: boolean;
   stickyScroll?: boolean;
   callToAction?: CallToActionConfig;
   hideYoutubeUi?: boolean;
+  smartPoster?: SmartPosterConfig;
+  className?: string;
 }
 
 export interface PlayerState {
@@ -36,8 +47,10 @@ export interface PlayerState {
   isPlaying: boolean;
   isMuted: boolean;
   currentTime: number;
+  duration: number;
   inMutedPreview: boolean;
-  showLazyCover: boolean;
+  showPoster: boolean;
   showCta: boolean;
+  autoplayBlocked: boolean;
   isSticky: boolean;
 }
