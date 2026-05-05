@@ -106,8 +106,7 @@ export default function LeadflowPage() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
-                Con LeadFlow genera entre 5 a 10 interesados diarios para tu equipo - sin crear contenido, sin
-                perseguir prospectos y sin depender de algoritmos.
+                Con LeadFlow genera de 5 a 10 interesados diarios para cada miembro de tu equipo - sin crear contenido ni depender de algoritmos.
               </p>
 
               <div className="mt-8">
