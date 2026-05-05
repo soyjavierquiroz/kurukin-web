@@ -25,7 +25,6 @@ const filterBullets = [
   '✔ Tu oferta y negocio es real y ya convierte',
 ];
 
-// ARRAY DE LOGOS MLM
 const mlmLogos = [
   'https://cdn.kuruk.in/leadflow-assets/landing/logos-mlm/1.webp',
   'https://cdn.kuruk.in/leadflow-assets/landing/logos-mlm/2.webp',
@@ -67,9 +66,9 @@ export default function LeadflowPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
 
-  // Lógica para el botón Sticky Mobile tras 250px de scroll
   useEffect(() => {
     const handleScroll = () => {
+      // Se activa a los 250px de scroll
       if (window.scrollY > 250) {
         setShowSticky(true);
       } else {
@@ -101,13 +100,11 @@ export default function LeadflowPage() {
       </div>
 
       <main>
-        {/* HERO SECTION */}
+        {/* HERO SECTION - CTA Visible en todo dispositivo */}
         <section id="hero" className="relative overflow-hidden bg-black">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
           
           <div className="relative mx-auto grid max-w-7xl gap-5 px-4 pt-8 pb-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
-            
-            {/* COLUMNA 1: COPY */}
             <div className="max-w-none">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
                 ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
@@ -127,11 +124,11 @@ export default function LeadflowPage() {
                   text="Quiero ver si califico para obtener LEDFLOW"
                   microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar."
                   onClick={() => setIsFormOpen(true)}
+                  className="block" 
                 />
               </div>
             </div>
 
-            {/* COLUMNA 2: VIDEO */}
             <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
               <div className="absolute -inset-6 bg-white/5 blur-3xl" />
               <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
@@ -162,7 +159,7 @@ export default function LeadflowPage() {
           </div>
         </section>
 
-        {/* FRANJA DE VALIDACIÓN (LOGOS MLM) */}
+        {/* FRANJA DE VALIDACIÓN */}
         <section className="border-y border-white/5 bg-black py-12 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="mb-12 text-center">
@@ -170,7 +167,6 @@ export default function LeadflowPage() {
                 Hemos ayudado a varios equipos MLM hispanos a generar prospectos y <br className="hidden md:block" />
                 crecer sus negocios de manera consistente y predecible.
               </p>
-              
               <p className="mt-6 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
                 Equipos en estas compañías ya usan este sistema...
               </p>
@@ -180,33 +176,17 @@ export default function LeadflowPage() {
           <div className="relative mx-auto flex max-w-7xl overflow-hidden">
             <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-black to-transparent sm:w-32" />
             <div className="absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-black to-transparent sm:w-32" />
-
             <div className="flex w-max animate-[marquee_30s_linear_infinite] items-center hover:[animation-play-state:paused]">
               {[...mlmLogos, ...mlmLogos].map((logo, index) => (
-                <div 
-                  key={index} 
-                  className="mx-6 flex w-24 flex-shrink-0 items-center justify-center transition-all duration-300 hover:opacity-100 sm:mx-10 sm:w-32 opacity-40 grayscale hover:grayscale-0"
-                >
-                  <img
-                    src={logo}
-                    alt={`Logo MLM ${index}`}
-                    className="h-auto w-full object-contain"
-                    loading="lazy"
-                  />
+                <div key={index} className="mx-6 flex w-24 flex-shrink-0 items-center justify-center transition-all duration-300 hover:opacity-100 sm:mx-10 sm:w-32 opacity-40 grayscale hover:grayscale-0">
+                  <img src={logo} alt={`Logo MLM ${index}`} className="h-auto w-full object-contain" loading="lazy" />
                 </div>
               ))}
             </div>
           </div>
-
-          <style dangerouslySetInnerHTML={{__html: `
-            @keyframes marquee {
-              0% { transform: translateX(0%); }
-              100% { transform: translateX(-50%); }
-            }
-          `}} />
         </section>
 
-        {/* SECCIÓN DEPENDENCIA */}
+        {/* SECCIÓN DEPENDENCIA - RESTAURADA */}
         <section className="bg-slate-50 text-slate-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -214,17 +194,12 @@ export default function LeadflowPage() {
                 <h2 className="text-3xl font-bold leading-[1.1] md:text-5xl">
                   Si hoy el equipo no se mueve sin ti, no tienes estructura. <span className="text-red-600">Tienes dependencia.</span>
                 </h2>
-
                 <p className="mt-8 text-lg font-bold text-slate-800">
                   👉 Esto es lo que realmente está pasando en tu equipo:
                 </p>
-
                 <div className="mt-5 space-y-4">
                   {problemBullets.map((item) => (
-                    <div 
-                      key={item} 
-                      className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-red-100 group"
-                    >
+                    <div key={item} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-red-100 group">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
                         <XCircle className="h-6 w-6 text-red-500 transition-transform group-hover:scale-110" />
                       </div>
@@ -233,14 +208,9 @@ export default function LeadflowPage() {
                   ))}
                 </div>
               </div>
-
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-tr from-red-100 to-cyan-100 blur-3xl opacity-60 rounded-full" />
-                <img 
-                  src="https://cdn.kuruk.in/leadflow-assets/landing/dependencia.webp" 
-                  alt="Estructura vs Dependencia" 
-                  className="relative rounded-[2.5rem] shadow-2xl border-8 border-white"
-                />
+                <img src="https://cdn.kuruk.in/leadflow-assets/landing/dependencia.webp" alt="Estructura vs Dependencia" className="relative rounded-[2.5rem] shadow-2xl border-8 border-white" />
               </div>
             </div>
           </div>
@@ -254,7 +224,7 @@ export default function LeadflowPage() {
           </div>
         </section>
 
-        {/* SECCIÓN SISTEMA */}
+        {/* SECCIÓN SISTEMA - CTA Solo Desktop */}
         <section className="relative overflow-hidden bg-slate-950">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_32%)]" />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
@@ -281,22 +251,11 @@ export default function LeadflowPage() {
                     <p className="mt-3 text-base leading-relaxed text-slate-300 md:text-lg">{description}</p>
                   </div>
                 ))}
-
-                <div className="relative mt-8 rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-5 backdrop-blur-sm">
-                  <div className="absolute -left-[34px] top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-400 shadow-[0_0_16px_rgba(34,211,238,0.5)]" />
-                  <p className="text-lg font-medium text-slate-100">
-                    <span className="font-bold text-cyan-300">⚡ Resultado:</span> tu equipo tiene conversaciones nuevas todos los días y deja de depender de ti para crecer y moverse.
-                  </p>
-                </div>
               </div>
 
               <div className="relative group">
                 <div className="absolute -inset-4 bg-cyan-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img 
-                  src="https://cdn.kuruk.in/leadflow-assets/landing/sindependencia.webp" 
-                  alt="Diagrama de flujo de equipo sin dependencia" 
-                  className="relative rounded-[2rem] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.6)] w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-                />
+                <img src="https://cdn.kuruk.in/leadflow-assets/landing/sindependencia.webp" alt="Diagrama de flujo" className="relative rounded-[2rem] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.6)] w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]" />
               </div>
             </div>
 
@@ -304,6 +263,7 @@ export default function LeadflowPage() {
               <LeadflowCta
                 text="Quiero que mi equipo genere prospectos ahora"
                 onClick={() => setIsFormOpen(true)}
+                className="hidden lg:block" 
               />
             </div>
           </div>
@@ -321,7 +281,7 @@ export default function LeadflowPage() {
           </div>
         </section>
 
-        {/* SECCIÓN GARANTÍA */}
+        {/* SECCIÓN GARANTÍA - CTA Solo Desktop */}
         <section className="bg-white text-slate-950">
           <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
             <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-2xl md:p-12">
@@ -329,14 +289,18 @@ export default function LeadflowPage() {
                 <ShieldCheck className="h-16 w-16 text-blue-500" />
                 <h2 className="mt-6 text-3xl font-bold md:text-5xl">Si en 30 días tu equipo no está teniendo conversaciones diarias con prospectos reales, seguimos trabajando contigo hasta lograrlo.</h2>
                 <div className="mt-10">
-                  <LeadflowCta text="Quiero aplicar para LEADFLOW" onClick={() => setIsFormOpen(true)} />
+                  <LeadflowCta 
+                    text="Quiero aplicar para LEADFLOW" 
+                    onClick={() => setIsFormOpen(true)} 
+                    className="hidden lg:block"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CTA STICKY MOBILE */}
+        {/* CTA STICKY MOBILE - Solo Móvil */}
         {showSticky && (
           <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-lg border-t border-white/10" />
