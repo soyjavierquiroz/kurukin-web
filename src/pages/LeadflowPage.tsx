@@ -87,114 +87,114 @@ export default function LeadflowPage() {
 
       <main>
         {/* HERO SECTION */}
-<section id="hero" className="relative overflow-hidden bg-black">
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
-  
-  <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
-    
-    {/* COLUMNA 1: COPY */}
-    <div className="max-w-none">
-      <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
-        ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
-      </p>
+        <section id="hero" className="relative overflow-hidden bg-black">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
+          
+          {/* OPTIMIZACIÓN MÓVIL: pt-8 (inicio a la mitad) y gap-5 (espacio antes del video a la mitad) */}
+          <div className="relative mx-auto grid max-w-7xl gap-5 px-4 pt-8 pb-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
+            
+            {/* COLUMNA 1: COPY */}
+            <div className="max-w-none">
+              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
+                ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
+              </p>
 
-      <h1 className="mt-5 text-4xl font-bold leading-[1.02] text-white md:text-6xl">
-        Si tu equipo no genera conversaciones diarias sin ti...{' '}
-        <span className="text-cyan-300">tienes un empleo disfrazado.</span>
-      </h1>
+              {/* TITULAR: text-3xl en móvil para mejor acomodo horizontal */}
+              <h1 className="mt-5 text-3xl font-bold leading-[1.02] text-white md:text-6xl">
+                Si tu equipo no genera conversaciones diarias sin ti...{' '}
+                <span className="text-cyan-300">tienes un empleo disfrazado.</span>
+              </h1>
 
-      <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
-        Genera entre 3 a 10 conversaciones diarias por miembro en 7 días - sin crear contenido, sin
-        perseguir prospectos y sin depender de algoritmos.
-      </p>
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
+                Genera entre 3 a 10 conversaciones diarias por miembro en 7 días - sin crear contenido, sin
+                perseguir prospectos y sin depender de algoritmos.
+              </p>
 
-      <div className="mt-8">
-        <LeadflowCta
-          text="Quiero ver si califico para obtener LEDFLOW"
-          microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar."
-          onClick={() => setIsFormOpen(true)}
-        />
-      </div>
-    </div>
+              <div className="mt-8">
+                <LeadflowCta
+                  text="Quiero ver si califico para obtener LEDFLOW"
+                  microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar."
+                  onClick={() => setIsFormOpen(true)}
+                />
+              </div>
+            </div>
 
-    {/* COLUMNA 2: VIDEO */}
-    <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
-      <div className="absolute -inset-6 bg-white/5 blur-3xl" />
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
-        <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
-          <KurukinPlayer
-            provider="bunnynet"
-            videoId={LEADFLOW_VIDEO_URL}
-            vslMode={true}
-            resumePlayback={true}
-            mutedPreview={{
-              enabled: true,
-              overlayPosition: 'center',
-              buttonText: 'MENSAJE URGENTE - ACTIVA EL AUDIO',
-              fallbackText1: 'MENSAJE URGENTE',
-              fallbackText2: 'ACTIVA EL AUDIO',
-            }}
-            smartPoster={{
-              eyebrow: 'Mensaje Urgente',
-              title: 'Haz clic para ver por qué tu equipo no crece',
-              description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
-              buttonText: 'Ver mensaje',
-            }}
-            className="h-full w-full [&_video]:object-cover" 
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+            {/* COLUMNA 2: VIDEO */}
+            <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+              <div className="absolute -inset-6 bg-white/5 blur-3xl" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+                <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
+                  <KurukinPlayer
+                    provider="bunnynet"
+                    videoId={LEADFLOW_VIDEO_URL}
+                    vslMode={true}
+                    resumePlayback={true}
+                    mutedPreview={{
+                      enabled: true,
+                      overlayPosition: 'center',
+                      buttonText: 'MENSAJE URGENTE - ACTIVA EL AUDIO',
+                      fallbackText1: 'MENSAJE URGENTE',
+                      fallbackText2: 'ACTIVA EL AUDIO',
+                    }}
+                    smartPoster={{
+                      eyebrow: 'Mensaje Urgente',
+                      title: 'Haz clic para ver por qué tu equipo no crece',
+                      description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
+                      buttonText: 'Ver mensaje',
+                    }}
+                    className="h-full w-full [&_video]:object-cover" 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        {/* RESTO DE LAS SECCIONES... */}
         {/* FRANJA DE VALIDACIÓN (LOGOS MLM) */}
-<section className="border-y border-white/5 bg-black py-12 overflow-hidden">
-  <div className="mx-auto max-w-7xl px-4 sm:px-6">
-    <div className="mb-12 text-center">
-      {/* Texto Principal (Más grande) */}
-      <p className="text-lg font-medium leading-relaxed text-slate-200 md:text-xl lg:text-2xl">
-        Hemos ayudado a varios equipos MLM hispanos a generar prospectos y <br className="hidden md:block" />
-        crecer sus negocios de manera consistente y predecible.
-      </p>
-      
-      {/* Subtexto Eyebrow */}
-      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-        Equipos en estas compañías ya usan este sistema...
-      </p>
-    </div>
-  </div>
+        <section className="border-y border-white/5 bg-black py-12 overflow-hidden">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-12 text-center">
+              <p className="text-lg font-medium leading-relaxed text-slate-200 md:text-xl lg:text-2xl">
+                Hemos ayudado a varios equipos MLM hispanos a generar prospectos y <br className="hidden md:block" />
+                crecer sus negocios de manera consistente y predecible.
+              </p>
+              
+              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                Equipos en estas compañías ya usan este sistema...
+              </p>
+            </div>
+          </div>
 
-  <div className="relative mx-auto flex max-w-7xl overflow-hidden">
-    <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-black to-transparent sm:w-32" />
-    <div className="absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-black to-transparent sm:w-32" />
+          <div className="relative mx-auto flex max-w-7xl overflow-hidden">
+            <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-black to-transparent sm:w-32" />
+            <div className="absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-black to-transparent sm:w-32" />
 
-    <div className="flex w-max animate-[marquee_30s_linear_infinite] items-center hover:[animation-play-state:paused]">
-      {[...mlmLogos, ...mlmLogos].map((logo, index) => (
-        <div 
-          key={index} 
-          className="mx-6 flex w-24 flex-shrink-0 items-center justify-center transition-all duration-300 hover:opacity-100 sm:mx-10 sm:w-32 opacity-40 grayscale hover:grayscale-0"
-        >
-          <img
-            src={logo}
-            alt={`Logo MLM ${index}`}
-            className="h-auto w-full object-contain"
-            loading="lazy"
-          />
-        </div>
-      ))}
-    </div>
-  </div>
+            <div className="flex w-max animate-[marquee_30s_linear_infinite] items-center hover:[animation-play-state:paused]">
+              {[...mlmLogos, ...mlmLogos].map((logo, index) => (
+                <div 
+                  key={index} 
+                  className="mx-6 flex w-24 flex-shrink-0 items-center justify-center transition-all duration-300 hover:opacity-100 sm:mx-10 sm:w-32 opacity-40 grayscale hover:grayscale-0"
+                >
+                  <img
+                    src={logo}
+                    alt={`Logo MLM ${index}`}
+                    className="h-auto w-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
-  <style dangerouslySetInnerHTML={{__html: `
-    @keyframes marquee {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-50%); }
-    }
-  `}} />
-</section>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes marquee {
+              0% { transform: translateX(0%); }
+              100% { transform: translateX(-50%); }
+            }
+          `}} />
+        </section>
 
+        {/* ... Resto del componente se mantiene igual ... */}
         <section className="bg-slate-50 text-slate-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
