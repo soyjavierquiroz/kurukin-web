@@ -67,10 +67,10 @@ export default function LeadflowPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
 
-  // Lógica para el botón Sticky Mobile tras 500px de scroll
+  // Lógica para el botón Sticky Mobile tras 250px de scroll
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 400) {
+      if (window.scrollY > 250) {
         setShowSticky(true);
       } else {
         setShowSticky(false);
