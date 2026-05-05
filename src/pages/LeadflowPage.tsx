@@ -70,7 +70,7 @@ export default function LeadflowPage() {
   // Lógica para el botón Sticky Mobile tras 500px de scroll
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 500) {
+      if (window.scrollY > 400) {
         setShowSticky(true);
       } else {
         setShowSticky(false);
@@ -312,7 +312,7 @@ export default function LeadflowPage() {
         <section className="bg-black">
           <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
             <p className="text-sm font-semibold uppercase tracking-[0.32em] text-red-300">⚠️ Esto no es para todos</p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">Leadflow es para líderes con equipo que están listos para escalar. Si estás empezando, esto no es para ti.</h2>
+            <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">LeadFlow es para líderes con equipo que están listos para escalar. Si estás empezando, esto no es para ti.</h2>
             <div className="mt-10 rounded-2xl border border-red-900/30 bg-red-950/20 p-6 divide-y divide-white/10 border-y border-white/10">
               {filterBullets.map((item) => (
                 <div key={item} className="py-5 text-lg text-slate-200">{item}</div>
@@ -345,7 +345,7 @@ export default function LeadflowPage() {
                 onClick={() => setIsFormOpen(true)}
                 className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-blue-600 py-3 font-bold text-white shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-95 transition-transform"
               >
-                <span className="text-lg uppercase tracking-tight">Aplicar ahora</span>
+                <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
                 <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
                   Solo 5 equipos este mes
                 </span>
