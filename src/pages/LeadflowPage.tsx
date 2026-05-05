@@ -65,6 +65,21 @@ function LeadflowCta({
 
 export default function LeadflowPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [showSticky, setShowSticky] = useState(false);
+
+  // Lógica para el botón Sticky Mobile tras 500px de scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        setShowSticky(true);
+      } else {
+        setShowSticky(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (isFormOpen) {
@@ -90,7 +105,6 @@ export default function LeadflowPage() {
         <section id="hero" className="relative overflow-hidden bg-black">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
           
-          {/* OPTIMIZACIÓN MÓVIL: pt-8 (inicio a la mitad) y gap-5 (espacio antes del video a la mitad) */}
           <div className="relative mx-auto grid max-w-7xl gap-5 px-4 pt-8 pb-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
             
             {/* COLUMNA 1: COPY */}
@@ -99,7 +113,6 @@ export default function LeadflowPage() {
                 ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
               </p>
 
-              {/* TITULAR: text-3xl en móvil para mejor acomodo horizontal */}
               <h1 className="mt-5 text-3xl font-bold leading-[1.02] text-white md:text-6xl">
                 Si tu equipo no prospecta sin ti...{' '}
                 <span className="text-cyan-300">tienes un empleo disfrazado.</span>
@@ -193,7 +206,7 @@ export default function LeadflowPage() {
           `}} />
         </section>
 
-        {/* ... Resto del componente se mantiene igual ... */}
+        {/* SECCIÓN DEPENDENCIA */}
         <section className="bg-slate-50 text-slate-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -241,6 +254,7 @@ export default function LeadflowPage() {
           </div>
         </section>
 
+        {/* SECCIÓN SISTEMA */}
         <section className="relative overflow-hidden bg-slate-950">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_32%)]" />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
@@ -307,6 +321,7 @@ export default function LeadflowPage() {
           </div>
         </section>
 
+        {/* SECCIÓN GARANTÍA */}
         <section className="bg-white text-slate-950">
           <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
             <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-2xl md:p-12">
@@ -321,6 +336,25 @@ export default function LeadflowPage() {
           </div>
         </section>
 
+        {/* CTA STICKY MOBILE */}
+        {showSticky && (
+          <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-lg border-t border-white/10" />
+            <div className="relative">
+              <button
+                onClick={() => setIsFormOpen(true)}
+                className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-blue-600 py-3 font-bold text-white shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-95 transition-transform"
+              >
+                <span className="text-lg uppercase tracking-tight">Aplicar ahora</span>
+                <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
+                  Solo 5 equipos este mes
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL FORMULARIO */}
         {isFormOpen && (
           <div className="fixed inset-0 z-[100] bg-[#050505]/95 backdrop-blur-md h-[100dvh] w-screen overflow-hidden flex flex-col">
             <div className="mx-auto flex w-full max-w-3xl justify-end p-4">
