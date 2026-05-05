@@ -101,12 +101,12 @@ export default function LeadflowPage() {
 
               {/* TITULAR: text-3xl en móvil para mejor acomodo horizontal */}
               <h1 className="mt-5 text-3xl font-bold leading-[1.02] text-white md:text-6xl">
-                Si tu equipo no genera conversaciones serias sin ti...{' '}
+                Si tu equipo no prospecta sin ti...{' '}
                 <span className="text-cyan-300">tienes un empleo disfrazado.</span>
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
-                Genera entre 5 a 10 interesados diarios por miembro en 7 días - sin crear contenido, sin
+                Con LeadFlow genera entre 5 a 10 interesados diarios para tu equipo - sin crear contenido, sin
                 perseguir prospectos y sin depender de algoritmos.
               </p>
 
