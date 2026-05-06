@@ -3,7 +3,7 @@ import { ArrowRight, ShieldCheck, XCircle } from 'lucide-react';
 import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
 
-const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/75053d02-d0ab-4782-91c8-b39a6c2b677f/playlist.m3u8';
+const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/1063ad15-0f8a-4471-8134-a2a8af4e919f/playlist.m3u8';
 
 const ctaBaseClassName = [
   'group inline-flex w-full min-h-[64px] items-center justify-center gap-3 rounded-2xl',
