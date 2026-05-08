@@ -27,14 +27,21 @@ interface TikTokTrackFunction {
 interface TikTokPixelQueue extends Array<unknown> {
   track?: TikTokTrackFunction;
   identify?: (payload: Record<string, string>) => void;
-  load?: (pixelId: string) => void;
+  load?: (pixelId: string, options?: Record<string, unknown>) => void;
   page?: () => void;
+  methods?: string[];
+  setAndDefer?: (target: TikTokPixelQueue, method: string) => void;
+  instance?: (pixelId: string) => TikTokPixelQueue;
+  _i?: Record<string, TikTokPixelQueue & { _u?: string }>;
+  _o?: Record<string, Record<string, unknown>>;
+  _t?: Record<string, number>;
 }
 
 declare global {
   interface Window {
     fbq?: MetaFbqFunction;
     _fbq?: MetaFbqFunction;
+    TiktokAnalyticsObject?: string;
     ttq?: TikTokPixelQueue;
   }
 }
@@ -70,6 +77,13 @@ export interface TrackLeadInput {
   eventId?: string;
   value?: number;
   currency?: string;
+}
+
+export interface PixelInitResult {
+  meta: boolean;
+  tiktok: boolean;
+  metaPixelId: string | null;
+  tiktokPixelId: string | null;
 }
 
 let metaScriptPromise: Promise<void> | null = null;
@@ -292,21 +306,12 @@ function loadMetaPixel(pixelId: string | null): Promise<void> {
   return metaScriptPromise;
 }
 
-function loadTiktokPixel(pixelId: string | null): Promise<void> {
+function injectTiktokScript(pixelId: string): Promise<void> {
   if (!isBrowser() || !pixelId) {
     return Promise.resolve();
   }
 
-  const ttq = ensureTiktokStub();
-  if (!ttq) {
-    return Promise.resolve();
-  }
-
   if (document.getElementById(TIKTOK_PIXEL_SCRIPT_ID)) {
-    if (initializedTiktokPixelId !== pixelId) {
-      ttq.load?.(pixelId);
-      initializedTiktokPixelId = pixelId;
-    }
     return Promise.resolve();
   }
 
@@ -320,15 +325,38 @@ function loadTiktokPixel(pixelId: string | null): Promise<void> {
     script.async = true;
     script.src = `${TIKTOK_PIXEL_SCRIPT_URL}?sdkid=${encodeURIComponent(pixelId)}&lib=ttq`;
     script.onload = () => {
-      window.ttq?.page?.();
-      initializedTiktokPixelId = pixelId;
       resolve();
     };
     script.onerror = () => reject(new Error('Failed to load TikTok Pixel script.'));
+
+    const firstScript = document.getElementsByTagName('script')[0];
+    if (firstScript?.parentNode) {
+      firstScript.parentNode.insertBefore(script, firstScript);
+      return;
+    }
+
     document.head.appendChild(script);
   });
 
   return tiktokScriptPromise;
+}
+
+function loadTiktokPixel(pixelId: string | null): Promise<void> {
+  if (!isBrowser() || !pixelId) {
+    return Promise.resolve();
+  }
+
+  const ttq = ensureTiktokStub();
+  if (!ttq) {
+    return Promise.resolve();
+  }
+
+  if (initializedTiktokPixelId !== pixelId) {
+    ttq.load?.(pixelId);
+    initializedTiktokPixelId = pixelId;
+  }
+
+  return tiktokScriptPromise ?? Promise.resolve();
 }
 
 function ensureTiktokStub(): TikTokPixelQueue | null {
@@ -336,28 +364,67 @@ function ensureTiktokStub(): TikTokPixelQueue | null {
     return null;
   }
 
+  window.TiktokAnalyticsObject = 'ttq';
   const existing = window.ttq as TikTokPixelQueue | undefined;
 
-  if (existing && typeof existing.track === 'function') {
+  if (existing && typeof existing.load === 'function' && typeof existing.track === 'function') {
     return existing;
   }
 
   const ttq = Array.isArray(existing) ? existing : ([] as unknown as TikTokPixelQueue);
-  const enqueue =
-    (method: string) =>
-    (...args: readonly unknown[]): void => {
-      ttq.push([method, ...args]);
+  ttq.methods = [
+    'page',
+    'track',
+    'identify',
+    'instances',
+    'debug',
+    'on',
+    'off',
+    'once',
+    'ready',
+    'alias',
+    'group',
+    'enableCookie',
+    'disableCookie',
+    'holdConsent',
+    'revokeConsent',
+    'grantConsent',
+  ];
+  ttq.setAndDefer = (target: TikTokPixelQueue, method: string) => {
+    (target as unknown as Record<string, unknown>)[method] = (...args: readonly unknown[]) => {
+      target.push([method, ...args]);
+    };
+  };
+
+  ttq.methods.forEach((method) => {
+    ttq.setAndDefer?.(ttq, method);
+  });
+
+  ttq.instance = (pixelId: string): TikTokPixelQueue => {
+    const instanceQueue = (ttq._i?.[pixelId] ?? []) as TikTokPixelQueue;
+    ttq.methods?.forEach((method) => {
+      ttq.setAndDefer?.(instanceQueue, method);
+    });
+    return instanceQueue;
+  };
+
+  ttq.load = (nextPixelId: string, options: Record<string, unknown> = {}) => {
+    const instanceQueue = [] as unknown as TikTokPixelQueue & { _u?: string };
+    instanceQueue._u = TIKTOK_PIXEL_SCRIPT_URL;
+    ttq._i = {
+      ...(ttq._i ?? {}),
+      [nextPixelId]: instanceQueue,
+    };
+    ttq._t = {
+      ...(ttq._t ?? {}),
+      [nextPixelId]: Date.now(),
+    };
+    ttq._o = {
+      ...(ttq._o ?? {}),
+      [nextPixelId]: options,
     };
 
-  ttq.track = enqueue('track');
-  ttq.identify = (payload: Record<string, string>) => {
-    ttq.push(['identify', payload]);
-  };
-  ttq.page = () => {
-    ttq.push(['page']);
-  };
-  ttq.load = (nextPixelId: string) => {
-    ttq.push(['load', nextPixelId]);
+    void injectTiktokScript(nextPixelId);
   };
 
   window.ttq = ttq;
@@ -408,6 +475,59 @@ async function dispatchBrowserPixels({
   }
 
   return { meta, tiktok };
+}
+
+export async function initPixels(): Promise<PixelInitResult> {
+  const metaPixelId = resolveEnvValue(import.meta.env.VITE_META_PIXEL_ID);
+  const tiktokPixelId = resolveEnvValue(import.meta.env.VITE_TIKTOK_PIXEL_ID);
+
+  const [meta, tiktok] = await Promise.all([
+    loadMetaPixel(metaPixelId)
+      .then(() => Boolean(metaPixelId && typeof window.fbq === 'function'))
+      .catch((error) => {
+        console.error('[analytics] Meta pixel init failed', error);
+        return false;
+      }),
+    loadTiktokPixel(tiktokPixelId)
+      .then(() => Boolean(tiktokPixelId && typeof window.ttq?.load === 'function'))
+      .catch((error) => {
+        console.error('[analytics] TikTok pixel init failed', error);
+        return false;
+      }),
+  ]);
+
+  return {
+    meta,
+    tiktok,
+    metaPixelId,
+    tiktokPixelId,
+  };
+}
+
+export async function trackPageView(eventId = getSessionEventId()): Promise<TrackEventResult> {
+  await initPixels();
+
+  let meta = false;
+  let tiktok = false;
+
+  if (isBrowser() && typeof window.fbq === 'function') {
+    window.fbq('track', 'PageView', {}, { eventID: eventId });
+    meta = true;
+  }
+
+  if (isBrowser() && typeof window.ttq?.page === 'function') {
+    window.ttq.page();
+    tiktok = true;
+  }
+
+  return {
+    eventId,
+    browserSent: {
+      meta,
+      tiktok,
+    },
+    reason: null,
+  };
 }
 
 export function getAnalyticsContext(): AnalyticsContext {
