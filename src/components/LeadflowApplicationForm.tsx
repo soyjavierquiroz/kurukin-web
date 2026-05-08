@@ -17,6 +17,7 @@ import {
 import flags from 'react-phone-number-input/flags';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
+import { getAnalyticsContext, trackLead, type AnalyticsContext } from '../lib/analytics';
 
 const TOTAL_STEPS = 13;
 const MIN_TEXTAREA_LENGTH = 20;
@@ -242,7 +243,10 @@ export interface LeadflowPayload {
   telefono: string;
   nombre_completo: string;
   fbc: string | null;
+  fbp: string | null;
+  ttclid: string | null;
   ttc: string | null;
+  analytics: AnalyticsContext;
   respuestas: {
     tamano_equipo: { value: string; label: string } | null;
     compania_producto: string;
@@ -287,35 +291,6 @@ interface LeadflowAiWebhookResponse {
   ai_consulting_text?: string;
 }
 
-interface InitialLeadUserData {
-  email?: string;
-  phone?: string;
-  name?: string;
-}
-
-interface PreparedLeadUserData {
-  email?: string;
-  phone?: string;
-  firstName?: string;
-  lastName?: string;
-}
-
-interface FbqTrackFunction {
-  (...args: readonly unknown[]): void;
-}
-
-interface TikTokTrackFunction {
-  track?: (eventName: string, params?: Record<string, unknown>) => void;
-  identify?: (payload: Record<string, string>) => void;
-}
-
-declare global {
-  interface Window {
-    fbq?: FbqTrackFunction;
-    ttq?: TikTokTrackFunction;
-  }
-}
-
 interface OptionButtonProps {
   label: string;
   description?: string;
@@ -330,22 +305,6 @@ interface CountrySelectFieldProps {
   disabled?: boolean;
   onChange: (value: Country) => void;
 }
-
-interface TrackingClickIds {
-  fbc: string | null;
-  ttc: string | null;
-}
-
-const QUALIFIED_LEAD_TRACKING_PARAMS = {
-  content_name: 'Lead Calificado',
-  value: 10.0,
-  currency: 'USD',
-} as const;
-
-const QUALIFIED_FINAL_STATUSES: ReadonlySet<FinalStatus> = new Set(['calificado_llamada', 'sesion_pagada']);
-const TRACKING_STORAGE_PREFIX = 'leadflow.capi';
-const META_FBC_COOKIE_NAME = '_fbc';
-const TIKTOK_TTCLID_COOKIE_NAME = 'ttclid';
 
 const INITIAL_ANSWERS: Answers = {
   teamSize: '',
@@ -398,203 +357,8 @@ function safeValidatePhone(value: string): boolean {
   }
 }
 
-function normalizeNullable(value: string | null | undefined): string | null {
-  if (typeof value !== 'string') {
-    return null;
-  }
-
-  const normalized = value.trim();
-  return normalized.length > 0 ? normalized : null;
-}
-
-function readCookieValue(name: string): string | null {
-  if (typeof document === 'undefined') {
-    return null;
-  }
-
-  const encodedName = `${name}=`;
-  const segments = document.cookie.split('; ');
-  const target = segments.find((segment) => segment.startsWith(encodedName));
-
-  if (!target) {
-    return null;
-  }
-
-  return normalizeNullable(decodeURIComponent(target.slice(encodedName.length)));
-}
-
-function writeCookieValue(name: string, value: string, days = 90): void {
-  if (typeof document === 'undefined' || typeof window === 'undefined') {
-    return;
-  }
-
-  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  const maxAge = days * 24 * 60 * 60;
-  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
-}
-
-function readStorageValue(key: string): string | null {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  try {
-    return normalizeNullable(window.localStorage.getItem(key)) ?? normalizeNullable(window.sessionStorage.getItem(key));
-  } catch {
-    return null;
-  }
-}
-
-function writeStorageValue(key: string, value: string): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(key, value);
-    window.sessionStorage.setItem(key, value);
-  } catch {
-    // Ignore storage write failures.
-  }
-}
-
-function createMetaFbc(fbclid: string): string {
-  return `fb.1.${Date.now()}.${fbclid}`;
-}
-
-function captureTrackingClickIds(): TrackingClickIds {
-  if (typeof window === 'undefined') {
-    return { fbc: null, ttc: null };
-  }
-
-  const params = new URLSearchParams(window.location.search);
-  const fbclid = normalizeNullable(params.get('fbclid'));
-  const ttclid = normalizeNullable(params.get('ttclid'));
-  const storedFbc = readStorageValue(`${TRACKING_STORAGE_PREFIX}.fbc`);
-  const storedTtc = readStorageValue(`${TRACKING_STORAGE_PREFIX}.ttc`);
-  const cookieFbc = readCookieValue(META_FBC_COOKIE_NAME);
-  const cookieTtc = readCookieValue(TIKTOK_TTCLID_COOKIE_NAME) ?? readCookieValue('ttc');
-
-  const fbc = cookieFbc ?? storedFbc ?? (fbclid ? createMetaFbc(fbclid) : null);
-  const ttc = ttclid ?? cookieTtc ?? storedTtc;
-
-  if (fbc) {
-    writeStorageValue(`${TRACKING_STORAGE_PREFIX}.fbc`, fbc);
-    if (!cookieFbc) {
-      writeCookieValue(META_FBC_COOKIE_NAME, fbc);
-    }
-  }
-
-  if (ttc) {
-    writeStorageValue(`${TRACKING_STORAGE_PREFIX}.ttc`, ttc);
-    if (!cookieTtc) {
-      writeCookieValue(TIKTOK_TTCLID_COOKIE_NAME, ttc);
-    }
-  }
-
-  return { fbc, ttc };
-}
-
-function normalizeEmailForTracking(email?: string): string | null {
-  if (!email) return null;
-
-  const normalized = email.trim().toLowerCase();
-  return normalized.length > 0 ? normalized : null;
-}
-
-function normalizePhoneForTracking(phone?: string): string | null {
-  if (!phone) return null;
-
-  const normalized = phone.replace(/\D/g, '');
-  return normalized.length > 0 ? normalized : null;
-}
-
-function normalizeNamePartsForTracking(name?: string): { firstName: string | null; lastName: string | null } {
-  if (!name) {
-    return { firstName: null, lastName: null };
-  }
-
-  const normalizedName = name.trim().replace(/\s+/g, ' ').toLowerCase();
-
-  if (!normalizedName) {
-    return { firstName: null, lastName: null };
-  }
-
-  const [firstName = '', ...lastNameParts] = normalizedName.split(' ');
-  const lastName = lastNameParts.join(' ').trim();
-
-  return {
-    firstName: firstName || null,
-    lastName: lastName || null,
-  };
-}
-
-async function sha256Hash(value: string): Promise<string> {
-  const encodedValue = new TextEncoder().encode(value);
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', encodedValue);
-  const hashBytes = Array.from(new Uint8Array(digest));
-
-  return hashBytes.map((byte) => byte.toString(16).padStart(2, '0')).join('');
-}
-
-async function prepareLeadUserData(userData: InitialLeadUserData): Promise<PreparedLeadUserData> {
-  const normalizedEmail = normalizeEmailForTracking(userData.email);
-  const normalizedPhone = normalizePhoneForTracking(userData.phone);
-  const normalizedName = normalizeNamePartsForTracking(userData.name);
-
-  if (typeof globalThis.crypto === 'undefined' || !globalThis.crypto.subtle) {
-    return {
-      email: normalizedEmail ?? undefined,
-      phone: normalizedPhone ?? undefined,
-      firstName: normalizedName.firstName ?? undefined,
-      lastName: normalizedName.lastName ?? undefined,
-    };
-  }
-
-  const [email, phone, firstName, lastName] = await Promise.all([
-    normalizedEmail ? sha256Hash(normalizedEmail) : Promise.resolve(undefined),
-    normalizedPhone ? sha256Hash(normalizedPhone) : Promise.resolve(undefined),
-    normalizedName.firstName ? sha256Hash(normalizedName.firstName) : Promise.resolve(undefined),
-    normalizedName.lastName ? sha256Hash(normalizedName.lastName) : Promise.resolve(undefined),
-  ]);
-
-  return {
-    email,
-    phone,
-    firstName,
-    lastName,
-  };
-}
-
-async function trackInitialLead(userData: InitialLeadUserData): Promise<void> {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const preparedUserData = await prepareLeadUserData(userData);
-  const metaPixelId = import.meta.env.VITE_META_PIXEL_ID?.trim();
-
-  if (typeof window.fbq === 'function') {
-    if (metaPixelId && (preparedUserData.email || preparedUserData.phone || preparedUserData.firstName || preparedUserData.lastName)) {
-      window.fbq('init', metaPixelId, {
-        ...(preparedUserData.email ? { em: preparedUserData.email } : {}),
-        ...(preparedUserData.phone ? { ph: preparedUserData.phone } : {}),
-        ...(preparedUserData.firstName ? { fn: preparedUserData.firstName } : {}),
-        ...(preparedUserData.lastName ? { ln: preparedUserData.lastName } : {}),
-      });
-    }
-
-    window.fbq('track', 'CompleteRegistration', QUALIFIED_LEAD_TRACKING_PARAMS);
-  }
-
-  if (window.ttq?.identify && (preparedUserData.email || preparedUserData.phone)) {
-    window.ttq.identify({
-      ...(preparedUserData.email ? { email: preparedUserData.email } : {}),
-      ...(preparedUserData.phone ? { phone_number: preparedUserData.phone } : {}),
-    });
-  }
-
-  window.ttq?.track?.('CompleteRegistration', QUALIFIED_LEAD_TRACKING_PARAMS);
+function isAutoRejectOption(option: object | undefined): boolean {
+  return Boolean(option && 'autoReject' in option && option.autoReject);
 }
 
 function getOptionLabel(
@@ -629,7 +393,10 @@ function calculateQualification(answers: Answers): QualificationSummary {
     (investmentPosition?.score ?? 0);
 
   const autorejectTriggered = Boolean(
-    teamSize?.autoReject || adSpend?.autoReject || urgency?.autoReject || investmentPosition?.autoReject,
+    isAutoRejectOption(teamSize) ||
+      isAutoRejectOption(adSpend) ||
+      isAutoRejectOption(urgency) ||
+      isAutoRejectOption(investmentPosition),
   );
 
   let finalStatus: FinalStatus = 'rechazado';
@@ -659,14 +426,17 @@ const buildPayload = ({
   const email = answers.email.trim().toLowerCase();
   const telefono = answers.whatsapp.trim();
   const nombreCompleto = answers.fullName.trim();
-  const { fbc, ttc } = captureTrackingClickIds();
+  const analytics = getAnalyticsContext();
 
   return {
     email,
     telefono,
     nombre_completo: nombreCompleto,
-    fbc,
-    ttc,
+    fbc: analytics.fbc,
+    fbp: analytics.fbp,
+    ttclid: analytics.ttclid,
+    ttc: analytics.ttclid,
+    analytics,
     respuestas: {
       tamano_equipo: getOptionLabel(TEAM_SIZE_OPTIONS, answers.teamSize),
       compania_producto: answers.companyProduct.trim(),
@@ -845,7 +615,7 @@ function CountrySelectField({ value, error, disabled = false, onChange }: Countr
           ].join(' ')}
         >
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
-            {Flag ? <Flag className="h-4.5 w-6 rounded-sm shadow-sm" title={selectedLabel} /> : <span className="text-sm text-slate-300">--</span>}
+            {Flag ? <Flag className="h-4.5 w-6 rounded-sm shadow-sm" aria-label={selectedLabel} /> : <span className="text-sm text-slate-300">--</span>}
           </div>
 
           <div className="min-w-0 flex-1">
@@ -922,7 +692,7 @@ export function LeadflowApplicationForm({
   }, [visitorData?.country_code]);
 
   useEffect(() => {
-    captureTrackingClickIds();
+    getAnalyticsContext();
   }, []);
 
   useEffect(() => {
@@ -1079,13 +849,11 @@ export function LeadflowApplicationForm({
         };
       }
 
-      if (aiEvaluation?.es_valido === true && QUALIFIED_FINAL_STATUSES.has(finalPayload.final_status)) {
-        void trackInitialLead({
-          email: payload.respuestas.contacto.email,
-          phone: payload.respuestas.contacto.whatsapp,
-          name: payload.respuestas.contacto.nombre_completo,
+      if (aiEvaluation?.es_valido === true) {
+        void trackLead({
+          eventId: payload.analytics.eventId,
         }).catch((error) => {
-          console.error('[LeadflowApplicationForm] initial lead tracking failed', error);
+          console.error('[LeadflowApplicationForm] lead tracking failed', error);
         });
       }
 
