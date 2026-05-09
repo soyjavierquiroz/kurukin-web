@@ -190,7 +190,21 @@ export default function LeadflowPage() {
         <section className="bg-slate-50 text-slate-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-              <div>
+              
+              {/* Bloque de Imagen - Ahora primero en el código (izquierda en desktop) */}
+              {/* lg:order-1 asegura que en desktop esté a la izquierda, order-2 lo manda abajo en móvil */}
+              <div className="relative lg:order-1 order-2">
+                <div className="absolute -inset-4 bg-gradient-to-tr from-red-100 to-cyan-100 blur-3xl opacity-60 rounded-full" />
+                <img 
+                  src="https://cdn.kuruk.in/leadflow-assets/landing/dependencia.webp" 
+                  alt="Estructura vs Dependencia" 
+                  className="relative rounded-[2.5rem] shadow-2xl border-8 border-white" 
+                />
+              </div>
+
+              {/* Bloque de Texto - Ahora segundo en el código (derecha en desktop) */}
+              {/* lg:order-2 a la derecha en desktop, order-1 arriba en móvil */}
+              <div className="lg:order-2 order-1">
                 <h2 className="text-3xl font-bold leading-[1.1] md:text-5xl">
                   Si hoy el equipo no se mueve sin ti, no tienes estructura. <span className="text-red-600">Tienes dependencia.</span>
                 </h2>
@@ -208,10 +222,7 @@ export default function LeadflowPage() {
                   ))}
                 </div>
               </div>
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-tr from-red-100 to-cyan-100 blur-3xl opacity-60 rounded-full" />
-                <img src="https://cdn.kuruk.in/leadflow-assets/landing/dependencia.webp" alt="Estructura vs Dependencia" className="relative rounded-[2.5rem] shadow-2xl border-8 border-white" />
-              </div>
+
             </div>
           </div>
         </section>
