@@ -68,7 +68,6 @@ export default function LeadflowPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Se activa a los 250px de scroll
       if (window.scrollY > 250) {
         setShowSticky(true);
       } else {
@@ -100,7 +99,7 @@ export default function LeadflowPage() {
       </div>
 
       <main>
-        {/* HERO SECTION - CTA Visible en todo dispositivo */}
+        {/* HERO SECTION */}
         <section id="hero" className="relative overflow-hidden bg-black">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
           
@@ -186,13 +185,11 @@ export default function LeadflowPage() {
           </div>
         </section>
 
-        {/* SECCIÓN DEPENDENCIA - RESTAURADA */}
+        {/* SECCIÓN DEPENDENCIA */}
         <section className="bg-slate-50 text-slate-950 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
               
-              {/* Bloque de Imagen - Ahora primero en el código (izquierda en desktop) */}
-              {/* lg:order-1 asegura que en desktop esté a la izquierda, order-2 lo manda abajo en móvil */}
               <div className="relative lg:order-1 order-2">
                 <div className="absolute -inset-4 bg-gradient-to-tr from-red-100 to-cyan-100 blur-3xl opacity-60 rounded-full" />
                 <img 
@@ -202,8 +199,6 @@ export default function LeadflowPage() {
                 />
               </div>
 
-              {/* Bloque de Texto - Ahora segundo en el código (derecha en desktop) */}
-              {/* lg:order-2 a la derecha en desktop, order-1 arriba en móvil */}
               <div className="lg:order-2 order-1">
                 <h2 className="text-3xl font-bold leading-[1.1] md:text-5xl">
                   Si hoy el equipo no se mueve sin ti, no tienes estructura. <span className="text-red-600">Tienes dependencia.</span>
@@ -222,96 +217,41 @@ export default function LeadflowPage() {
                   ))}
                 </div>
               </div>
-
             </div>
           </div>
         </section>
 
-        <section className="bg-black">
-          <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 md:py-24">
-            <h2 className="text-3xl font-bold leading-tight text-white md:text-5xl">
-              El problema no es tu equipo. Es que no tienen sistema.
-            </h2>
-          </div>
-        </section>
-
-        {/* SECCIÓN SISTEMA - CTA Solo Desktop */}
-        <section className="relative overflow-hidden bg-slate-950">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_32%)]" />
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
-            <div className="max-w-4xl">
-              <h2 className="text-3xl font-bold leading-tight text-white md:text-5xl">
-                Así es como tu equipo empieza a moverse y <span className="text-cyan-300">crecer de forma predecible mes a mes</span>
-              </h2>
-              <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-300">
-                Funciona porque es simple: cuando tu equipo tiene conversaciones todos los días, el crecimiento deja de depender de unos pocos y se vuelve automático.
-              </p>
+        {/* FOOTER SECTION */}
+        <footer className="bg-black border-t border-white/10 py-16 text-slate-400">
+          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
+            <div className="mb-10 flex flex-col items-center justify-center space-y-2">
+              <p className="text-lg font-bold text-white tracking-tight">LeadFlow by KuruKin</p>
+              <p className="text-xs uppercase tracking-[0.2em]">Copyright © 2026 - Todos los derechos reservados</p>
             </div>
 
-            <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)] lg:items-center">
-              <div className="ml-3 border-l-2 border-blue-500/30 pl-6 space-y-6">
-                {[
-                  ['01', 'Ayudamos a líderes MLM con +20 personas a generar 3–10 conversaciones diarias en 7 días', 'Sin perseguir, sin crear contenido diario.'],
-                  ['02', 'El sistema los asigna automáticamente a tu equipo', 'Cada miembro recibe prospectos listos para iniciar conversación.'],
-                  ['03', 'Tu equipo inicia conversaciones y da seguimiento a prospectos todos los días', 'Guiones simples + seguimiento automático = conversaciones diarias.'],
-                ].map(([number, title, description]) => (
-                  <div key={number} className="relative rounded-xl border border-white/5 bg-slate-900/50 p-5">
-                    <div className="absolute -left-[34px] top-6 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 shadow-[0_0_16px_rgba(59,130,246,0.5)]" />
-                    <div className="text-sm font-bold tracking-[0.28em] text-blue-300">{number}</div>
-                    <h3 className="mt-3 text-2xl font-bold text-white">{title}</h3>
-                    <p className="mt-3 text-base leading-relaxed text-slate-300 md:text-lg">{description}</p>
-                  </div>
-                ))}
+            <div className="grid gap-8 text-[10px] leading-relaxed md:text-[11px]">
+              <div className="space-y-4">
+                <p>
+                  <strong>DESCARGO DE RESPONSABILIDAD DE RESULTADOS:</strong> Los resultados mencionados anteriormente son mis resultados personales y de mis clientes. Por favor, comprende que estos resultados no son típicos y no estoy sugiriendo que los duplicarás (o harás algo al respecto). Tu éxito depende de muchos factores, incluidos tu historial, capacidad, ética de trabajo y enfoque. Todo negocio conlleva riesgos, así como esfuerzos y acciones masivas y consistentes. Si no estás dispuesto a aceptar eso, por favor NO intentes trabajar con nosotros.
+                </p>
+                <p>
+                  Este sitio no es parte del sitio web de Facebook o Meta Platforms, Inc. Además, este sitio NO está respaldado por Meta de ninguna manera. FACEBOOK y META son marcas comerciales de Meta Platforms, Inc.
+                </p>
+                <p>
+                  Este sitio no es parte del sitio web de TikTok o TikTok Inc. Además, este sitio NO está respaldado por TikTok de ninguna manera. TIKTOK es una marca comercial de TikTok Inc.
+                </p>
               </div>
-
-              <div className="relative group">
-                <div className="absolute -inset-4 bg-cyan-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img src="https://cdn.kuruk.in/leadflow-assets/landing/sindependencia.webp" alt="Diagrama de flujo" className="relative rounded-[2rem] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.6)] w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]" />
-              </div>
-            </div>
-
-            <div className="mt-12">
-              <LeadflowCta
-                text="Quiero que mi equipo genere prospectos ahora"
-                onClick={() => setIsFormOpen(true)}
-                className="hidden lg:block" 
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-black">
-          <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
-            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-red-300">⚠️ Esto no es para todos</p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">LeadFlow es para líderes con equipo que están listos para escalar. Si estás empezando, esto no es para ti.</h2>
-            <div className="mt-10 rounded-2xl border border-red-900/30 bg-red-950/20 p-6 divide-y divide-white/10 border-y border-white/10">
-              {filterBullets.map((item) => (
-                <div key={item} className="py-5 text-lg text-slate-200">{item}</div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* SECCIÓN GARANTÍA - CTA Solo Desktop */}
-        <section className="bg-white text-slate-950">
-          <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-2xl md:p-12">
-              <div className="flex flex-col items-center text-center">
-                <ShieldCheck className="h-16 w-16 text-blue-500" />
-                <h2 className="mt-6 text-3xl font-bold md:text-5xl">Si en 30 días tu equipo no está teniendo conversaciones diarias con prospectos reales, seguimos trabajando contigo hasta lograrlo.</h2>
-                <div className="mt-10">
-                  <LeadflowCta 
-                    text="Quiero aplicar para LEADFLOW" 
-                    onClick={() => setIsFormOpen(true)} 
-                    className="hidden lg:block"
-                  />
-                </div>
+              
+              <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                <a href="#" className="hover:text-cyan-400 transition-colors">Políticas de Privacidad</a>
+                <a href="#" className="hover:text-cyan-400 transition-colors">Términos de Servicio</a>
+                <a href="#" className="hover:text-cyan-400 transition-colors">Cookies</a>
               </div>
             </div>
           </div>
-        </section>
+        </footer>
 
-        {/* CTA STICKY MOBILE - Solo Móvil */}
+        {/* CTA STICKY MOBILE */}
         {showSticky && (
           <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-lg border-t border-white/10" />
