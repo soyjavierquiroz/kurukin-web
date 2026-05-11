@@ -17,7 +17,7 @@ import {
 import flags from 'react-phone-number-input/flags';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
-import { getAnalyticsContext, trackLead, type AnalyticsContext } from '../lib/analytics';
+import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm, type AnalyticsContext } from '../lib/analytics';
 
 const TOTAL_STEPS = 13;
 const MIN_TEXTAREA_LENGTH = 20;
@@ -813,6 +813,12 @@ export function LeadflowApplicationForm({
 
     console.log('[LeadflowApplicationForm payload]', payload);
 
+    void trackSubmitForm({
+      eventId: payload.analytics.eventId,
+    }).catch((error) => {
+      console.error('[LeadflowApplicationForm] submit form tracking failed', error);
+    });
+
     let finalPayload = payload;
     let nextAiResponse: string | null = null;
 
@@ -850,10 +856,10 @@ export function LeadflowApplicationForm({
       }
 
       if (aiEvaluation?.es_valido === true) {
-        void trackLead({
+        void trackQualifiedLead({
           eventId: payload.analytics.eventId,
         }).catch((error) => {
-          console.error('[LeadflowApplicationForm] lead tracking failed', error);
+          console.error('[LeadflowApplicationForm] qualified lead tracking failed', error);
         });
       }
 

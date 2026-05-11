@@ -79,6 +79,38 @@ export interface TrackLeadInput {
   currency?: string;
 }
 
+export interface TrackStandardEventInput {
+  eventId?: string;
+  browser?: Record<string, unknown>;
+}
+
+type StandardAnalyticsEvent = 'submit_form' | 'qualified_lead';
+
+interface StandardAnalyticsEventConfig {
+  metaEventName: string;
+  tiktokEventName: string;
+  browser: Record<string, unknown>;
+}
+
+const STANDARD_EVENTS: Record<StandardAnalyticsEvent, StandardAnalyticsEventConfig> = {
+  submit_form: {
+    metaEventName: 'Lead',
+    tiktokEventName: 'SubmitForm',
+    browser: {
+      content_name: 'submit_form',
+    },
+  },
+  qualified_lead: {
+    metaEventName: 'CompleteRegistration',
+    tiktokEventName: 'CompleteRegistration',
+    browser: {
+      content_name: 'qualified_lead',
+      value: 10,
+      currency: 'USD',
+    },
+  },
+};
+
 export interface PixelInitResult {
   meta: boolean;
   tiktok: boolean;
@@ -549,17 +581,45 @@ export async function trackEvent(name: string, data: TrackEventData = {}): Promi
   };
 }
 
-export function trackLead(input: TrackLeadInput): Promise<TrackEventResult> {
-  const value = input.value ?? 10;
-  const currency = input.currency ?? 'USD';
+function trackStandardEvent(
+  standardEvent: StandardAnalyticsEvent,
+  input: TrackStandardEventInput = {},
+): Promise<TrackEventResult> {
+  const config = STANDARD_EVENTS[standardEvent];
 
-  return trackEvent('Lead', {
+  return trackEvent(config.metaEventName, {
     eventId: input.eventId,
-    tiktokEventName: 'SubmitForm',
+    metaEventName: config.metaEventName,
+    tiktokEventName: config.tiktokEventName,
     browser: {
-      content_name: 'Lead Calificado',
-      value,
-      currency,
+      ...config.browser,
+      ...input.browser,
+    },
+  });
+}
+
+export function trackSubmitForm(input: TrackStandardEventInput = {}): Promise<TrackEventResult> {
+  return trackStandardEvent('submit_form', input);
+}
+
+export function trackQualifiedLead(input: TrackStandardEventInput = {}): Promise<TrackEventResult> {
+  return trackStandardEvent('qualified_lead', {
+    ...input,
+    browser: {
+      ...input.browser,
+      content_name: 'qualified_lead',
+      value: 10,
+      currency: 'USD',
+    },
+  });
+}
+
+export function trackLead(input: TrackLeadInput = {}): Promise<TrackEventResult> {
+  return trackQualifiedLead({
+    eventId: input.eventId,
+    browser: {
+      value: input.value ?? 10,
+      currency: input.currency ?? 'USD',
     },
   });
 }
