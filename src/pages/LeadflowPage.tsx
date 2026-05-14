@@ -142,10 +142,10 @@ export default function LeadflowPage() {
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+            <div className="relative mx-auto w-full max-w-4xl lg:max-w-none">
               <div className="absolute -inset-6 bg-white/5 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505] p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
-                <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
+              <div className="relative aspect-video w-full overflow-hidden rounded-[2rem] border border-white/10 bg-gray-900 shadow-[0_40px_120px_rgba(0,0,0,0.65)] ring-4 ring-cyan-400/20">
+                <div className="absolute inset-0 h-full w-full">
                   <KurukinPlayer
                     provider="bunnynet"
                     videoId={LEADFLOW_VIDEO_URL}
@@ -164,7 +164,7 @@ export default function LeadflowPage() {
                       description: 'Haz clic y escucha el punto exacto que esta frenando la duplicación.',
                       buttonText: 'Ver mensaje',
                     }}
-                    className="h-full w-full [&_video]:object-cover" 
+                    className="h-full w-full [&_video]:h-full [&_video]:w-full [&_video]:object-cover"
                   />
                 </div>
               </div>
