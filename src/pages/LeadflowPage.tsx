@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, ShieldCheck, XCircle } from 'lucide-react';
 import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
+import { trackPageView } from '../lib/analytics';
 
 const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/1ef89dab-10dc-4838-941b-47f059ac8b5f/playlist.m3u8';
 
@@ -65,6 +66,10 @@ function LeadflowCta({
 export default function LeadflowPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
+
+  useEffect(() => {
+    void trackPageView();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
