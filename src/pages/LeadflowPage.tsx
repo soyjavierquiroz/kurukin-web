@@ -129,7 +129,7 @@ export default function LeadflowPage() {
               </p>
 
               <h1 className="mt-5 text-3xl font-bold leading-[1.02] text-white md:text-6xl">
-                Si tu equipo no prospecta sin ti...{' '}
+                Si tu equipo MLM no prospecta sin ti...{' '}
                 <span className="text-cyan-300">tienes un empleo disfrazado.</span>
               </h1>
 
