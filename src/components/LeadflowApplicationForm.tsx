@@ -346,7 +346,7 @@ function OptionButton({ option, selected, onClick }: OptionButtonProps) {
       type="button"
       onClick={onClick}
       className={[
-        'group flex w-full items-start gap-4 rounded-xl border p-4 text-left transition duration-200 sm:p-5',
+        'group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
           ? 'border-cyan-300/80 bg-cyan-400/10 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
@@ -363,7 +363,7 @@ function OptionButton({ option, selected, onClick }: OptionButtonProps) {
       >
         <CheckCircle2 className="h-4 w-4" />
       </span>
-      <span className="text-lg font-semibold leading-snug text-white sm:text-xl">{option.label}</span>
+      <span className="text-base font-semibold leading-snug text-white md:text-lg">{option.label}</span>
     </button>
   );
 }
@@ -404,6 +404,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [isQualified, setIsQualified] = useState(false);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     analyticsRef.current = {
@@ -433,6 +434,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       };
     });
   }, [selectedCountry]);
+
+  useEffect(() => {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep]);
 
   const progressPercentage = useMemo(() => {
     if (lastPayload) return 100;
@@ -642,29 +651,23 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     switch (currentStep) {
       case 0:
         return (
-          <div className="flex min-h-[560px] flex-col justify-center py-6 sm:min-h-[620px]">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-300">
-              🔒 EXCLUSIVO PARA LÍDERES CON EQUIPOS ACTIVOS
-            </p>
-            <h1 className="mt-6 text-4xl font-black leading-[0.95] text-white sm:text-6xl">
-              Si tu equipo de MLM no prospecta sin ti... tienes un{' '}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                autoempleo disfrazado.
-              </span>
-            </h1>
-            <p className="mt-6 text-lg leading-relaxed text-slate-300 sm:text-xl">
-              LeadFlow despliega la infraestructura automatizada de adquisición para líderes que corren por rangos altos.
-              No aceptamos curiosos, no financiamos a personas sin flujo de caja y solo abrimos 5 cupos por mes para
-              desarrollo de sistemas. Si buscas un curso barato o trucos gratuitos, puedes cerrar esta pestaña.
-            </p>
-            <button
-              type="button"
-              onClick={() => setCurrentStep(1)}
-              className="mt-8 inline-flex min-h-[64px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 p-5 text-lg font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.36)] transition hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <span>⚡ INICIAR MI AUDITORÍA DE EQUIPO</span>
-              <ArrowRight className="h-5 w-5" />
-            </button>
+          <div className="flex min-h-[460px] flex-col justify-center py-4">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)] md:p-6">
+              <h1 className="text-2xl font-black leading-tight text-white">🔒 DIAGNÓSTICO DE VIABILIDAD</h1>
+              <p className="mt-4 text-base leading-relaxed text-slate-300 md:text-lg">
+                Este sistema solo se despliega para organizaciones con tracción operativa real. Evaluaremos tu estructura
+                en los próximos 6 pasos para verificar si calificas para la infraestructura de LeadFlow. Si buscas trucos
+                gratuitos, puedes cerrar esta pestaña ahora.
+              </p>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(1)}
+                className="mt-6 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-base font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.36)] transition hover:scale-[1.01] active:scale-[0.99] md:text-lg"
+              >
+                <span>⚡ INICIAR MI EVALUACIÓN DE ESTRUCTURA</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         );
       case 1:
@@ -875,7 +878,10 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-5 sm:px-6 sm:py-8">
+      <div
+        ref={scrollContainerRef}
+        className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-4 sm:px-6 sm:py-6"
+      >
         {shouldShowResult && lastPayload ? (
           <div className="flex min-h-[520px] flex-col justify-center py-6">
             <div
@@ -915,7 +921,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                   href={whatsappScheduleUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 p-4 text-lg font-black uppercase text-white shadow-[0_0_30px_rgba(37,99,235,0.35)] transition hover:scale-[1.01] active:scale-[0.99]"
+                  className="mt-5 inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-lg font-black uppercase text-white shadow-[0_0_30px_rgba(37,99,235,0.35)] transition hover:scale-[1.01] active:scale-[0.99]"
                 >
                   Agendar diagnóstico
                   <ArrowRight className="h-5 w-5" />
@@ -943,7 +949,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
             <button
               type="button"
               onClick={goToPreviousStep}
-              className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl border border-white/10 px-4 text-sm font-bold uppercase text-slate-300 transition hover:border-white/25 hover:text-white"
+              className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 text-sm font-bold uppercase text-slate-400 transition hover:border-white/25 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
               Atrás
@@ -953,7 +959,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <button
                 type="button"
                 onClick={goToNextStep}
-                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-black uppercase text-slate-950 transition hover:bg-cyan-100 sm:flex-none"
+                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] sm:flex-none"
               >
                 Continuar
                 <ArrowRight className="h-4 w-4" />
@@ -965,7 +971,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 type="button"
                 onClick={() => void handleFinalSubmission()}
                 disabled={isSubmitting}
-                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 px-5 text-sm font-black uppercase text-white transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
+                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
               >
                 {isSubmitting ? (
                   <>
@@ -999,11 +1005,11 @@ function StepShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[520px] flex-col justify-center py-6">
+    <div className="flex min-h-[430px] flex-col justify-center py-4 md:min-h-[520px] md:py-6">
       <p className="text-sm font-black uppercase tracking-[0.2em] text-cyan-300">{eyebrow}</p>
-      <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">{title}</h2>
-      {subtitle ? <p className="mt-4 text-lg leading-relaxed text-slate-300 sm:text-xl">{subtitle}</p> : null}
-      <div className="mt-8 space-y-4">{children}</div>
+      <h2 className="mb-4 mt-3 text-xl font-bold leading-tight text-white md:text-2xl">{title}</h2>
+      {subtitle ? <p className="-mt-2 mb-4 text-base leading-relaxed text-slate-300 md:text-lg">{subtitle}</p> : null}
+      <div className="space-y-3 md:space-y-4">{children}</div>
     </div>
   );
 }
