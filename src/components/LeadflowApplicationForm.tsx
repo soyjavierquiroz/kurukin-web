@@ -79,14 +79,17 @@ const ALLOWED_COUNTRIES: Country[] = [...PRIORITY_COUNTRIES, ...OTHER_ALLOWED_CO
 const TEAM_SIZE_OPTIONS = [
   {
     value: 'less_than_15',
+    shortLabel: 'Menos de 15 personas',
     label: 'Menos de 15 personas (Sigo haciendo todo el trabajo solo)',
   },
   {
     value: '15_to_50',
+    shortLabel: '15 a 50 personas',
     label: 'Entre 15 y 50 personas (Tengo equipo, pero nos estancamos)',
   },
   {
     value: 'more_than_50',
+    shortLabel: 'Más de 50 personas',
     label: 'Más de 50 personas (Tengo líneas sólidas y líderes corriendo)',
   },
 ] as const;
@@ -94,14 +97,17 @@ const TEAM_SIZE_OPTIONS = [
 const ACQUISITION_OPTIONS = [
   {
     value: 'no_survival',
+    shortLabel: 'Mensajes en frío',
     label: 'No. Dependemos 100% de perseguir amigos, familiares y mandar mensajes en frío',
   },
   {
     value: 'organic_hope',
+    shortLabel: 'Orgánico (TikTok/Reels)',
     label: 'Dependemos de subir Reels y TikToks rezando para que el algoritmo nos traiga interesados',
   },
   {
     value: 'paid_no_system',
+    shortLabel: 'Tráfico pago sin cierre',
     label: 'Ya metemos publicidad pagada, pero mi equipo no sabe cómo cerrar prospectos en frío',
   },
 ] as const;
@@ -109,14 +115,17 @@ const ACQUISITION_OPTIONS = [
 const INVESTMENT_OPTIONS = [
   {
     value: 'capital_ready',
+    shortLabel: 'Capital listo',
     label: 'Tengo el dinero listo para pagarlo yo mismo si el sistema me convence en la llamada',
   },
   {
     value: 'team_pool',
+    shortLabel: 'Co-inversión (Vaca)',
     label: "Voy a armar una 'vaca' (co-inversión) con mis líderes clave para dividir el costo de las licencias",
   },
   {
     value: 'no_budget',
+    shortLabel: 'Sin presupuesto',
     label: 'No tenemos ese presupuesto en el equipo en este momento',
   },
 ] as const;
@@ -124,10 +133,12 @@ const INVESTMENT_OPTIONS = [
 const DECISION_OPTIONS = [
   {
     value: 'yes',
+    shortLabel: 'Decisión propia',
     label: 'Depende 100% de mí. Yo decido qué herramientas usa mi organización',
   },
   {
     value: 'need_upline',
+    shortLabel: 'Consulta Upline/Socios',
     label: 'Tengo que consultarlo con mi línea ascendente, socios o patrocinador',
   },
 ] as const;
@@ -310,12 +321,23 @@ function buildPayload({
     ttc: analytics.ttclid,
     analytics,
     respuestas: {
-      tamano_equipo: answers.teamSize,
+      tamano_equipo: answers.teamSize
+        ? { value: answers.teamSize.value, label: (answers.teamSize as any).shortLabel }
+        : null,
       compania_producto: answers.companyProduct.trim(),
       principal_problema: answers.mainProblem.trim(),
-      inversion_ads: answers.acquisitionThermometer,
-      posicion_frente_a_inversion: answers.investmentPosition,
-      decision_de_compra: answers.purchaseDecision,
+      inversion_ads: answers.acquisitionThermometer
+        ? {
+            value: answers.acquisitionThermometer.value,
+            label: (answers.acquisitionThermometer as any).shortLabel,
+          }
+        : null,
+      posicion_frente_a_inversion: answers.investmentPosition
+        ? { value: answers.investmentPosition.value, label: (answers.investmentPosition as any).shortLabel }
+        : null,
+      decision_de_compra: answers.purchaseDecision
+        ? { value: answers.purchaseDecision.value, label: (answers.purchaseDecision as any).shortLabel }
+        : null,
       contacto: {
         nombre_completo: nombreCompleto,
         whatsapp: telefono,
