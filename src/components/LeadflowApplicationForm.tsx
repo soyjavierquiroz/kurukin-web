@@ -812,18 +812,21 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <div className="flex min-h-[460px] flex-col justify-center py-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)] md:p-6">
-              <h1 className="text-2xl font-black leading-tight text-white">🔒 DIAGNÓSTICO DE VIABILIDAD</h1>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">🔒 FILTRO DE ESCALA REAL</p>
+              <h1 className="mt-3 text-2xl font-extrabold leading-tight text-white">
+                ¿Tu red realmente duplica... o eres el único que trabaja?
+              </h1>
               <p className="mt-4 text-base leading-relaxed text-slate-300 md:text-lg">
-                Este sistema solo se despliega para organizaciones con tracción operativa real. Evaluaremos tu estructura
-                en los próximos 6 pasos para verificar si calificas para la infraestructura de LeadFlow. Si buscas trucos
-                gratuitos, puedes cerrar esta pestaña ahora.
+                LeadFlow no es un curso ni un truco gratis. Es la máquina de adquisición de LEADS para líderes que van
+                por rangos altos. En 60 segundos sabrás por qué tu cheque se estancó. Si buscas atajos, cierra esta
+                pestaña.
               </p>
               <button
                 type="button"
                 onClick={() => setCurrentStep(1)}
                 className="mt-6 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-base font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.36)] transition hover:scale-[1.01] active:scale-[0.99] md:text-lg"
               >
-                <span>⚡ INICIAR MI EVALUACIÓN DE ESTRUCTURA</span>
+                <span>⚡ PROBAR MI CAPACIDAD DE ESCALAR</span>
                 <ArrowRight className="h-5 w-5" />
               </button>
             </div>
