@@ -401,10 +401,11 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
       }}
       className={[
         'group flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
+        'border-white/10 bg-slate-900/30 backdrop-blur-md',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
-          ? 'border-cyan-500 bg-cyan-950/30 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
-          : 'border-white/10 bg-slate-900/40 hover:border-cyan-300/60 hover:bg-white/[0.07]',
+          ? 'border-cyan-500 bg-cyan-950/35 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
+          : 'hover:border-cyan-300/60 hover:bg-white/[0.07]',
       ].join(' ')}
       aria-pressed={selected}
     >
@@ -811,22 +812,21 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 0:
         return (
           <div className="flex min-h-[460px] flex-col justify-center py-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)] md:p-6">
+            <div className="rounded-2xl border border-white/10 bg-slate-900/30 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-md md:p-6">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">🔒 FILTRO DE ESCALA REAL</p>
               <h1 className="mt-3 text-2xl font-extrabold leading-tight text-white">
                 ¿Tu red realmente duplica... o eres el único que trabaja?
               </h1>
               <p className="mt-4 text-base leading-relaxed text-slate-300 md:text-lg">
-                LeadFlow no es un curso ni un truco gratis. Es la máquina de adquisición de LEADS para líderes que van
-                por rangos altos. En 60 segundos sabrás por qué tu cheque se estancó. Si buscas atajos, cierra esta
-                pestaña.
+                LeadFlow no es un curso ni un truco gratis. Es la máquina de adquisición para líderes que van por rangos
+                altos. En 60 segundos sabrás por qué tu cheque se estancó. Si buscas atajos, cierra esta pestaña.
               </p>
               <button
                 type="button"
                 onClick={() => setCurrentStep(1)}
                 className="mt-6 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-base font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.36)] transition hover:scale-[1.01] active:scale-[0.99] md:text-lg"
               >
-                <span>⚡ PROBAR MI CAPACIDAD DE ESCALAR</span>
+                <span>⚡ PROBAR MI CAPACIDAD DE ESCALA</span>
                 <ArrowRight className="h-5 w-5" />
               </button>
             </div>
@@ -1016,14 +1016,15 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   return (
     <section
       className={[
-        'relative flex h-full w-full flex-col overflow-hidden bg-slate-950 text-white',
-        'sm:rounded-2xl sm:border sm:border-white/10',
+        'relative flex h-full w-full flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white',
+        'sm:rounded-2xl sm:border sm:border-white/10 sm:bg-slate-900/30 sm:backdrop-blur-md',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <header className="shrink-0 border-b border-white/10 bg-black px-4 py-3 sm:px-6">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.07),transparent_65%)] pointer-events-none" />
+      <header className="relative z-10 shrink-0 border-b border-white/10 bg-slate-950/80 px-4 py-3 backdrop-blur-md sm:px-6">
         <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500 ease-out"
@@ -1038,10 +1039,10 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
       <div
         ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-4 sm:px-6 sm:py-6"
+        className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6"
       >
         {isEvaluating ? (
-          <div className="flex min-h-[520px] flex-col items-center justify-center bg-black py-10 text-center">
+          <div className="flex min-h-[520px] flex-col items-center justify-center py-10 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-950/30 shadow-[0_0_42px_rgba(34,211,238,0.18)]">
               <Loader2 className="h-10 w-10 animate-spin text-cyan-300" />
             </div>
@@ -1137,7 +1138,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       </div>
 
       {shouldShowFooter ? (
-        <footer className="shrink-0 border-t border-white/10 bg-black p-4">
+        <footer className="relative z-10 shrink-0 border-t border-white/10 bg-slate-950/85 p-4 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
