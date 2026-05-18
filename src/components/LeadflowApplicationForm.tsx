@@ -8,6 +8,7 @@ import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm } from '../lib
 const TOTAL_STEPS = 7;
 const SUCCESS_COUNTDOWN_SECONDS = 20;
 const EVALUATION_MIN_DURATION_MS = 5000;
+const CONVERSATIONS_PER_DISTRIBUTOR_PER_WEEK = 5;
 const MIN_COMPANY_TEXT_LENGTH = 4;
 const MIN_DETAILED_TEXT_LENGTH = 15;
 const MIN_DETAILED_TEXT_WORDS = 3;
@@ -401,10 +402,10 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
       }}
       className={[
         'group flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
-        'border-white/10 bg-slate-900/30 backdrop-blur-md',
+        'border-white/10 bg-slate-900/30 shadow-[0_0_80px_rgba(0,0,0,0.16)] backdrop-blur-md',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
-          ? 'border-cyan-500 bg-cyan-950/35 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
+          ? 'border-cyan-500/80 bg-cyan-950/35 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
           : 'hover:border-cyan-300/60 hover:bg-white/[0.07]',
       ].join(' ')}
       aria-pressed={selected}
@@ -448,6 +449,7 @@ function renderAIText(text: string | null) {
 export function LeadflowApplicationForm({ className = '', onPayloadReady }: LeadflowApplicationFormProps) {
   const { visitorData, isLoading: isVisitorLoading } = useVisitor();
   const [currentStep, setCurrentStep] = useState(0);
+  const [activeDistributors, setActiveDistributors] = useState(18);
   const [respuestas, setRespuestas] = useState<Answers>(INITIAL_ANSWERS);
   const answers = respuestas;
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -566,6 +568,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     if (lastPayload) return 100;
     return Math.round((currentStep / TOTAL_STEPS) * 100);
   }, [currentStep, lastPayload]);
+  const lostQualifiedConversions = activeDistributors * CONVERSATIONS_PER_DISTRIBUTOR_PER_WEEK;
   const currentStepKey = getCurrentStepKey(currentStep);
 
   const updateAnswer = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
@@ -811,24 +814,78 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     switch (currentStep) {
       case 0:
         return (
-          <div className="flex min-h-[460px] flex-col justify-center py-4">
-            <div className="rounded-2xl border border-white/10 bg-slate-900/30 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-md md:p-6">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">🔒 FILTRO DE ESCALA REAL</p>
-              <h1 className="mt-3 text-2xl font-extrabold leading-tight text-white">
-                ¿Tu red realmente duplica... o eres el único que trabaja?
-              </h1>
-              <p className="mt-4 text-base leading-relaxed text-slate-300 md:text-lg">
-                LeadFlow no es un curso ni un truco gratis. Es la máquina de adquisición para líderes que van por rangos
-                altos. En 60 segundos sabrás por qué tu cheque se estancó. Si buscas atajos, cierra esta pestaña.
-              </p>
-              <button
-                type="button"
-                onClick={() => setCurrentStep(1)}
-                className="mt-6 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-base font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.36)] transition hover:scale-[1.01] active:scale-[0.99] md:text-lg"
-              >
-                <span>⚡ PROBAR MI CAPACIDAD DE ESCALA</span>
-                <ArrowRight className="h-5 w-5" />
-              </button>
+          <div className="flex min-h-[560px] flex-col justify-center py-4 md:min-h-[620px]">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/30 p-5 shadow-[0_0_80px_rgba(0,0,0,0.4)] backdrop-blur-md md:p-7">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_42%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.12),transparent_45%)]" />
+              <div className="relative">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">
+                  🔒 FILTRO DE ESCALA REAL
+                </p>
+                <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white md:text-4xl">
+                  ¿Tu red realmente duplica... o eres el único en tu equipo que trabaja?
+                </h1>
+
+                <div className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:p-5">
+                  <div className="flex items-end justify-between gap-4">
+                    <label
+                      htmlFor="active-distributors"
+                      className="text-sm font-black uppercase tracking-[0.16em] text-slate-300"
+                    >
+                      Distribuidores Activos en tu Red
+                    </label>
+                    <span className="text-3xl font-black tabular-nums text-cyan-200">{activeDistributors}</span>
+                  </div>
+                  <input
+                    id="active-distributors"
+                    type="range"
+                    min="1"
+                    max="100"
+                    value={activeDistributors}
+                    onChange={(event) => setActiveDistributors(Number(event.target.value))}
+                    className="mt-5 h-2 w-full cursor-pointer appearance-none rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 accent-cyan-300 outline-none [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-cyan-200 [&::-moz-range-thumb]:shadow-[0_0_24px_rgba(34,211,238,0.8)] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-cyan-200 [&::-webkit-slider-thumb]:shadow-[0_0_24px_rgba(34,211,238,0.8)]"
+                    aria-valuetext={`${activeDistributors} distribuidores activos`}
+                  />
+                  <div className="mt-2 flex justify-between text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                    <span>1</span>
+                    <span>100</span>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-red-400/20 bg-gradient-to-br from-red-950/35 via-slate-950/75 to-black/80 p-4 shadow-[0_0_34px_rgba(239,68,68,0.1)] md:p-5">
+                  <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-3">
+                    <span className="text-sm font-bold text-slate-300">Red estancada</span>
+                    <span className="text-xl font-black tabular-nums text-white">
+                      {activeDistributors} distribuidores
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm font-black uppercase tracking-[0.16em] text-red-300">
+                      Conversiones cualificadas PERDIDAS por semana
+                    </p>
+                    <p className="mt-2 text-4xl font-black tabular-nums text-white md:text-5xl">
+                      {lostQualifiedConversions}
+                    </p>
+                  </div>
+                  <p className="mt-4 text-base font-extrabold leading-snug text-red-100 md:text-lg">
+                    Duplicación muerta. LeadFlow automatiza estas {lostQualifiedConversions} conversaciones sin
+                    depender de ti.
+                  </p>
+                </div>
+
+                <p className="mt-5 text-base font-semibold leading-relaxed text-slate-300 md:text-lg">
+                  LeadFlow no es un curso. Es la infraestructura de adquisición masiva para líderes MLM serios. En 60
+                  segundos sabrás si tu red califica para la automatización. Si buscas atajos gratis, cierra esta
+                  pestaña.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="mt-6 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-xl border border-cyan-200/40 bg-gradient-to-r from-cyan-400 via-blue-600 to-fuchsia-600 bg-[length:220%_220%] p-4 text-base font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.42)] transition hover:scale-[1.01] hover:shadow-[0_0_44px_rgba(34,211,238,0.46)] active:scale-[0.99] motion-safe:animate-[leadflowCtaGradient_4s_ease_infinite] md:text-lg"
+                >
+                  <span>⚡ PROBAR MI CAPACIDAD DE ESCALA</span>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -1023,7 +1080,15 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.07),transparent_65%)] pointer-events-none" />
+      <style>
+        {`@keyframes leadflowCtaGradient {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }`}
+      </style>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.07),transparent_75%)]" />
+      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-blue-600/15 blur-3xl" />
       <header className="relative z-10 shrink-0 border-b border-white/10 bg-slate-950/80 px-4 py-3 backdrop-blur-md sm:px-6">
         <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
