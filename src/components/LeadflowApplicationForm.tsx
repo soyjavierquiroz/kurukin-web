@@ -7,6 +7,7 @@ import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm } from '../lib
 
 const TOTAL_STEPS = 7;
 const SUCCESS_COUNTDOWN_SECONDS = 20;
+const EVALUATION_MIN_DURATION_MS = 5000;
 const MIN_COMPANY_TEXT_LENGTH = 4;
 const MIN_DETAILED_TEXT_LENGTH = 15;
 const MIN_DETAILED_TEXT_WORDS = 3;
@@ -16,9 +17,17 @@ const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const WEBHOOK_URL = 'https://webhooks.kuruk.in/webhook/leadflow-eval';
 const SITE_ID = 'KURUKIN';
-const WHATSAPP_SUCCESS_URL = `https://wa.me/59179790873?text=${encodeURIComponent(
-  'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo y obtuve Luz Verde. Quiero coordinar los detalles de la infraestructura.',
+const WHATSAPP_SUCCESS_MESSAGE =
+  'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo y obtuve Luz Verde. Quiero coordinar los detalles de la infraestructura.';
+const WHATSAPP_SUCCESS_URL = `https://api.whatsapp.com/send?phone=59179790873&text=${encodeURIComponent(
+  WHATSAPP_SUCCESS_MESSAGE,
 )}`;
+const EVALUATION_MESSAGES = [
+  '🤖 Inicializando motor de evaluación de estructuras...',
+  '📊 Analizando métricas de duplicación y retención...',
+  '⚙️ Verificando viabilidad de infraestructura financiera...',
+  '🔒 Generando diagnóstico final de escala...',
+] as const;
 
 const SUPPORTED_COUNTRIES = new Set<Country>(getCountries() as Country[]);
 
@@ -132,12 +141,12 @@ interface Option {
 }
 
 interface Answers {
-  teamSize: (typeof TEAM_SIZE_OPTIONS)[number]['value'] | '';
+  teamSize: Option | null;
   companyProduct: string;
   mainProblem: string;
-  acquisitionThermometer: (typeof ACQUISITION_OPTIONS)[number]['value'] | '';
-  investmentPosition: (typeof INVESTMENT_OPTIONS)[number]['value'] | '';
-  purchaseDecision: (typeof DECISION_OPTIONS)[number]['value'] | '';
+  acquisitionThermometer: Option | null;
+  investmentPosition: Option | null;
+  purchaseDecision: Option | null;
   fullName: string;
   whatsapp: string;
   email: string;
@@ -197,12 +206,12 @@ interface OptionButtonProps {
 }
 
 const INITIAL_ANSWERS: Answers = {
-  teamSize: '',
+  teamSize: null,
   companyProduct: '',
   mainProblem: '',
-  acquisitionThermometer: '',
-  investmentPosition: '',
-  purchaseDecision: '',
+  acquisitionThermometer: null,
+  investmentPosition: null,
+  purchaseDecision: null,
   fullName: '',
   whatsapp: '',
   email: '',
@@ -225,11 +234,6 @@ function resolveCountryLabel(country: Country | ''): string {
   } catch {
     return country;
   }
-}
-
-function getOption(options: readonly { value: string; label: string }[], value: string): Option | null {
-  const match = options.find((option) => option.value === value);
-  return match ? { value: match.value, label: match.label } : null;
 }
 
 function safeValidatePhone(value: string): boolean {
@@ -275,7 +279,7 @@ function buildPayload({
     siteId: SITE_ID,
   };
   const selectedCountry = answers.country || normalizeCountry(visitorData?.country_code);
-  const noBudget = answers.investmentPosition === 'no_budget';
+  const noBudget = answers.investmentPosition?.value === 'no_budget';
   const email = answers.email.trim().toLowerCase();
   const telefono = answers.whatsapp.trim();
   const nombreCompleto = answers.fullName.trim();
@@ -290,12 +294,12 @@ function buildPayload({
     ttc: analytics.ttclid,
     analytics,
     respuestas: {
-      tamano_equipo: getOption(TEAM_SIZE_OPTIONS, answers.teamSize),
+      tamano_equipo: answers.teamSize,
       compania_producto: answers.companyProduct.trim(),
       principal_problema: answers.mainProblem.trim(),
-      inversion_ads: getOption(ACQUISITION_OPTIONS, answers.acquisitionThermometer),
-      posicion_frente_a_inversion: getOption(INVESTMENT_OPTIONS, answers.investmentPosition),
-      decision_de_compra: getOption(DECISION_OPTIONS, answers.purchaseDecision),
+      inversion_ads: answers.acquisitionThermometer,
+      posicion_frente_a_inversion: answers.investmentPosition,
+      decision_de_compra: answers.purchaseDecision,
       contacto: {
         nombre_completo: nombreCompleto,
         whatsapp: telefono,
@@ -377,7 +381,7 @@ function OptionButton({ option, selected, onClick }: OptionButtonProps) {
         'group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
-          ? 'border-cyan-500 bg-cyan-950/20 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
+          ? 'border-cyan-500 bg-cyan-950/30 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
           : 'border-white/10 bg-slate-900/40 hover:border-cyan-300/60 hover:bg-white/[0.07]',
       ].join(' ')}
       aria-pressed={selected}
@@ -426,6 +430,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [selectedCountry, setSelectedCountry] = useState<Country>(FALLBACK_COUNTRY);
   const [isWhatsappValid, setIsWhatsappValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [evaluationMessageIndex, setEvaluationMessageIndex] = useState(0);
   const [submissionError, setSubmissionError] = useState('');
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
@@ -483,6 +489,16 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   }, [lastPayload]);
 
   useEffect(() => {
+    if (!isEvaluating) return;
+
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [isEvaluating]);
+
+  useEffect(() => {
     if (!lastPayload || !isQualified) {
       setCountdown(SUCCESS_COUNTDOWN_SECONDS);
       return;
@@ -506,6 +522,21 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     };
   }, [isQualified, lastPayload]);
 
+  useEffect(() => {
+    if (!isEvaluating) {
+      setEvaluationMessageIndex(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setEvaluationMessageIndex((prev) => (prev + 1) % EVALUATION_MESSAGES.length);
+    }, 1500);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isEvaluating]);
+
   const progressPercentage = useMemo(() => {
     if (lastPayload) return 100;
     return Math.round((currentStep / TOTAL_STEPS) * 100);
@@ -525,9 +556,12 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
   const selectAndAdvance = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
     updateAnswer(key, value);
-    startTransition(() => {
-      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
-    });
+
+    window.setTimeout(() => {
+      startTransition(() => {
+        setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+      });
+    }, 140);
   };
 
   const goToNextStep = () => {
@@ -578,28 +612,40 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     const userData = buildUserData(answers);
 
     setIsSubmitting(true);
+    setIsEvaluating(true);
     setSubmissionError('');
     setAiResponse(null);
     setIsQualified(false);
+    setLastPayload(null);
 
     try {
       void trackSubmitForm(payload.analytics.eventId, userData).catch((error) => {
         console.error('[LeadflowApplicationForm] SubmitForm tracking failed', error);
       });
 
-      const response = await fetch(WEBHOOK_URL, {
+      const minimumEvaluationDelay = new Promise((resolve) => {
+        window.setTimeout(resolve, EVALUATION_MIN_DURATION_MS);
+      });
+      const evaluationRequest = fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+      }).then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Leadflow webhook failed with status ${response.status}`);
+        }
+
+        return (await response.json()) as LeadflowWebhookResponse;
       });
 
-      if (!response.ok) {
-        throw new Error(`Leadflow webhook failed with status ${response.status}`);
+      const [evaluationResult] = await Promise.allSettled([evaluationRequest, minimumEvaluationDelay]);
+      if (evaluationResult.status === 'rejected') {
+        throw evaluationResult.reason;
       }
 
-      const evaluation = (await response.json()) as LeadflowWebhookResponse;
+      const evaluation = evaluationResult.value;
       const noBudget = payload.respuestas.posicion_frente_a_inversion?.value === 'no_budget';
       const approved = !noBudget && evaluation.es_valido === true;
       const classification = evaluation.clasificacion || evaluation.classification || 'Aprobado';
@@ -634,6 +680,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       console.error('[LeadflowApplicationForm] submission failed', error);
       setSubmissionError('No pudimos procesar la auditoría en este momento. Inténtalo de nuevo en unos segundos.');
     } finally {
+      setIsEvaluating(false);
       setIsSubmitting(false);
     }
   };
@@ -744,8 +791,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.teamSize === option.value}
-                onClick={() => selectAndAdvance('teamSize', option.value)}
+                selected={answers.teamSize?.value === option.value}
+                onClick={() => selectAndAdvance('teamSize', { value: option.value, label: option.label })}
               />
             ))}
             <InlineError message={errors.teamSize} />
@@ -800,8 +847,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.acquisitionThermometer === option.value}
-                onClick={() => selectAndAdvance('acquisitionThermometer', option.value)}
+                selected={answers.acquisitionThermometer?.value === option.value}
+                onClick={() => selectAndAdvance('acquisitionThermometer', { value: option.value, label: option.label })}
               />
             ))}
             <InlineError message={errors.acquisitionThermometer} />
@@ -817,8 +864,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.investmentPosition === option.value}
-                onClick={() => selectAndAdvance('investmentPosition', option.value)}
+                selected={answers.investmentPosition?.value === option.value}
+                onClick={() => selectAndAdvance('investmentPosition', { value: option.value, label: option.label })}
               />
             ))}
             <InlineError message={errors.investmentPosition} />
@@ -834,8 +881,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.purchaseDecision === option.value}
-                onClick={() => selectAndAdvance('purchaseDecision', option.value)}
+                selected={answers.purchaseDecision?.value === option.value}
+                onClick={() => selectAndAdvance('purchaseDecision', { value: option.value, label: option.label })}
               />
             ))}
             <InlineError message={errors.purchaseDecision} />
@@ -906,7 +953,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   };
 
   const shouldShowResult = Boolean(lastPayload);
-  const shouldShowFooter = !shouldShowResult && currentStep > 0;
+  const shouldShowFooter = !isEvaluating && !shouldShowResult && currentStep > 0;
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
   const isCurrentTextInvalid =
@@ -928,12 +975,12 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500 ease-out"
-            style={{ width: `${progressPercentage}%` }}
+            style={{ width: `${isEvaluating || shouldShowResult ? 100 : progressPercentage}%` }}
           />
         </div>
         <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-          <span>{shouldShowResult ? 'Resultado' : currentStep === 0 ? 'Auditoría LeadFlow' : `PASO ${currentStep} / ${TOTAL_STEPS}`}</span>
-          <span>{progressPercentage}%</span>
+          <span>{isEvaluating ? 'Evaluando' : shouldShowResult ? 'Resultado' : currentStep === 0 ? 'Auditoría LeadFlow' : `PASO ${currentStep} / ${TOTAL_STEPS}`}</span>
+          <span>{isEvaluating || shouldShowResult ? '100%' : `${progressPercentage}%`}</span>
         </div>
       </header>
 
@@ -941,7 +988,27 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         ref={scrollContainerRef}
         className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-4 sm:px-6 sm:py-6"
       >
-        {shouldShowResult && lastPayload ? (
+        {isEvaluating ? (
+          <div className="flex min-h-[520px] flex-col items-center justify-center bg-black py-10 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-950/30 shadow-[0_0_42px_rgba(34,211,238,0.18)]">
+              <Loader2 className="h-10 w-10 animate-spin text-cyan-300" />
+            </div>
+            <p className="mt-8 text-xs font-black uppercase tracking-[0.24em] text-cyan-300">
+              Evaluación LeadFlow
+            </p>
+            <h2 className="mt-4 max-w-md text-2xl font-black leading-tight text-white md:text-4xl">
+              Procesando viabilidad operativa
+            </h2>
+            <p className="mt-5 min-h-[56px] max-w-md text-base font-semibold leading-relaxed text-slate-300 md:text-lg">
+              {EVALUATION_MESSAGES[evaluationMessageIndex]}
+            </p>
+            <div className="mt-8 flex items-center gap-2" aria-hidden="true">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 [animation-delay:150ms]" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 [animation-delay:300ms]" />
+            </div>
+          </div>
+        ) : shouldShowResult && lastPayload ? (
           <div
             className={[
               'mx-auto flex w-full max-w-xl flex-col items-center py-8 text-center md:py-12',
