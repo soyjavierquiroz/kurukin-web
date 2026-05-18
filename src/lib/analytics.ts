@@ -2,6 +2,24 @@
 
 const CAPI_RELAY_URL = import.meta.env.VITE_CAPI_RELAY_URL || 'https://relay.kuruk.in/v1/events';
 const SITE_ID = import.meta.env.VITE_SITE_ID || 'KURUKIN';
+const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
+
+type FbqFunction = {
+  (...args: any[]): void;
+  callMethod?: (...args: any[]) => void;
+  push?: FbqFunction;
+  loaded?: boolean;
+  version?: string;
+  queue?: any[];
+};
+
+declare global {
+  interface Window {
+    fbq?: FbqFunction;
+    _fbq?: FbqFunction;
+    __kurukinMetaPixelInitialized?: boolean;
+  }
+}
 
 // Helper para extraer cookies de Meta/TikTok del navegador
 const getCookie = (name: string): string | null => {
@@ -34,10 +52,43 @@ interface AnalyticsContext {
   ttclid: string | null;
 }
 
-// 1. Inicialización limpia (Reemplaza la carga de scripts de Meta y TikTok)
+// 1. Inicialización híbrida: Browser Pixel + CAPI Relay
 export async function initPixels(): Promise<void> {
-  console.log(`[Analytics] Sistema inicializado en modo Relay Server-Side para el tenant: ${SITE_ID}`);
-  // No inyectamos scripts de terceros. El navegador queda limpio y libre de bloqueos.
+  if (!META_PIXEL_ID) {
+    console.warn('[Analytics] VITE_META_PIXEL_ID no está configurado. Meta Pixel no será inicializado.');
+    return Promise.resolve();
+  }
+
+  if (!window.fbq) {
+    const fbq = function (...args: any[]) {
+      if (fbq.callMethod) {
+        fbq.callMethod(...args);
+      } else {
+        fbq.queue?.push(args);
+      }
+    } as FbqFunction;
+
+    window.fbq = fbq;
+    if (!window._fbq) window._fbq = fbq;
+    fbq.push = fbq;
+    fbq.loaded = true;
+    fbq.version = '2.0';
+    fbq.queue = [];
+  }
+
+  if (!document.querySelector('script[src="https://connect.facebook.net/en_US/fbevents.js"]')) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(script);
+  }
+
+  if (!window.__kurukinMetaPixelInitialized) {
+    window.fbq('init', META_PIXEL_ID);
+    window.__kurukinMetaPixelInitialized = true;
+  }
+
+  console.log(`[Analytics] Sistema inicializado en modo híbrido Browser Pixel + CAPI para el tenant: ${SITE_ID}`);
   return Promise.resolve();
 }
 
@@ -75,10 +126,13 @@ export async function trackEvent(
 ): Promise<void> {
   const context = getAnalyticsContext();
   const finalEventId = customEventId || context.eventId;
+  const metaEventName = eventName === 'SubmitForm' ? 'Lead' : eventName;
+
+  window.fbq?.('track', metaEventName, customData, { eventID: finalEventId });
 
   const payload = {
     siteId: SITE_ID,
-    event_name: eventName,
+    event_name: metaEventName,
     event_id: finalEventId,
     event_time: Math.floor(Date.now() / 1000),
     event_source_url: window.location.href,
@@ -105,9 +159,9 @@ export async function trackEvent(
     });
 
     if (response.status === 202 || response.ok) {
-      console.log(`[CAPI Server-Side] Evento '${eventName}' enviado con éxito al Relay.`);
+      console.log(`[CAPI Server-Side] Evento '${metaEventName}' enviado con éxito al Relay.`);
     } else {
-      console.warn(`[CAPI Server-Side] El Relay rechazó el evento '${eventName}' con estatus: ${response.status}`);
+      console.warn(`[CAPI Server-Side] El Relay rechazó el evento '${metaEventName}' con estatus: ${response.status}`);
     }
   } catch (error) {
     console.error(`[CAPI Server-Side] Error al conectar con el servidor de eventos:`, error);
@@ -120,7 +174,7 @@ export async function trackPageView(): Promise<void> {
 }
 
 export async function trackSubmitForm(customEventId?: string, userData?: Record<string, any>): Promise<void> {
-  // TikTok espera 'SubmitForm', Meta espera 'Lead' -> El relay se encarga del mapeo interno por canal
+  // Meta espera 'Lead'; trackEvent normaliza el nombre también para CAPI.
   return trackEvent('SubmitForm', customEventId, userData);
 }
 
