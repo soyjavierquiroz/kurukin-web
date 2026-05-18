@@ -1,5 +1,5 @@
 import { startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
 import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
@@ -10,6 +10,9 @@ const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const WEBHOOK_URL = 'https://webhooks.kuruk.in/webhook/leadflow-eval';
 const SITE_ID = 'KURUKIN';
+const WHATSAPP_SUCCESS_URL = `https://wa.me/59179790873?text=${encodeURIComponent(
+  'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo y obtuve Luz Verde. Quiero coordinar los detalles de la infraestructura.',
+)}`;
 
 const SUPPORTED_COUNTRIES = new Set<Country>(getCountries() as Country[]);
 
@@ -402,6 +405,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isQualified, setIsQualified] = useState(false);
+  const [countdown, setCountdown] = useState(15);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -442,6 +446,40 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentStep]);
+
+  useEffect(() => {
+    if (!lastPayload) return;
+
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [lastPayload]);
+
+  useEffect(() => {
+    if (!lastPayload || !isQualified) {
+      setCountdown(15);
+      return;
+    }
+
+    setCountdown(15);
+
+    const timer = window.setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          window.location.href = WHATSAPP_SUCCESS_URL;
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isQualified, lastPayload]);
 
   const progressPercentage = useMemo(() => {
     if (lastPayload) return 100;
@@ -673,7 +711,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 1:
         return (
           <StepShell
-            eyebrow="Pantalla 1"
+            eyebrow="PASO 1"
             title="¿De qué tamaño es tu organización activa actualmente?"
             subtitle="Gente cobrando cheques y construyendo, no consumidores durmientes."
           >
@@ -691,7 +729,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 2:
         return (
           <StepShell
-            eyebrow="Pantalla 2"
+            eyebrow="PASO 2"
             title="¿En qué compañía de MLM / Redes de Mercadeo estás corriendo tu negocio hoy?"
           >
             {renderTextInput({
@@ -707,7 +745,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 3:
         return (
           <StepShell
-            eyebrow="Pantalla 3"
+            eyebrow="PASO 3"
             title="Sé brutalmente honesto: ¿Cuál es el freno número uno en tu equipo por el cual tu gente no duplica y tu cheque se estancó?"
           >
             {renderTextarea({
@@ -724,7 +762,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 4:
         return (
           <StepShell
-            eyebrow="Pantalla 4"
+            eyebrow="PASO 4"
             title="Si hoy mismo te apagamos tu lista de contactos conocidos y tus redes sociales personales... ¿Tu red sigue registrando gente mañana?"
           >
             {ACQUISITION_OPTIONS.map((option) => (
@@ -741,8 +779,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 5:
         return (
           <StepShell
-            eyebrow="Pantalla 5"
-            title="El sistema LeadFlow se monta en bloque para tu equipo y la inversión va desde los $1,500 hasta los $3,000 USD anuales. Al ser una herramienta grupal, el costo se puede dividir. ¿Cómo lo vas a pagar?"
+            eyebrow="PASO 5"
+            title="¿Cómo planeas financiar esta infraestructura para tu organización?"
           >
             {INVESTMENT_OPTIONS.map((option) => (
               <OptionButton
@@ -758,7 +796,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 6:
         return (
           <StepShell
-            eyebrow="Pantalla 6"
+            eyebrow="PASO 6"
             title="Si vemos que tu equipo califica para el sistema... ¿La decisión de compra depende 100% de ti o tienes que pedirle permiso a tu Upline o rango superior?"
           >
             {DECISION_OPTIONS.map((option) => (
@@ -775,9 +813,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 7:
         return (
           <StepShell
-            eyebrow="Pantalla 7"
-            title="Déjanos tus datos reales para agendar la llamada de diagnóstico."
-            subtitle="Si los datos de contacto son falsos, el sistema de IA anulará la aplicación de inmediato."
+            eyebrow="PASO 7"
+            title="Escribe tu datos de contacto para coordinar la sesión de viabilidad para verificar si LeadFlow es el vehículo de duplicación correcto para tu equipo."
           >
             <div className="space-y-5">
               {renderTextInput({
@@ -842,18 +879,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
   const shouldShowContinue = !isChoiceStep && !isFinalStep;
-  const waNumber = (import.meta.env.VITE_LEADFLOW_WHATSAPP_NUMBER || import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873').replace(
-    /\D/g,
-    '',
-  );
-  const calendarUrl = import.meta.env.VITE_LEADFLOW_CALENDAR_URL || 'https://kurukin.com/contactar/agendar';
-  const whatsappScheduleMessage = encodeURIComponent(
-    'Hola, acabo de completar mi auditoría de LeadFlow y el sistema me aprobó para agendar diagnóstico.',
-  );
-  const whatsappScheduleUrl = `https://wa.me/${waNumber}?text=${whatsappScheduleMessage}`;
-  const resultText = isQualified
-    ? 'Tu aplicación pasó el filtro inicial. El siguiente paso es revisar si tu estructura puede absorber LeadFlow sin que tú sigas cargando toda la prospección.'
-    : 'Gracias por completar la auditoría. Registramos tus respuestas correctamente. En este momento no habilitaremos agenda directa para tu aplicación.';
 
   return (
     <section
@@ -873,7 +898,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
           />
         </div>
         <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-          <span>{shouldShowResult ? 'Resultado' : currentStep === 0 ? 'Auditoría LeadFlow' : `Paso ${currentStep} / ${TOTAL_STEPS}`}</span>
+          <span>{shouldShowResult ? 'Resultado' : currentStep === 0 ? 'Auditoría LeadFlow' : `PASO ${currentStep} / ${TOTAL_STEPS}`}</span>
           <span>{progressPercentage}%</span>
         </div>
       </header>
@@ -883,51 +908,57 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-4 sm:px-6 sm:py-6"
       >
         {shouldShowResult && lastPayload ? (
-          <div className="flex min-h-[520px] flex-col justify-center py-6">
-            <div
-              className={[
-                'flex h-14 w-14 items-center justify-center rounded-xl border',
-                isQualified ? 'border-cyan-300/40 bg-cyan-300/10 text-cyan-200' : 'border-slate-600 bg-white/[0.04] text-slate-300',
-              ].join(' ')}
-            >
-              {isQualified ? <ShieldCheck className="h-7 w-7" /> : <XCircle className="h-7 w-7" />}
-            </div>
-
-            <p className="mt-6 text-sm font-black uppercase tracking-[0.2em] text-cyan-300">
-              {isQualified ? 'Acceso habilitado' : 'Auditoría recibida'}
-            </p>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
-              {isQualified ? 'Tu equipo puede pasar a diagnóstico.' : 'Gracias. El sistema registró tu aplicación.'}
-            </h2>
-            <div className="mt-5 space-y-4">{renderAIText(aiResponse) || renderAIText(resultText)}</div>
-
+          <div className="mx-auto flex w-full max-w-xl flex-col items-center py-8 text-center md:py-12">
             {isQualified ? (
-              <div className="mt-8 rounded-xl border border-cyan-300/20 bg-white/[0.04] p-4 sm:p-5">
-                <div className="flex items-center gap-3 text-cyan-200">
-                  <CalendarDays className="h-5 w-5" />
-                  <h3 className="text-lg font-black uppercase tracking-[0.12em]">Agenda del closer</h3>
+              <>
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200 shadow-[0_0_34px_rgba(34,211,238,0.16)]">
+                  <ShieldCheck className="h-8 w-8" />
                 </div>
-                <p className="mt-3 text-base leading-relaxed text-slate-300">
-                  Abre la conversación de agenda y envía el mensaje prellenado. Si tu teléfono y correo no coinciden con
-                  la auditoría, se cancela el acceso.
+                <h2 className="mt-6 text-2xl font-black leading-tight text-white md:text-4xl">
+                  🔥 ACCESO PRE-APROBADO
+                </h2>
+                <p className="mt-4 text-base font-semibold leading-relaxed text-slate-200 md:text-lg">
+                  Tu perfil cuenta con la madurez operativa requerida. Tienes luz verde para la implementación del
+                  sistema.
                 </p>
-                <iframe
-                  title="Calendario de diagnóstico LeadFlow"
-                  src={calendarUrl}
-                  className="mt-5 h-[520px] w-full rounded-lg border border-white/10 bg-black"
-                  loading="lazy"
-                />
+
+                {aiResponse ? (
+                  <div className="mt-6 w-full rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-5 text-left shadow-[0_0_30px_rgba(34,211,238,0.1)]">
+                    <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-cyan-200">
+                      Diagnóstico operativo
+                    </p>
+                    <div className="space-y-4">{renderAIText(aiResponse)}</div>
+                  </div>
+                ) : null}
+
+                <p className="mt-6 text-base font-semibold leading-relaxed text-slate-300">
+                  Redireccionando al canal oficial de WhatsApp en{' '}
+                  <span className="font-black text-cyan-200">{countdown}s</span> para coordinar tu sesión...
+                </p>
                 <a
-                  href={whatsappScheduleUrl}
+                  href={WHATSAPP_SUCCESS_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-lg font-black uppercase text-white shadow-[0_0_30px_rgba(37,99,235,0.35)] transition hover:scale-[1.01] active:scale-[0.99]"
+                  className="mt-6 inline-flex min-h-[68px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-4 text-lg font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99]"
                 >
-                  Agendar diagnóstico
-                  <ArrowRight className="h-5 w-5" />
+                  🟢 CONECTAR POR WHATSAPP AHORA
                 </a>
-              </div>
-            ) : null}
+              </>
+            ) : (
+              <>
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-red-400/20 bg-white/[0.03] text-red-300">
+                  <XCircle className="h-8 w-8" />
+                </div>
+                <h2 className="mt-6 text-2xl font-black leading-tight text-white md:text-4xl">
+                  ❌ EVALUACIÓN FINAL: PERFIL NO VIABLE
+                </h2>
+                <p className="mt-5 text-base font-medium leading-relaxed text-slate-300 md:text-lg">
+                  Tras procesar los datos operativos de tu organización, el sistema determinamos que tu estructura actual
+                  no cuenta con la masa crítica o el flujo de caja mínimo indispensable para garantizar la duplicación con
+                  la infraestructura de LeadFlow en este momento. Agradecemos tu interés.
+                </p>
+              </>
+            )}
 
             {import.meta.env.DEV ? (
               <details className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
@@ -980,7 +1011,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                   </>
                 ) : (
                   <>
-                    🚀 ENVIAR AUDITORÍA Y SOLICITAR ACCESO
+                    ⚡ COMPROBAR VIABILIDAD
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
