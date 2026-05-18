@@ -1,28 +1,15 @@
-import { startTransition, useEffect, useMemo, useRef, useState, type ComponentType, type SVGProps } from 'react';
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  ChevronDown,
-  CircleDollarSign,
-  Loader2,
-  ShieldAlert,
-} from 'lucide-react';
-import {
-  getCountries,
-  isValidPhoneNumber,
-  type Country,
-} from 'react-phone-number-input';
-import flags from 'react-phone-number-input/flags';
+import { startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
+import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
-import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm, type AnalyticsContext } from '../lib/analytics';
+import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm } from '../lib/analytics';
 
-const TOTAL_STEPS = 13;
-const MIN_TEXTAREA_LENGTH = 20;
+const TOTAL_STEPS = 7;
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const WEBHOOK_URL = 'https://webhooks.kuruk.in/webhook/leadflow-eval';
+const SITE_ID = 'KURUKIN';
 
 const SUPPORTED_COUNTRIES = new Set<Country>(getCountries() as Country[]);
 
@@ -72,163 +59,76 @@ const ALLOWED_COUNTRIES: Country[] = [...PRIORITY_COUNTRIES, ...OTHER_ALLOWED_CO
 ) as Country[];
 
 const TEAM_SIZE_OPTIONS = [
-  { value: 'more_than_50', label: 'Más de 50', score: 25 },
-  { value: '20_to_50', label: '20 a 50', score: 20 },
-  { value: '10_to_20', label: '10 a 20', score: 10 },
-  { value: 'less_than_10', label: 'Menos de 10', score: 0 },
-  { value: 'no_team', label: 'No tengo equipo', score: 0, autoReject: true },
-] as const;
-
-const CONSISTENT_SALES_OPTIONS = [
-  { value: 'consistent_yes', label: 'Sí, consistentemente', score: 20 },
-  { value: 'irregular_yes', label: 'Sí, pero irregular', score: 10 },
-  { value: 'no', label: 'No', score: 0 },
-] as const;
-
-const AD_SPEND_OPTIONS = [
-  { value: '1000_plus', label: '$1,000+', score: 25 },
-  { value: '500_to_1000', label: '$500–$1,000', score: 20 },
-  { value: '100_to_500', label: '$100–$500', score: 10 },
-  { value: 'less_than_100', label: 'Menos de $100', score: 0, autoReject: true },
-] as const;
-
-const INVESTMENT_COVERAGE_OPTIONS = [
-  { value: 'leader_only', label: 'Yo como líder', score: 5 },
-  { value: 'distributed_team', label: 'Mi equipo distribuido', score: 5 },
-  { value: 'combined', label: 'Combinación de ambos', score: 10 },
-  { value: 'unknown', label: 'Aún no lo sé', score: -5 },
-] as const;
-
-const LEAD_SOURCE_OPTIONS = [
-  { value: 'paid_ads', label: 'Publicidad pagada' },
-  { value: 'organic_content', label: 'Contenido orgánico' },
-  { value: 'referrals', label: 'Referidos' },
-  { value: 'events', label: 'Eventos / networking' },
-  { value: 'direct_outreach', label: 'Prospección directa' },
-  { value: 'no_system', label: 'No tenemos sistema' },
-] as const;
-
-const LEAD_RESPONSE_OPTIONS = [
-  { value: 'most_know_how', label: 'La mayoría sabe', score: 10 },
-  { value: 'mixed', label: 'Algunos sí otros no', score: 5 },
-  { value: 'no', label: 'No saben', score: 0 },
-] as const;
-
-const URGENCY_OPTIONS = [
-  { value: 'immediately', label: 'Inmediatamente', score: 15 },
-  { value: 'in_30_days', label: 'En 30 días', score: 10 },
-  { value: 'in_90_days', label: 'En 90 días', score: 5 },
-  { value: 'just_exploring', label: 'Solo explorando', score: 0, autoReject: true },
-] as const;
-
-const PURCHASE_DECISION_OPTIONS = [
-  { value: 'yes', label: 'Sí', score: 15 },
-  { value: 'with_someone_else', label: 'Lo decido con alguien más', score: 5 },
-  { value: 'no', label: 'No', score: 0 },
-] as const;
-
-const INVESTMENT_POSITION_OPTIONS = [
-  { value: 'capital_ready', label: 'Tengo el capital listo', score: 20 },
-  { value: 'shared_capital', label: 'Puedo cubrirlo con mi equipo/compartido', score: 20 },
-  { value: 'partial_gap', label: 'Tendría que resolver una parte', score: 10 },
-  { value: 'no_capital', label: 'No dispongo de capital', score: 0, autoReject: true },
-] as const;
-
-const AUTO_ADVANCE_STEPS = new Set([1, 3, 5, 6, 8, 9, 11, 12]);
-
-const STEP_META = [
   {
-    eyebrow: 'Paso 1 de 13',
-    title: '¿Qué tamaño tiene hoy tu equipo?',
-    description: 'Esto nos dice si ya existe una base real para escalar con infraestructura.',
+    value: 'less_than_15',
+    label: 'Menos de 15 personas (Sigo haciendo todo el trabajo solo)',
   },
   {
-    eyebrow: 'Paso 2 de 13',
-    title: '¿Cuál es tu compañía o producto principal?',
-    description: 'Queremos ubicar el contexto exacto de la operación que buscas acelerar.',
+    value: '15_to_50',
+    label: 'Entre 15 y 50 personas (Tengo equipo, pero nos estancamos)',
   },
   {
-    eyebrow: 'Paso 3 de 13',
-    title: '¿Tu operación ya genera ventas consistentes?',
-    description: 'Leadflow acelera lo que ya tiene algo de tracción, no reemplaza el market fit.',
-  },
-  {
-    eyebrow: 'Paso 4 de 13',
-    title: '¿Cuál es hoy tu principal problema para crecer?',
-    description: 'Explícalo con claridad para entender dónde está el cuello de botella real.',
-  },
-  {
-    eyebrow: 'Paso 5 de 13',
-    title: '¿Cuánto están invirtiendo hoy en anuncios?',
-    description: 'Buscamos operaciones con capacidad mínima de adquisición.',
-  },
-  {
-    eyebrow: 'Paso 6 de 13',
-    title: '¿Quién cubre normalmente la inversión para crecer?',
-    description: 'Esto nos ayuda a medir velocidad de ejecución y fricción interna.',
-  },
-  {
-    eyebrow: 'Paso 7 de 13',
-    title: '¿Cómo están generando leads hoy?',
-    description: 'Puedes marcar varias opciones. Selecciona al menos una.',
-  },
-  {
-    eyebrow: 'Paso 8 de 13',
-    title: 'Cuando entra un lead, ¿tu equipo sabe responderlo?',
-    description: 'La calidad de respuesta define si el sistema realmente convierte.',
-  },
-  {
-    eyebrow: 'Paso 9 de 13',
-    title: '¿Qué tan urgente es resolver esto?',
-    description: 'Necesitamos saber si estás evaluando de verdad o solo explorando ideas.',
-  },
-  {
-    eyebrow: 'Paso 10 de 13',
-    title: '¿Por qué esto es importante para ti justo ahora?',
-    description: 'Cuéntanos qué cambió o qué riesgo ya no quieres seguir tolerando.',
-  },
-  {
-    eyebrow: 'Paso 11 de 13',
-    title: '¿Tienes decisión de compra sobre esta implementación?',
-    description: 'Esto define la ruta correcta después del diagnóstico.',
-  },
-  {
-    eyebrow: 'Paso 12 de 13',
-    title:
-      'Sabiendo que esta infraestructura requiere una inversión a partir de $3,500 USD para su implementación, ¿cuál es tu posición actual?',
-    description: 'Necesitamos confirmar si el proyecto puede ejecutarse sin quedar bloqueado en el arranque.',
-  },
-  {
-    eyebrow: 'Paso 13 de 13',
-    title: 'Último paso: Datos de contacto.',
-    description: 'Tu país se precarga automáticamente, pero puedes ajustarlo si hace falta.',
+    value: 'more_than_50',
+    label: 'Más de 50 personas (Tengo líneas sólidas y líderes corriendo)',
   },
 ] as const;
 
-type FinalStatus = 'calificado_llamada' | 'sesion_pagada' | 'rechazado';
-type AutoAdvanceKey =
-  | 'teamSize'
-  | 'consistentSales'
-  | 'adSpend'
-  | 'investmentCoverage'
-  | 'leadResponseCapability'
-  | 'urgency'
-  | 'purchaseDecision'
-  | 'investmentPosition';
+const ACQUISITION_OPTIONS = [
+  {
+    value: 'no_survival',
+    label: 'No. Dependemos 100% de perseguir amigos, familiares y mandar mensajes en frío',
+  },
+  {
+    value: 'organic_hope',
+    label: 'Dependemos de subir Reels y TikToks rezando para que el algoritmo nos traiga interesados',
+  },
+  {
+    value: 'paid_no_system',
+    label: 'Ya metemos publicidad pagada, pero mi equipo no sabe cómo cerrar prospectos en frío',
+  },
+] as const;
+
+const INVESTMENT_OPTIONS = [
+  {
+    value: 'capital_ready',
+    label: 'Tengo el dinero listo para pagarlo yo mismo si el sistema me convence en la llamada',
+  },
+  {
+    value: 'team_pool',
+    label: "Voy a armar una 'vaca' (co-inversión) con mis líderes clave para dividir el costo de las licencias",
+  },
+  {
+    value: 'no_budget',
+    label: 'No tenemos ese presupuesto en el equipo en este momento',
+  },
+] as const;
+
+const DECISION_OPTIONS = [
+  {
+    value: 'yes',
+    label: 'Depende 100% de mí. Yo decido qué herramientas usa mi organización',
+  },
+  {
+    value: 'need_upline',
+    label: 'Tengo que consultarlo con mi línea ascendente, socios o patrocinador',
+  },
+] as const;
+
+type FinalStatus = 'calificado_llamada' | 'rechazado';
+type AnalyticsPayloadContext = ReturnType<typeof getAnalyticsContext>;
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 interface Answers {
-  teamSize: string;
+  teamSize: (typeof TEAM_SIZE_OPTIONS)[number]['value'] | '';
   companyProduct: string;
-  consistentSales: string;
   mainProblem: string;
-  adSpend: string;
-  investmentCoverage: string;
-  leadSources: string[];
-  leadResponseCapability: string;
-  urgency: string;
-  whyNow: string;
-  purchaseDecision: string;
-  investmentPosition: string;
+  acquisitionThermometer: (typeof ACQUISITION_OPTIONS)[number]['value'] | '';
+  investmentPosition: (typeof INVESTMENT_OPTIONS)[number]['value'] | '';
+  purchaseDecision: (typeof DECISION_OPTIONS)[number]['value'] | '';
   fullName: string;
   whatsapp: string;
   email: string;
@@ -246,20 +146,14 @@ export interface LeadflowPayload {
   fbp: string | null;
   ttclid: string | null;
   ttc: string | null;
-  analytics: AnalyticsContext;
+  analytics: AnalyticsPayloadContext;
   respuestas: {
-    tamano_equipo: { value: string; label: string } | null;
+    tamano_equipo: Option | null;
     compania_producto: string;
-    ventas_consistentes: { value: string; label: string } | null;
     principal_problema: string;
-    inversion_ads: { value: string; label: string } | null;
-    quien_cubre_inversion: { value: string; label: string } | null;
-    generacion_de_leads: Array<{ value: string; label: string }>;
-    respuesta_de_leads: { value: string; label: string } | null;
-    urgencia: { value: string; label: string } | null;
-    motivacion_actual: string;
-    decision_de_compra: { value: string; label: string } | null;
-    posicion_frente_a_inversion: { value: string; label: string } | null;
+    inversion_ads: Option | null;
+    posicion_frente_a_inversion: Option | null;
+    decision_de_compra: Option | null;
     contacto: {
       nombre_completo: string;
       whatsapp: string;
@@ -270,7 +164,6 @@ export interface LeadflowPayload {
       };
     };
   };
-  score_total: number;
   autoreject_triggered: boolean;
   final_status: FinalStatus;
 }
@@ -280,50 +173,39 @@ interface LeadflowApplicationFormProps {
   onPayloadReady?: (payload: LeadflowPayload) => Promise<void> | void;
 }
 
-interface QualificationSummary {
-  scoreTotal: number;
-  autorejectTriggered: boolean;
-  finalStatus: FinalStatus;
-}
-
-interface LeadflowAiWebhookResponse {
+interface LeadflowWebhookResponse {
   es_valido?: boolean;
+  clasificacion?: string;
+  classification?: string;
   ai_consulting_text?: string;
+  message?: string;
 }
 
 interface OptionButtonProps {
-  label: string;
-  description?: string;
+  option: Option;
   selected: boolean;
   onClick: () => void;
-  multiSelect?: boolean;
-}
-
-interface CountrySelectFieldProps {
-  value: Country | '';
-  error?: string;
-  disabled?: boolean;
-  onChange: (value: Country) => void;
 }
 
 const INITIAL_ANSWERS: Answers = {
   teamSize: '',
   companyProduct: '',
-  consistentSales: '',
   mainProblem: '',
-  adSpend: '',
-  investmentCoverage: '',
-  leadSources: [],
-  leadResponseCapability: '',
-  urgency: '',
-  whyNow: '',
-  purchaseDecision: '',
+  acquisitionThermometer: '',
   investmentPosition: '',
+  purchaseDecision: '',
   fullName: '',
   whatsapp: '',
   email: '',
   country: '',
 };
+
+function normalizeCountry(countryCode?: string): Country {
+  if (!countryCode) return FALLBACK_COUNTRY;
+
+  const normalized = countryCode.toUpperCase() as Country;
+  return ALLOWED_COUNTRIES.includes(normalized) ? normalized : FALLBACK_COUNTRY;
+}
 
 function resolveCountryLabel(country: Country | ''): string {
   if (!country) return '';
@@ -336,15 +218,9 @@ function resolveCountryLabel(country: Country | ''): string {
   }
 }
 
-const COUNTRY_LABELS = new Map<Country, string>(
-  ALLOWED_COUNTRIES.map((country) => [country, resolveCountryLabel(country)]),
-);
-
-function normalizeCountry(countryCode?: string): Country {
-  if (!countryCode) return FALLBACK_COUNTRY;
-
-  const normalized = countryCode.toUpperCase() as Country;
-  return ALLOWED_COUNTRIES.includes(normalized) ? normalized : FALLBACK_COUNTRY;
+function getOption(options: readonly { value: string; label: string }[], value: string): Option | null {
+  const match = options.find((option) => option.value === value);
+  return match ? { value: match.value, label: match.label } : null;
 }
 
 function safeValidatePhone(value: string): boolean {
@@ -357,76 +233,32 @@ function safeValidatePhone(value: string): boolean {
   }
 }
 
-function isAutoRejectOption(option: object | undefined): boolean {
-  return Boolean(option && 'autoReject' in option && option.autoReject);
-}
-
-function getOptionLabel(
-  options: readonly { value: string; label: string }[],
-  value: string,
-): { value: string; label: string } | null {
-  const match = options.find((option) => option.value === value);
-  return match ? { value: match.value, label: match.label } : null;
-}
-
-function calculateQualification(answers: Answers): QualificationSummary {
-  const teamSize = TEAM_SIZE_OPTIONS.find((option) => option.value === answers.teamSize);
-  const consistentSales = CONSISTENT_SALES_OPTIONS.find((option) => option.value === answers.consistentSales);
-  const adSpend = AD_SPEND_OPTIONS.find((option) => option.value === answers.adSpend);
-  const investmentCoverage = INVESTMENT_COVERAGE_OPTIONS.find((option) => option.value === answers.investmentCoverage);
-  const leadResponse = LEAD_RESPONSE_OPTIONS.find((option) => option.value === answers.leadResponseCapability);
-  const urgency = URGENCY_OPTIONS.find((option) => option.value === answers.urgency);
-  const purchaseDecision = PURCHASE_DECISION_OPTIONS.find((option) => option.value === answers.purchaseDecision);
-  const investmentPosition = INVESTMENT_POSITION_OPTIONS.find((option) => option.value === answers.investmentPosition);
-
-  const leadSourceScore = answers.leadSources.includes('paid_ads') ? 10 : 0;
-
-  const scoreTotal =
-    (teamSize?.score ?? 0) +
-    (consistentSales?.score ?? 0) +
-    (adSpend?.score ?? 0) +
-    (investmentCoverage?.score ?? 0) +
-    leadSourceScore +
-    (leadResponse?.score ?? 0) +
-    (urgency?.score ?? 0) +
-    (purchaseDecision?.score ?? 0) +
-    (investmentPosition?.score ?? 0);
-
-  const autorejectTriggered = Boolean(
-    isAutoRejectOption(teamSize) ||
-      isAutoRejectOption(adSpend) ||
-      isAutoRejectOption(urgency) ||
-      isAutoRejectOption(investmentPosition),
-  );
-
-  let finalStatus: FinalStatus = 'rechazado';
-
-  if (scoreTotal >= 70 && !autorejectTriggered && answers.purchaseDecision !== 'no') {
-    finalStatus = 'calificado_llamada';
-  } else if (((scoreTotal >= 40 && scoreTotal < 70) || answers.purchaseDecision === 'no') && !autorejectTriggered) {
-    finalStatus = 'sesion_pagada';
-  }
-
+function buildUserData(answers: Answers) {
   return {
-    scoreTotal,
-    autorejectTriggered,
-    finalStatus,
+    em: answers.email.trim().toLowerCase(),
+    ph: answers.whatsapp.trim(),
+    fn: answers.fullName.trim(),
   };
 }
 
-const buildPayload = ({
+function buildPayload({
   answers,
   visitorData,
+  analyticsContext,
 }: {
   answers: Answers;
   visitorData: VisitorData | null;
-}): LeadflowPayload => {
-  const { scoreTotal, autorejectTriggered, finalStatus } = calculateQualification(answers);
+  analyticsContext?: AnalyticsPayloadContext | null;
+}): LeadflowPayload {
+  const analytics = {
+    ...(analyticsContext ?? getAnalyticsContext()),
+    siteId: SITE_ID,
+  };
   const selectedCountry = answers.country || normalizeCountry(visitorData?.country_code);
+  const noBudget = answers.investmentPosition === 'no_budget';
   const email = answers.email.trim().toLowerCase();
   const telefono = answers.whatsapp.trim();
   const nombreCompleto = answers.fullName.trim();
-  const analytics = getAnalyticsContext();
 
   return {
     email,
@@ -438,101 +270,62 @@ const buildPayload = ({
     ttc: analytics.ttclid,
     analytics,
     respuestas: {
-      tamano_equipo: getOptionLabel(TEAM_SIZE_OPTIONS, answers.teamSize),
+      tamano_equipo: getOption(TEAM_SIZE_OPTIONS, answers.teamSize),
       compania_producto: answers.companyProduct.trim(),
-      ventas_consistentes: getOptionLabel(CONSISTENT_SALES_OPTIONS, answers.consistentSales),
       principal_problema: answers.mainProblem.trim(),
-      inversion_ads: getOptionLabel(AD_SPEND_OPTIONS, answers.adSpend),
-      quien_cubre_inversion: getOptionLabel(INVESTMENT_COVERAGE_OPTIONS, answers.investmentCoverage),
-      generacion_de_leads: answers.leadSources
-        .map((value) => getOptionLabel(LEAD_SOURCE_OPTIONS, value))
-        .filter((item): item is { value: string; label: string } => Boolean(item)),
-      respuesta_de_leads: getOptionLabel(LEAD_RESPONSE_OPTIONS, answers.leadResponseCapability),
-      urgencia: getOptionLabel(URGENCY_OPTIONS, answers.urgency),
-      motivacion_actual: answers.whyNow.trim(),
-      decision_de_compra: getOptionLabel(PURCHASE_DECISION_OPTIONS, answers.purchaseDecision),
-      posicion_frente_a_inversion: getOptionLabel(INVESTMENT_POSITION_OPTIONS, answers.investmentPosition),
+      inversion_ads: getOption(ACQUISITION_OPTIONS, answers.acquisitionThermometer),
+      posicion_frente_a_inversion: getOption(INVESTMENT_OPTIONS, answers.investmentPosition),
+      decision_de_compra: getOption(DECISION_OPTIONS, answers.purchaseDecision),
       contacto: {
         nombre_completo: nombreCompleto,
         whatsapp: telefono,
         email,
         pais: {
           code: selectedCountry,
-          label: COUNTRY_LABELS.get(selectedCountry) ?? resolveCountryLabel(selectedCountry),
+          label: resolveCountryLabel(selectedCountry),
         },
       },
     },
-    score_total: scoreTotal,
-    autoreject_triggered: autorejectTriggered,
-    final_status: finalStatus,
+    autoreject_triggered: noBudget,
+    final_status: noBudget ? 'rechazado' : 'calificado_llamada',
   };
-};
+}
 
-function validateStep(
-  step: number,
-  answers: Answers,
-  isWhatsappValid: boolean,
-): FieldErrors {
+function validateStep(step: number, answers: Answers, isWhatsappValid: boolean): FieldErrors {
   const nextErrors: FieldErrors = {};
 
   switch (step) {
     case 1:
-      if (!answers.teamSize) nextErrors.teamSize = 'Este campo es obligatorio';
+      if (!answers.teamSize) nextErrors.teamSize = 'Selecciona una opción para continuar.';
       break;
     case 2:
-      if (!answers.companyProduct.trim()) nextErrors.companyProduct = 'Este campo es obligatorio';
+      if (!answers.companyProduct.trim()) nextErrors.companyProduct = 'Escribe la compañía donde estás corriendo.';
       break;
     case 3:
-      if (!answers.consistentSales) nextErrors.consistentSales = 'Este campo es obligatorio';
+      if (!answers.mainProblem.trim()) nextErrors.mainProblem = 'Describe el freno principal de tu equipo.';
       break;
     case 4:
-      if (!answers.mainProblem.trim()) {
-        nextErrors.mainProblem = 'Este campo es obligatorio';
-      } else if (answers.mainProblem.trim().length < MIN_TEXTAREA_LENGTH) {
-        nextErrors.mainProblem = 'Escribe al menos 20 caracteres';
-      }
+      if (!answers.acquisitionThermometer) nextErrors.acquisitionThermometer = 'Selecciona el escenario más cercano.';
       break;
     case 5:
-      if (!answers.adSpend) nextErrors.adSpend = 'Este campo es obligatorio';
+      if (!answers.investmentPosition) nextErrors.investmentPosition = 'Selecciona cómo resolverán la inversión.';
       break;
     case 6:
-      if (!answers.investmentCoverage) nextErrors.investmentCoverage = 'Este campo es obligatorio';
+      if (!answers.purchaseDecision) nextErrors.purchaseDecision = 'Selecciona quién toma la decisión.';
       break;
     case 7:
-      if (answers.leadSources.length === 0) nextErrors.leadSources = 'Selecciona al menos una opción';
-      break;
-    case 8:
-      if (!answers.leadResponseCapability) nextErrors.leadResponseCapability = 'Este campo es obligatorio';
-      break;
-    case 9:
-      if (!answers.urgency) nextErrors.urgency = 'Este campo es obligatorio';
-      break;
-    case 10:
-      if (!answers.whyNow.trim()) {
-        nextErrors.whyNow = 'Este campo es obligatorio';
-      } else if (answers.whyNow.trim().length < MIN_TEXTAREA_LENGTH) {
-        nextErrors.whyNow = 'Escribe al menos 20 caracteres';
-      }
-      break;
-    case 11:
-      if (!answers.purchaseDecision) nextErrors.purchaseDecision = 'Este campo es obligatorio';
-      break;
-    case 12:
-      if (!answers.investmentPosition) nextErrors.investmentPosition = 'Este campo es obligatorio';
-      break;
-    case 13:
-      if (!answers.fullName.trim()) nextErrors.fullName = 'Este campo es obligatorio';
+      if (!answers.fullName.trim()) nextErrors.fullName = 'Escribe tu nombre completo.';
       if (!answers.whatsapp.trim()) {
-        nextErrors.whatsapp = 'Este campo es obligatorio';
+        nextErrors.whatsapp = 'Escribe tu WhatsApp.';
       } else if (!safeValidatePhone(answers.whatsapp) || !isWhatsappValid) {
-        nextErrors.whatsapp = 'Ingresa un WhatsApp válido';
+        nextErrors.whatsapp = 'Ingresa un WhatsApp válido.';
       }
       if (!answers.email.trim()) {
-        nextErrors.email = 'Este campo es obligatorio';
+        nextErrors.email = 'Escribe tu correo electrónico.';
       } else if (!EMAIL_REGEX.test(answers.email.trim())) {
-        nextErrors.email = 'Ingresa un email válido';
+        nextErrors.email = 'Ingresa un correo válido.';
       }
-      if (!answers.country) nextErrors.country = 'Selecciona un país';
+      if (!answers.country) nextErrors.country = 'Selecciona tu país.';
       break;
     default:
       break;
@@ -544,156 +337,92 @@ function validateStep(
 function InlineError({ message }: { message?: string }) {
   if (!message) return null;
 
-  return <p className="mt-1.5 text-xs text-red-400">{message}</p>;
+  return <p className="mt-2 text-sm font-medium text-red-300">{message}</p>;
 }
 
-function OptionButton({ label, description, selected, onClick, multiSelect = false }: OptionButtonProps) {
+function OptionButton({ option, selected, onClick }: OptionButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={[
-        'group flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-200',
-        'hover:-translate-y-0.5 hover:border-cyan-400/60 hover:shadow-[0_0_20px_rgba(34,211,238,0.12)]',
+        'group flex w-full items-start gap-4 rounded-xl border p-4 text-left transition duration-200 sm:p-5',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
-          ? 'border-cyan-400/70 bg-cyan-400/10 shadow-[0_0_24px_rgba(34,211,238,0.14)]'
-          : 'border-white/10 bg-white/[0.03]',
+          ? 'border-cyan-300/80 bg-cyan-400/10 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
+          : 'border-white/10 bg-white/[0.04] hover:border-cyan-300/60 hover:bg-white/[0.07]',
       ].join(' ')}
+      aria-pressed={selected}
     >
-      <div
+      <span
         className={[
-          'mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200',
-          selected ? 'border-cyan-300 bg-cyan-400/20 text-cyan-200' : 'border-white/20 bg-black/30 text-transparent',
+          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition',
+          selected ? 'border-cyan-300 bg-cyan-300 text-slate-950' : 'border-white/20 bg-slate-950 text-transparent',
         ].join(' ')}
         aria-hidden="true"
       >
-        {selected ? <CheckCircle2 className="h-3.5 w-3.5" /> : multiSelect ? <div className="h-2 w-2 rounded-sm border border-white/20" /> : null}
-      </div>
-
-      <div className="flex-1">
-        <div className="text-sm font-semibold text-white sm:text-base">{label}</div>
-        {description ? <p className="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm">{description}</p> : null}
-      </div>
+        <CheckCircle2 className="h-4 w-4" />
+      </span>
+      <span className="text-lg font-semibold leading-snug text-white sm:text-xl">{option.label}</span>
     </button>
   );
 }
 
-function CountrySelectField({ value, error, disabled = false, onChange }: CountrySelectFieldProps) {
-  const selectedLabel = value ? COUNTRY_LABELS.get(value) ?? resolveCountryLabel(value) : 'Selecciona un país';
-  const Flag = value ? (flags[value] as ComponentType<SVGProps<SVGSVGElement>> | undefined) : undefined;
-
-  return (
-    <div className="w-full max-w-full min-w-0 box-border">
-      <label className="mb-2 block text-sm font-medium text-slate-200">
-        País
-        <span className="ml-1 text-red-500">*</span>
-      </label>
-
-      <div className="relative w-full max-w-full min-w-0">
-        <select
-          value={value}
-          onChange={(event) => onChange(event.target.value as Country)}
-          disabled={disabled}
-          className="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0"
-          style={{ colorScheme: 'dark' }}
-          aria-label="Seleccionar país"
-        >
-          {ALLOWED_COUNTRIES.map((country) => (
-            <option key={country} value={country}>
-              {COUNTRY_LABELS.get(country) ?? country}
-            </option>
-          ))}
-        </select>
-
-        <div
-          className={[
-            'flex min-h-[48px] items-center gap-3 rounded-xl border px-3.5 py-2.5 transition-all duration-200',
-            error
-              ? 'border-red-500 bg-red-500/5'
-              : 'border-white/10 bg-white/[0.03] hover:border-cyan-400/60 hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]',
-            disabled ? 'opacity-60' : '',
-          ].join(' ')}
-        >
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">
-            {Flag ? <Flag className="h-4.5 w-6 rounded-sm shadow-sm" aria-label={selectedLabel} /> : <span className="text-sm text-slate-300">--</span>}
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">País</p>
-            <p className="truncate text-sm font-medium text-white sm:text-base">{selectedLabel}</p>
-          </div>
-
-          <div className="flex items-center gap-2 text-slate-300">
-            <ChevronDown className="h-4 w-4 text-slate-500" />
-          </div>
-        </div>
-      </div>
-
-      <InlineError message={error} />
-    </div>
-  );
-}
-
-const renderAIText = (text: string | null) => {
+function renderAIText(text: string | null) {
   if (!text) return null;
 
-  return text.split('\n').map((paragraph, pIndex) => {
+  return text.split('\n').map((paragraph, index) => {
     if (!paragraph.trim()) return null;
 
     return (
-      <p key={pIndex} className="mb-4 text-slate-300 text-base md:text-lg leading-relaxed">
-        {paragraph.split('**').map((chunk, cIndex) => {
-          if (cIndex % 2 === 1) {
-            return (
-              <span key={cIndex} className="font-bold text-white tracking-wide">
-                {chunk}
-              </span>
-            );
-          }
-
-          return chunk;
-        })}
+      <p key={index} className="text-base leading-relaxed text-slate-300 sm:text-lg">
+        {paragraph.split('**').map((chunk, chunkIndex) =>
+          chunkIndex % 2 === 1 ? (
+            <span key={chunkIndex} className="font-bold text-white">
+              {chunk}
+            </span>
+          ) : (
+            chunk
+          ),
+        )}
       </p>
     );
   });
-};
+}
 
-export function LeadflowApplicationForm({
-  className = '',
-  onPayloadReady,
-}: LeadflowApplicationFormProps) {
+export function LeadflowApplicationForm({ className = '', onPayloadReady }: LeadflowApplicationFormProps) {
   const { visitorData, isLoading: isVisitorLoading } = useVisitor();
-
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>(INITIAL_ANSWERS);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [selectedCountry, setSelectedCountry] = useState<Country>(FALLBACK_COUNTRY);
   const [isWhatsappValid, setIsWhatsappValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiResponse, setAiResponse] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(30);
   const [submissionError, setSubmissionError] = useState('');
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
-
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [isQualified, setIsQualified] = useState(false);
   const hasManualCountrySelectionRef = useRef(false);
+  const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
+
+  useEffect(() => {
+    analyticsRef.current = {
+      ...getAnalyticsContext(),
+      siteId: SITE_ID,
+    };
+  }, []);
 
   useEffect(() => {
     if (!visitorData?.country_code) return;
     if (hasManualCountrySelectionRef.current) return;
 
     const detectedCountry = normalizeCountry(visitorData.country_code);
-
     setSelectedCountry(detectedCountry);
     setAnswers((prev) => ({
       ...prev,
       country: detectedCountry,
     }));
   }, [visitorData?.country_code]);
-
-  useEffect(() => {
-    getAnalyticsContext();
-  }, []);
 
   useEffect(() => {
     setAnswers((prev) => {
@@ -705,8 +434,11 @@ export function LeadflowApplicationForm({
     });
   }, [selectedCountry]);
 
-  const progressPercentage = useMemo(() => Math.round((currentStep / TOTAL_STEPS) * 100), [currentStep]);
-  const currentMeta = STEP_META[currentStep - 1] ?? STEP_META[0];
+  const progressPercentage = useMemo(() => {
+    if (lastPayload) return 100;
+    return Math.round((currentStep / TOTAL_STEPS) * 100);
+  }, [currentStep, lastPayload]);
+
   const updateAnswer = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
     setAnswers((prev) => ({
       ...prev,
@@ -719,9 +451,15 @@ export function LeadflowApplicationForm({
     setSubmissionError('');
   };
 
+  const selectAndAdvance = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
+    updateAnswer(key, value);
+    startTransition(() => {
+      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+    });
+  };
+
   const goToNextStep = () => {
     const stepErrors = validateStep(currentStep, answers, isWhatsappValid);
-
     if (Object.keys(stepErrors).length > 0) {
       setErrors((prev) => ({
         ...prev,
@@ -737,59 +475,18 @@ export function LeadflowApplicationForm({
 
   const goToPreviousStep = () => {
     startTransition(() => {
-      setCurrentStep((prev) => Math.max(prev - 1, 1));
+      setCurrentStep((prev) => Math.max(prev - 1, 0));
     });
-  };
-
-  const handleAutoAdvanceSelection = (key: AutoAdvanceKey, value: string) => {
-    updateAnswer(key, value);
-
-    startTransition(() => {
-      setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
-    });
-  };
-
-  const toggleLeadSource = (value: string) => {
-    setAnswers((prev) => {
-      const currentValues = prev.leadSources;
-      const hasValue = currentValues.includes(value);
-
-      let nextValues: string[];
-
-      if (value === 'no_system') {
-        nextValues = hasValue ? [] : ['no_system'];
-      } else if (hasValue) {
-        nextValues = currentValues.filter((item) => item !== value);
-      } else {
-        nextValues = [...currentValues.filter((item) => item !== 'no_system'), value];
-      }
-
-      return {
-        ...prev,
-        leadSources: nextValues,
-      };
-    });
-
-    setErrors((prev) => ({
-      ...prev,
-      leadSources: undefined,
-    }));
-    setSubmissionError('');
   };
 
   const handleCountrySelection = (country: Country) => {
     hasManualCountrySelectionRef.current = true;
     setSelectedCountry(country);
-    setErrors((prev) => ({
-      ...prev,
-      country: undefined,
-    }));
-    setSubmissionError('');
+    updateAnswer('country', country);
   };
 
   const handleFinalSubmission = async () => {
-    const stepErrors = validateStep(13, answers, isWhatsappValid);
-
+    const stepErrors = validateStep(7, answers, isWhatsappValid);
     if (Object.keys(stepErrors).length > 0) {
       setErrors((prev) => ({
         ...prev,
@@ -798,93 +495,73 @@ export function LeadflowApplicationForm({
       return;
     }
 
-    setIsSubmitting(true);
-    setIsAnalyzing(true);
-    setAiResponse(null);
-    setSubmissionError('');
-
     const payload = buildPayload({
       answers: {
         ...answers,
         country: answers.country || selectedCountry,
       },
       visitorData,
+      analyticsContext: analyticsRef.current,
     });
+    const userData = buildUserData(answers);
 
-    console.log('[LeadflowApplicationForm payload]', payload);
-
-    void trackSubmitForm({
-      eventId: payload.analytics.eventId,
-    }).catch((error) => {
-      console.error('[LeadflowApplicationForm] submit form tracking failed', error);
-    });
-
-    let finalPayload = payload;
-    let nextAiResponse: string | null = null;
+    setIsSubmitting(true);
+    setSubmissionError('');
+    setAiResponse(null);
+    setIsQualified(false);
 
     try {
-      const minimumAnalysisDelay = new Promise((resolve) => {
-        window.setTimeout(resolve, 3500);
+      void trackSubmitForm(payload.analytics.eventId, userData).catch((error) => {
+        console.error('[LeadflowApplicationForm] SubmitForm tracking failed', error);
       });
 
-      const aiEvaluationPromise = fetch('https://webhooks.kuruk.in/webhook/leadflow-eval', {
+      const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            throw new Error(`Leadflow AI webhook failed with status ${response.status}`);
-          }
-
-          return (await response.json()) as LeadflowAiWebhookResponse;
-        })
-        .catch((error) => {
-          console.error('[LeadflowApplicationForm] AI evaluation failed', error);
-          return null;
-        });
-
-      const [aiEvaluation] = await Promise.all([aiEvaluationPromise, minimumAnalysisDelay]);
-
-      if (aiEvaluation?.es_valido === false) {
-        finalPayload = {
-          ...payload,
-          final_status: 'rechazado',
-        };
-      }
-
-      if (aiEvaluation?.es_valido === true) {
-        void trackQualifiedLead({
-          eventId: payload.analytics.eventId,
-        }).catch((error) => {
-          console.error('[LeadflowApplicationForm] qualified lead tracking failed', error);
-        });
-      }
-
-      nextAiResponse =
-        typeof aiEvaluation?.ai_consulting_text === 'string' && aiEvaluation.ai_consulting_text.trim().length > 0
-          ? aiEvaluation.ai_consulting_text.trim()
-          : null;
-    } catch (error) {
-      console.error('[LeadflowApplicationForm] submission failed', error);
-      nextAiResponse = null;
-    }
-
-    try {
-      await onPayloadReady?.(finalPayload);
-    } catch (error) {
-      console.error('[LeadflowApplicationForm] onPayloadReady failed', error);
-    } finally {
-      setAiResponse(nextAiResponse);
-      setLastPayload(finalPayload);
-
-      startTransition(() => {
-        setCurrentStep(TOTAL_STEPS);
       });
 
-      setIsAnalyzing(false);
+      if (!response.ok) {
+        throw new Error(`Leadflow webhook failed with status ${response.status}`);
+      }
+
+      const evaluation = (await response.json()) as LeadflowWebhookResponse;
+      const noBudget = payload.respuestas.posicion_frente_a_inversion?.value === 'no_budget';
+      const approved = !noBudget && evaluation.es_valido === true;
+      const classification = evaluation.clasificacion || evaluation.classification || 'Aprobado';
+      const finalPayload: LeadflowPayload = {
+        ...payload,
+        autoreject_triggered: noBudget,
+        final_status: approved ? 'calificado_llamada' : 'rechazado',
+      };
+
+      if (approved) {
+        void trackQualifiedLead(payload.analytics.eventId, userData, classification).catch((error) => {
+          console.error('[LeadflowApplicationForm] QualifiedLead tracking failed', error);
+        });
+      }
+
+      try {
+        await onPayloadReady?.(finalPayload);
+      } catch (error) {
+        console.error('[LeadflowApplicationForm] onPayloadReady failed', error);
+      }
+
+      setLastPayload(finalPayload);
+      setIsQualified(approved);
+      setAiResponse(
+        typeof evaluation.ai_consulting_text === 'string' && evaluation.ai_consulting_text.trim().length > 0
+          ? evaluation.ai_consulting_text.trim()
+          : typeof evaluation.message === 'string' && evaluation.message.trim().length > 0
+            ? evaluation.message.trim()
+            : null,
+      );
+    } catch (error) {
+      console.error('[LeadflowApplicationForm] submission failed', error);
+      setSubmissionError('No pudimos procesar la auditoría en este momento. Inténtalo de nuevo en unos segundos.');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -906,10 +583,9 @@ export function LeadflowApplicationForm({
     error?: string;
     type?: 'text' | 'email';
   }) => (
-    <div className="w-full max-w-full min-w-0 box-border">
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-slate-200">
+    <div className="w-full">
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
         {label}
-        <span className="ml-1 text-red-500">*</span>
       </label>
       <input
         id={id}
@@ -918,9 +594,9 @@ export function LeadflowApplicationForm({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         className={[
-          'h-12 w-full rounded-xl border bg-white/[0.03] px-4 text-sm text-white outline-none transition-all duration-200 sm:text-base',
-          'placeholder:text-slate-500 focus:border-cyan-400 focus:shadow-[0_0_18px_rgba(34,211,238,0.14)]',
-          error ? 'border-red-500' : 'border-white/10',
+          'min-h-[64px] w-full rounded-xl border bg-white/[0.04] p-4 text-lg font-semibold text-white outline-none transition sm:p-5 sm:text-xl',
+          'placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20',
+          error ? 'border-red-400' : 'border-white/10',
         ].join(' ')}
       />
       <InlineError message={error} />
@@ -942,537 +618,393 @@ export function LeadflowApplicationForm({
     onChange: (value: string) => void;
     error?: string;
   }) => (
-    <div className="w-full max-w-full min-w-0 box-border">
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-slate-200">
+    <div className="w-full">
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
         {label}
-        <span className="ml-1 text-red-500">*</span>
       </label>
       <textarea
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        rows={5}
+        rows={7}
         className={[
-          'w-full rounded-xl border bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none transition-all duration-200 sm:text-base',
-          'placeholder:text-slate-500 focus:border-cyan-400 focus:shadow-[0_0_18px_rgba(34,211,238,0.14)]',
-          error ? 'border-red-500' : 'border-white/10',
+          'w-full rounded-xl border bg-white/[0.04] p-4 text-lg font-semibold leading-relaxed text-white outline-none transition sm:p-5 sm:text-xl',
+          'placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20',
+          error ? 'border-red-400' : 'border-white/10',
         ].join(' ')}
       />
-      <div className="mt-1.5 flex items-center justify-between gap-3">
-        <InlineError message={error} />
-        <span className="text-xs text-slate-500">{value.trim().length}/{MIN_TEXTAREA_LENGTH}+ mínimo</span>
-      </div>
+      <InlineError message={error} />
     </div>
   );
 
   const renderStepContent = () => {
     switch (currentStep) {
+      case 0:
+        return (
+          <div className="flex min-h-[560px] flex-col justify-center py-6 sm:min-h-[620px]">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-300">
+              🔒 EXCLUSIVO PARA LÍDERES CON EQUIPOS ACTIVOS
+            </p>
+            <h1 className="mt-6 text-4xl font-black leading-[0.95] text-white sm:text-6xl">
+              Si tu equipo de MLM no prospecta sin ti... tienes un{' '}
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                autoempleo disfrazado.
+              </span>
+            </h1>
+            <p className="mt-6 text-lg leading-relaxed text-slate-300 sm:text-xl">
+              LeadFlow despliega la infraestructura automatizada de adquisición para líderes que corren por rangos altos.
+              No aceptamos curiosos, no financiamos a personas sin flujo de caja y solo abrimos 5 cupos por mes para
+              desarrollo de sistemas. Si buscas un curso barato o trucos gratuitos, puedes cerrar esta pestaña.
+            </p>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(1)}
+              className="mt-8 inline-flex min-h-[64px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 p-5 text-lg font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.36)] transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>⚡ INICIAR MI AUDITORÍA DE EQUIPO</span>
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          </div>
+        );
       case 1:
         return (
-          <div className="grid gap-3">
+          <StepShell
+            eyebrow="Pantalla 1"
+            title="¿De qué tamaño es tu organización activa actualmente?"
+            subtitle="Gente cobrando cheques y construyendo, no consumidores durmientes."
+          >
             {TEAM_SIZE_OPTIONS.map((option) => (
               <OptionButton
                 key={option.value}
-                label={option.label}
+                option={option}
                 selected={answers.teamSize === option.value}
-                onClick={() => handleAutoAdvanceSelection('teamSize', option.value)}
+                onClick={() => selectAndAdvance('teamSize', option.value)}
               />
             ))}
             <InlineError message={errors.teamSize} />
-          </div>
+          </StepShell>
         );
       case 2:
-        return renderTextInput({
-          id: 'companyProduct',
-          label: 'Compañía / producto',
-          value: answers.companyProduct,
-          placeholder: 'Ej. Red de bienestar con productos de consumo mensual',
-          onChange: (value) => updateAnswer('companyProduct', value),
-          error: errors.companyProduct,
-        });
+        return (
+          <StepShell
+            eyebrow="Pantalla 2"
+            title="¿En qué compañía de MLM / Redes de Mercadeo estás corriendo tu negocio hoy?"
+          >
+            {renderTextInput({
+              id: 'companyProduct',
+              label: 'Compañía',
+              value: answers.companyProduct,
+              placeholder: 'Ej: Herbalife, Amway, Jeunesse...',
+              onChange: (value) => updateAnswer('companyProduct', value),
+              error: errors.companyProduct,
+            })}
+          </StepShell>
+        );
       case 3:
         return (
-          <div className="grid gap-3">
-            {CONSISTENT_SALES_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                label={option.label}
-                selected={answers.consistentSales === option.value}
-                onClick={() => handleAutoAdvanceSelection('consistentSales', option.value)}
-              />
-            ))}
-            <InlineError message={errors.consistentSales} />
-          </div>
+          <StepShell
+            eyebrow="Pantalla 3"
+            title="Sé brutalmente honesto: ¿Cuál es el freno número uno en tu equipo por el cual tu gente no duplica y tu cheque se estancó?"
+          >
+            {renderTextarea({
+              id: 'mainProblem',
+              label: 'Diagnóstico',
+              value: answers.mainProblem,
+              placeholder:
+                '¿Tu gente se raja a los 30 días? ¿Se quedaron sin lista de contactos? ¿Dependen de que tú les des las presentaciones para poder cerrar?...',
+              onChange: (value) => updateAnswer('mainProblem', value),
+              error: errors.mainProblem,
+            })}
+          </StepShell>
         );
       case 4:
-        return renderTextarea({
-          id: 'mainProblem',
-          label: 'Principal problema',
-          value: answers.mainProblem,
-          placeholder: 'Describe con detalle qué está frenando hoy el crecimiento del equipo...',
-          onChange: (value) => updateAnswer('mainProblem', value),
-          error: errors.mainProblem,
-        });
+        return (
+          <StepShell
+            eyebrow="Pantalla 4"
+            title="Si hoy mismo te apagamos tu lista de contactos conocidos y tus redes sociales personales... ¿Tu red sigue registrando gente mañana?"
+          >
+            {ACQUISITION_OPTIONS.map((option) => (
+              <OptionButton
+                key={option.value}
+                option={option}
+                selected={answers.acquisitionThermometer === option.value}
+                onClick={() => selectAndAdvance('acquisitionThermometer', option.value)}
+              />
+            ))}
+            <InlineError message={errors.acquisitionThermometer} />
+          </StepShell>
+        );
       case 5:
         return (
-          <div className="grid gap-3">
-            {AD_SPEND_OPTIONS.map((option) => (
+          <StepShell
+            eyebrow="Pantalla 5"
+            title="El sistema LeadFlow se monta en bloque para tu equipo y la inversión va desde los $1,500 hasta los $3,000 USD anuales. Al ser una herramienta grupal, el costo se puede dividir. ¿Cómo lo vas a pagar?"
+          >
+            {INVESTMENT_OPTIONS.map((option) => (
               <OptionButton
                 key={option.value}
-                label={option.label}
-                selected={answers.adSpend === option.value}
-                onClick={() => handleAutoAdvanceSelection('adSpend', option.value)}
-              />
-            ))}
-            <InlineError message={errors.adSpend} />
-          </div>
-        );
-      case 6:
-        return (
-          <div className="grid gap-3">
-            {INVESTMENT_COVERAGE_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                label={option.label}
-                selected={answers.investmentCoverage === option.value}
-                onClick={() => handleAutoAdvanceSelection('investmentCoverage', option.value)}
-              />
-            ))}
-            <InlineError message={errors.investmentCoverage} />
-          </div>
-        );
-      case 7:
-        return (
-          <div className="space-y-4">
-            <div className="grid gap-3">
-              {LEAD_SOURCE_OPTIONS.map((option) => (
-                <OptionButton
-                  key={option.value}
-                  label={option.label}
-                  selected={answers.leadSources.includes(option.value)}
-                  onClick={() => toggleLeadSource(option.value)}
-                  multiSelect
-                />
-              ))}
-            </div>
-            <InlineError message={errors.leadSources} />
-          </div>
-        );
-      case 8:
-        return (
-          <div className="grid gap-3">
-            {LEAD_RESPONSE_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                label={option.label}
-                selected={answers.leadResponseCapability === option.value}
-                onClick={() => handleAutoAdvanceSelection('leadResponseCapability', option.value)}
-              />
-            ))}
-            <InlineError message={errors.leadResponseCapability} />
-          </div>
-        );
-      case 9:
-        return (
-          <div className="grid gap-3">
-            {URGENCY_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                label={option.label}
-                selected={answers.urgency === option.value}
-                onClick={() => handleAutoAdvanceSelection('urgency', option.value)}
-              />
-            ))}
-            <InlineError message={errors.urgency} />
-          </div>
-        );
-      case 10:
-        return renderTextarea({
-          id: 'whyNow',
-          label: 'Motivación: ¿por qué ahora?',
-          value: answers.whyNow,
-          placeholder: 'Cuéntanos qué cambió y por qué resolverlo ahora sí importa...',
-          onChange: (value) => updateAnswer('whyNow', value),
-          error: errors.whyNow,
-        });
-      case 11:
-        return (
-          <div className="grid gap-3">
-            {PURCHASE_DECISION_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                label={option.label}
-                selected={answers.purchaseDecision === option.value}
-                onClick={() => handleAutoAdvanceSelection('purchaseDecision', option.value)}
-              />
-            ))}
-            <InlineError message={errors.purchaseDecision} />
-          </div>
-        );
-      case 12:
-        return (
-          <div className="grid gap-3">
-            {INVESTMENT_POSITION_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                label={option.label}
+                option={option}
                 selected={answers.investmentPosition === option.value}
-                onClick={() => handleAutoAdvanceSelection('investmentPosition', option.value)}
+                onClick={() => selectAndAdvance('investmentPosition', option.value)}
               />
             ))}
             <InlineError message={errors.investmentPosition} />
-          </div>
+          </StepShell>
         );
-      case 13:
+      case 6:
         return (
-          <div className="w-full max-w-full min-w-0 box-border space-y-4">
-            <div className="grid w-full max-w-full min-w-0 box-border gap-4 md:grid-cols-2">
+          <StepShell
+            eyebrow="Pantalla 6"
+            title="Si vemos que tu equipo califica para el sistema... ¿La decisión de compra depende 100% de ti o tienes que pedirle permiso a tu Upline o rango superior?"
+          >
+            {DECISION_OPTIONS.map((option) => (
+              <OptionButton
+                key={option.value}
+                option={option}
+                selected={answers.purchaseDecision === option.value}
+                onClick={() => selectAndAdvance('purchaseDecision', option.value)}
+              />
+            ))}
+            <InlineError message={errors.purchaseDecision} />
+          </StepShell>
+        );
+      case 7:
+        return (
+          <StepShell
+            eyebrow="Pantalla 7"
+            title="Déjanos tus datos reales para agendar la llamada de diagnóstico."
+            subtitle="Si los datos de contacto son falsos, el sistema de IA anulará la aplicación de inmediato."
+          >
+            <div className="space-y-5">
               {renderTextInput({
                 id: 'fullName',
                 label: 'Nombre completo',
                 value: answers.fullName,
-                placeholder: 'Tu nombre y apellido',
+                placeholder: 'Nombre y apellido reales',
                 onChange: (value) => updateAnswer('fullName', value),
                 error: errors.fullName,
               })}
 
-              <CountrySelectField
-                value={answers.country || selectedCountry}
-                onChange={handleCountrySelection}
-                error={errors.country}
-                disabled={isVisitorLoading}
+              <SmartPhoneInput
+                key={answers.country || selectedCountry}
+                id="leadflow-whatsapp"
+                name="whatsapp"
+                label="WhatsApp"
+                value={answers.whatsapp}
+                onChange={(value) => updateAnswer('whatsapp', value)}
+                onValidityChange={setIsWhatsappValid}
+                onCountryChange={handleCountrySelection}
+                error={errors.whatsapp}
+                required
+                defaultCountry={answers.country || selectedCountry || FALLBACK_COUNTRY}
+                autoDetectCountry={false}
+                placeholder="Tu número con prefijo"
+                theme="dark"
+                className={[
+                  'text-lg',
+                  '[&_.PhoneInputCountry]:!h-16 [&_.PhoneInputCountry]:!min-w-[118px] [&_.PhoneInputCountry]:!px-4',
+                  '[&_.PhoneInputInput]:!h-16 [&_.PhoneInputInput]:!px-5 [&_.PhoneInputInput]:!text-lg [&_.PhoneInputInput]:!font-semibold',
+                  '[&_.SmartPhoneCallingCode]:!text-lg',
+                ].join(' ')}
               />
-
-              <div className="w-full max-w-full min-w-0 box-border md:col-span-2">
-                <SmartPhoneInput
-                  key={answers.country || selectedCountry}
-                  id="leadflow-whatsapp"
-                  name="whatsapp"
-                  label="WhatsApp"
-                  value={answers.whatsapp}
-                  onChange={(value) => updateAnswer('whatsapp', value)}
-                  onValidityChange={setIsWhatsappValid}
-                  onCountryChange={handleCountrySelection}
-                  error={errors.whatsapp}
-                  required
-                  defaultCountry={answers.country || selectedCountry || FALLBACK_COUNTRY}
-                  autoDetectCountry={false}
-                  placeholder="Tu número con prefijo"
-                  theme="dark"
-                  className="w-full max-w-full min-w-0 box-border"
-                />
-              </div>
 
               {renderTextInput({
                 id: 'email',
-                label: 'Email',
+                label: 'Correo electrónico',
                 value: answers.email,
                 placeholder: 'tu@email.com',
                 onChange: (value) => updateAnswer('email', value),
                 error: errors.email,
                 type: 'email',
               })}
+
+              {isVisitorLoading ? <p className="text-sm text-slate-500">Detectando país por IP...</p> : null}
+
+              {submissionError ? (
+                <div className="rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm font-semibold text-red-200">
+                  {submissionError}
+                </div>
+              ) : null}
             </div>
-
-            {isVisitorLoading ? (
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-slate-400 sm:text-sm">
-                Detectando país por IP para precargar la bandera y el prefijo...
-              </div>
-            ) : null}
-
-            {submissionError ? (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300 sm:text-sm">
-                {submissionError}
-              </div>
-            ) : null}
-          </div>
+          </StepShell>
         );
       default:
         return null;
     }
   };
 
-  const isAutoAdvanceStep = AUTO_ADVANCE_STEPS.has(currentStep);
-  const shouldShowNextButton = !isAutoAdvanceStep && currentStep < TOTAL_STEPS;
-  const waNumber = (import.meta.env.VITE_LEADFLOW_WHATSAPP_NUMBER || '59179790873').replace(/\D/g, '');
+  const shouldShowResult = Boolean(lastPayload);
+  const shouldShowFooter = !shouldShowResult && currentStep > 0;
+  const isFinalStep = currentStep === TOTAL_STEPS;
+  const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
+  const shouldShowContinue = !isChoiceStep && !isFinalStep;
+  const waNumber = (import.meta.env.VITE_LEADFLOW_WHATSAPP_NUMBER || import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873').replace(
+    /\D/g,
+    '',
+  );
+  const calendarUrl = import.meta.env.VITE_LEADFLOW_CALENDAR_URL || 'https://kurukin.com/contactar/agendar';
   const whatsappScheduleMessage = encodeURIComponent(
-    'Hola, acabo de completar mi evaluación para Leadflow. Me gustaría agendar mi llamada.',
+    'Hola, acabo de completar mi auditoría de LeadFlow y el sistema me aprobó para agendar diagnóstico.',
   );
   const whatsappScheduleUrl = `https://wa.me/${waNumber}?text=${whatsappScheduleMessage}`;
-  const isSuccessfulResult =
-    Boolean(lastPayload) && (lastPayload?.final_status === 'calificado_llamada' || lastPayload?.final_status === 'sesion_pagada');
-
-  useEffect(() => {
-    if (!isSuccessfulResult || isAnalyzing) {
-      setCountdown(30);
-      return;
-    }
-
-    setCountdown(30);
-
-    const timer = window.setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          window.location.href = whatsappScheduleUrl;
-          return 0;
-        }
-
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [isAnalyzing, isSuccessfulResult, whatsappScheduleUrl]);
-
-  const resultConfig = {
-    calificado_llamada: {
-      eyebrow: 'Resultado A',
-      title: 'Tu perfil encaja perfectamente.',
-      actionLabel: 'Agendar por WhatsApp',
-      actionHref: whatsappScheduleUrl,
-      icon: CalendarDays,
-    },
-    sesion_pagada: {
-      eyebrow: 'Resultado B',
-      title: 'Hay potencial, pero primero hace falta diagnóstico serio.',
-      actionLabel: 'Agendar por WhatsApp',
-      actionHref: whatsappScheduleUrl,
-      icon: CircleDollarSign,
-    },
-    rechazado: {
-      eyebrow: 'Resultado C',
-      title: 'Por ahora no eres candidato para Leadflow.',
-      actionLabel: '',
-      actionHref: '',
-      icon: ShieldAlert,
-    },
-  } as const;
-
-  const shouldShowResult = Boolean(lastPayload);
-  const isResultScreen = shouldShowResult && !isAnalyzing;
-  const activeResult = lastPayload ? resultConfig[lastPayload.final_status] : null;
-  const ResultIcon = activeResult?.icon;
-  const resultFallbackText =
-    lastPayload?.final_status === 'calificado_llamada'
-      ? 'Tu evaluación fue aprobada. Tu operación muestra señales claras para avanzar a una conversación estratégica sobre la implementación de Leadflow.'
-      : lastPayload?.final_status === 'sesion_pagada'
-        ? 'Tu operación tiene potencial, pero antes de implementar Leadflow conviene realizar un diagnóstico estratégico para ordenar los bloqueos principales.'
-        : 'Por ahora tu operación todavía no cumple las condiciones para implementar Leadflow. Cuando consolides tracción y capacidad de inversión, podremos reevaluarlo.';
-  const advanceButtonClassName = [
-    'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-cyan-400/30',
-    'bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.6)]',
-    'animate-pulse transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(34,211,238,0.28)]',
-    'sm:bg-gradient-to-r sm:from-cyan-500 sm:to-blue-600',
-  ].join(' ');
-  const backButtonClassName = [
-    'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/10',
-    'bg-transparent px-4 py-3 text-sm font-medium text-slate-300 transition-colors duration-200',
-    'hover:border-white/20 hover:bg-white/[0.04] hover:text-white',
-  ].join(' ');
+  const resultText = isQualified
+    ? 'Tu aplicación pasó el filtro inicial. El siguiente paso es revisar si tu estructura puede absorber LeadFlow sin que tú sigas cargando toda la prospección.'
+    : 'Gracias por completar la auditoría. Registramos tus respuestas correctamente. En este momento no habilitaremos agenda directa para tu aplicación.';
 
   return (
     <section
       className={[
-        'relative w-full bg-[#050505] text-white',
-        isResultScreen ? 'h-auto overflow-visible' : 'h-full overflow-hidden',
+        'relative flex h-full w-full flex-col overflow-hidden bg-slate-950 text-white',
+        'sm:rounded-2xl sm:border sm:border-white/10',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.12),transparent_25%)]" />
-
-      <div className={['relative w-full', isResultScreen ? 'h-auto' : 'h-full'].join(' ')}>
-        <div
-          className={[
-            'flex w-full flex-col bg-[#0a0a0a] sm:rounded-2xl sm:border border-white/10',
-            isResultScreen ? 'h-auto overflow-visible' : 'h-full overflow-hidden',
-          ].join(' ')}
-        >
-          <header className="shrink-0 p-4 border-b border-white/5">
-            <div className="flex items-center gap-3">
-              <span className="shrink-0 text-[11px] font-medium uppercase tracking-[0.24em] text-slate-400">
-                {isAnalyzing ? 'Analizando' : shouldShowResult ? 'Resultado final' : `Paso ${currentStep} de ${TOTAL_STEPS}`}
-              </span>
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_18px_rgba(34,211,238,0.45)] transition-all duration-300"
-                  style={{ width: `${isAnalyzing || shouldShowResult ? 100 : progressPercentage}%` }}
-                />
-              </div>
-              <span className="shrink-0 text-[11px] font-medium text-slate-500">
-                {isAnalyzing || shouldShowResult ? '100%' : `${progressPercentage}%`}
-              </span>
-            </div>
-          </header>
-
+      <header className="shrink-0 border-b border-white/10 bg-black px-4 py-3 sm:px-6">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className={[
-              'p-4 sm:p-6 pb-12',
-              isResultScreen
-                ? 'h-auto overflow-y-auto sm:overflow-visible max-h-[calc(100dvh-76px)] sm:max-h-none'
-                : 'flex-1 min-h-0 overflow-y-auto',
-            ].join(' ')}
-          >
-            {isAnalyzing ? (
-              <div className="flex h-full min-h-[320px] flex-col items-center justify-center text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 shadow-[0_0_40px_rgba(34,211,238,0.12)]">
-                  <Loader2 className="h-10 w-10 animate-spin text-cyan-300" />
-                </div>
-                <p className="mt-8 text-[11px] font-semibold uppercase tracking-[0.34em] text-cyan-300">
-                  Análisis profundo
-                </p>
-                <h2 className="mt-3 text-xl font-bold leading-tight text-white sm:text-2xl">
-                  Analizando viabilidad de tu operación...
-                </h2>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-400 sm:text-base">
-                  Evaluando respuestas con nuestro sistema de IA...
-                </p>
-                <div className="mt-6 flex items-center gap-2 text-cyan-300">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 [animation-delay:120ms]" />
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 [animation-delay:240ms]" />
-                </div>
-              </div>
-            ) : shouldShowResult && activeResult && ResultIcon ? (
-              <div className="w-full max-w-full min-w-0 box-border space-y-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-400/10 text-cyan-200 shadow-[0_0_24px_rgba(34,211,238,0.16)]">
-                  <ResultIcon className="h-6 w-6" />
-                </div>
-
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-300">
-                  {activeResult.eyebrow}
-                </p>
-                <h2 className="text-xl md:text-2xl font-bold leading-tight text-white">{activeResult.title}</h2>
-                <div className="max-w-2xl">
-                  {renderAIText(aiResponse) || renderAIText(resultFallbackText)}
-                </div>
-
-                {isSuccessfulResult ? (
-                  <div className="relative mt-10 mb-8 rounded-2xl border border-amber-500/20 bg-slate-900/60 p-8 shadow-2xl backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-
-                    <h3 className="mb-4 flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-amber-500">
-                      <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                      Acceso Prioritario
-                    </h3>
-
-                    <p className="mb-6 text-lg font-light leading-relaxed text-slate-300">
-                      Trabajamos exclusivamente con <span className="font-semibold text-white">5 equipos al mes</span>.
-                      Actualmente, la agenda de abril tiene{' '}
-                      <span className="font-bold text-amber-400">1 único espacio disponible</span>.
-                    </p>
-
-                    <div className="group relative mx-auto my-6 w-full max-w-md">
-                      <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 blur opacity-50 transition duration-500 animate-pulse group-hover:opacity-100" />
-                      <a
-                        href={whatsappScheduleUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="relative flex w-full items-center justify-center gap-3 rounded-xl border border-slate-700 bg-slate-950 px-8 py-4 text-lg font-bold tracking-wide text-white transition-all hover:scale-[1.02] hover:bg-slate-900 active:scale-95"
-                      >
-                        <svg className="h-6 w-6 text-green-400" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                        </svg>
-                        AGENDAR LLAMADA AHORA
-                      </a>
-                    </div>
-
-                    <p className="mt-6 text-center font-mono text-sm tracking-widest text-slate-500">
-                      Redirección automática en <span className="font-bold text-amber-500">{countdown}</span>s
-                    </p>
-                  </div>
-                ) : null}
-
-                {activeResult.actionHref && !isSuccessfulResult ? (
-                  <a
-                    href={activeResult.actionHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-cyan-400/30 bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(34,211,238,0.28)] sm:w-auto sm:bg-gradient-to-r sm:from-cyan-500 sm:to-blue-600"
-                  >
-                    <span>{activeResult.actionLabel}</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
-                ) : null}
-
-                {import.meta.env.DEV && lastPayload ? (
-                  <details className="rounded-xl border border-white/10 bg-black/30 p-4">
-                    <summary className="cursor-pointer text-sm font-medium text-slate-300">Payload de desarrollo</summary>
-                    <pre className="mt-3 overflow-x-auto text-xs leading-relaxed text-slate-400">
-                      {JSON.stringify(lastPayload, null, 2)}
-                    </pre>
-                  </details>
-                ) : null}
-              </div>
-            ) : (
-              <div className="w-full max-w-full min-w-0 box-border space-y-4">
-                <div className="space-y-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-300">
-                    {currentMeta.eyebrow}
-                  </p>
-                  <h2 className="text-xl md:text-2xl font-bold leading-tight text-white">{currentMeta.title}</h2>
-                  <p className="max-w-2xl text-sm leading-relaxed text-slate-400">{currentMeta.description}</p>
-                </div>
-
-                <div className="space-y-4">
-                  {renderStepContent()}
-                  {isAutoAdvanceStep ? (
-                    <p className="text-xs text-slate-500">Selecciona una opción para avanzar automáticamente.</p>
-                  ) : null}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {!shouldShowResult && !isAnalyzing ? (
-            <footer className="shrink-0 p-4 border-t border-white/10 bg-[#0a0a0a] flex justify-between items-center pb-safe">
-              <div className="flex w-full items-center justify-between gap-4">
-                {currentStep > 1 ? (
-                  <button type="button" onClick={goToPreviousStep} className={backButtonClassName}>
-                    <ArrowLeft className="h-4 w-4" />
-                    <span>Atrás</span>
-                  </button>
-                ) : (
-                  <div className="w-16 sm:w-24" aria-hidden="true" />
-                )}
-
-                {shouldShowNextButton ? (
-                  <button type="button" onClick={goToNextStep} className={`${advanceButtonClassName} min-w-0 flex-1 sm:flex-none`}>
-                    <span>Continuar</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                ) : null}
-
-                {currentStep === TOTAL_STEPS ? (
-                  <button
-                    type="button"
-                    onClick={() => void handleFinalSubmission()}
-                    disabled={isSubmitting}
-                    className={`${advanceButtonClassName} min-w-0 flex-1 sm:flex-none disabled:cursor-not-allowed disabled:opacity-70`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Procesando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Enviar solicitud</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
-                  </button>
-                ) : null}
-              </div>
-            </footer>
-          ) : null}
+            className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500 ease-out"
+            style={{ width: `${progressPercentage}%` }}
+          />
         </div>
+        <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          <span>{shouldShowResult ? 'Resultado' : currentStep === 0 ? 'Auditoría LeadFlow' : `Paso ${currentStep} / ${TOTAL_STEPS}`}</span>
+          <span>{progressPercentage}%</span>
+        </div>
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-5 sm:px-6 sm:py-8">
+        {shouldShowResult && lastPayload ? (
+          <div className="flex min-h-[520px] flex-col justify-center py-6">
+            <div
+              className={[
+                'flex h-14 w-14 items-center justify-center rounded-xl border',
+                isQualified ? 'border-cyan-300/40 bg-cyan-300/10 text-cyan-200' : 'border-slate-600 bg-white/[0.04] text-slate-300',
+              ].join(' ')}
+            >
+              {isQualified ? <ShieldCheck className="h-7 w-7" /> : <XCircle className="h-7 w-7" />}
+            </div>
+
+            <p className="mt-6 text-sm font-black uppercase tracking-[0.2em] text-cyan-300">
+              {isQualified ? 'Acceso habilitado' : 'Auditoría recibida'}
+            </p>
+            <h2 className="mt-3 text-3xl font-black leading-tight text-white sm:text-5xl">
+              {isQualified ? 'Tu equipo puede pasar a diagnóstico.' : 'Gracias. El sistema registró tu aplicación.'}
+            </h2>
+            <div className="mt-5 space-y-4">{renderAIText(aiResponse) || renderAIText(resultText)}</div>
+
+            {isQualified ? (
+              <div className="mt-8 rounded-xl border border-cyan-300/20 bg-white/[0.04] p-4 sm:p-5">
+                <div className="flex items-center gap-3 text-cyan-200">
+                  <CalendarDays className="h-5 w-5" />
+                  <h3 className="text-lg font-black uppercase tracking-[0.12em]">Agenda del closer</h3>
+                </div>
+                <p className="mt-3 text-base leading-relaxed text-slate-300">
+                  Abre la conversación de agenda y envía el mensaje prellenado. Si tu teléfono y correo no coinciden con
+                  la auditoría, se cancela el acceso.
+                </p>
+                <iframe
+                  title="Calendario de diagnóstico LeadFlow"
+                  src={calendarUrl}
+                  className="mt-5 h-[520px] w-full rounded-lg border border-white/10 bg-black"
+                  loading="lazy"
+                />
+                <a
+                  href={whatsappScheduleUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 p-4 text-lg font-black uppercase text-white shadow-[0_0_30px_rgba(37,99,235,0.35)] transition hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  Agendar diagnóstico
+                  <ArrowRight className="h-5 w-5" />
+                </a>
+              </div>
+            ) : null}
+
+            {import.meta.env.DEV ? (
+              <details className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
+                <summary className="cursor-pointer text-sm font-semibold text-slate-300">Payload de desarrollo</summary>
+                <pre className="mt-4 max-h-80 overflow-auto text-xs leading-relaxed text-slate-400">
+                  {JSON.stringify(lastPayload, null, 2)}
+                </pre>
+              </details>
+            ) : null}
+          </div>
+        ) : (
+          renderStepContent()
+        )}
       </div>
+
+      {shouldShowFooter ? (
+        <footer className="shrink-0 border-t border-white/10 bg-black p-4">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={goToPreviousStep}
+              className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl border border-white/10 px-4 text-sm font-bold uppercase text-slate-300 transition hover:border-white/25 hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Atrás
+            </button>
+
+            {shouldShowContinue ? (
+              <button
+                type="button"
+                onClick={goToNextStep}
+                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-black uppercase text-slate-950 transition hover:bg-cyan-100 sm:flex-none"
+              >
+                Continuar
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            ) : null}
+
+            {isFinalStep ? (
+              <button
+                type="button"
+                onClick={() => void handleFinalSubmission()}
+                disabled={isSubmitting}
+                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 px-5 text-sm font-black uppercase text-white transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Procesando
+                  </>
+                ) : (
+                  <>
+                    🚀 ENVIAR AUDITORÍA Y SOLICITAR ACCESO
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            ) : null}
+          </div>
+        </footer>
+      ) : null}
     </section>
+  );
+}
+
+function StepShell({
+  eyebrow,
+  title,
+  subtitle,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-[520px] flex-col justify-center py-6">
+      <p className="text-sm font-black uppercase tracking-[0.2em] text-cyan-300">{eyebrow}</p>
+      <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-5xl">{title}</h2>
+      {subtitle ? <p className="mt-4 text-lg leading-relaxed text-slate-300 sm:text-xl">{subtitle}</p> : null}
+      <div className="mt-8 space-y-4">{children}</div>
+    </div>
   );
 }
 
