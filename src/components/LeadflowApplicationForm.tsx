@@ -6,6 +6,10 @@ import { useVisitor, type VisitorData } from '../context/VisitorContext';
 import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm } from '../lib/analytics';
 
 const TOTAL_STEPS = 7;
+const SUCCESS_COUNTDOWN_SECONDS = 20;
+const MIN_DETAILED_TEXT_LENGTH = 15;
+const MIN_DETAILED_TEXT_WORDS = 3;
+const DETAILED_TEXT_WARNING = 'Por favor, introduce una respuesta detallada (mínimo 3 palabras) para procesar tu viabilidad.';
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const WEBHOOK_URL = 'https://webhooks.kuruk.in/webhook/leadflow-eval';
@@ -236,6 +240,13 @@ function safeValidatePhone(value: string): boolean {
   }
 }
 
+function isDetailedText(value: string): boolean {
+  const normalized = value.trim();
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length;
+
+  return normalized.length >= MIN_DETAILED_TEXT_LENGTH && wordCount >= MIN_DETAILED_TEXT_WORDS;
+}
+
 function buildUserData(answers: Answers) {
   return {
     em: answers.email.trim().toLowerCase(),
@@ -302,10 +313,18 @@ function validateStep(step: number, answers: Answers, isWhatsappValid: boolean):
       if (!answers.teamSize) nextErrors.teamSize = 'Selecciona una opción para continuar.';
       break;
     case 2:
-      if (!answers.companyProduct.trim()) nextErrors.companyProduct = 'Escribe la compañía donde estás corriendo.';
+      if (!answers.companyProduct.trim()) {
+        nextErrors.companyProduct = 'Escribe la compañía donde estás corriendo.';
+      } else if (!isDetailedText(answers.companyProduct)) {
+        nextErrors.companyProduct = DETAILED_TEXT_WARNING;
+      }
       break;
     case 3:
-      if (!answers.mainProblem.trim()) nextErrors.mainProblem = 'Describe el freno principal de tu equipo.';
+      if (!answers.mainProblem.trim()) {
+        nextErrors.mainProblem = 'Describe el freno principal de tu equipo.';
+      } else if (!isDetailedText(answers.mainProblem)) {
+        nextErrors.mainProblem = DETAILED_TEXT_WARNING;
+      }
       break;
     case 4:
       if (!answers.acquisitionThermometer) nextErrors.acquisitionThermometer = 'Selecciona el escenario más cercano.';
@@ -405,7 +424,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isQualified, setIsQualified] = useState(false);
-  const [countdown, setCountdown] = useState(15);
+  const [countdown, setCountdown] = useState(SUCCESS_COUNTDOWN_SECONDS);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -459,11 +478,11 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
   useEffect(() => {
     if (!lastPayload || !isQualified) {
-      setCountdown(15);
+      setCountdown(SUCCESS_COUNTDOWN_SECONDS);
       return;
     }
 
-    setCountdown(15);
+    setCountdown(SUCCESS_COUNTDOWN_SECONDS);
 
     const timer = window.setInterval(() => {
       setCountdown((prev) => {
@@ -740,6 +759,9 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               onChange: (value) => updateAnswer('companyProduct', value),
               error: errors.companyProduct,
             })}
+            {answers.companyProduct.trim().length > 0 && !isDetailedText(answers.companyProduct) ? (
+              <p className="text-sm font-medium leading-relaxed text-amber-300">{DETAILED_TEXT_WARNING}</p>
+            ) : null}
           </StepShell>
         );
       case 3:
@@ -757,6 +779,9 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               onChange: (value) => updateAnswer('mainProblem', value),
               error: errors.mainProblem,
             })}
+            {answers.mainProblem.trim().length > 0 && !isDetailedText(answers.mainProblem) ? (
+              <p className="text-sm font-medium leading-relaxed text-amber-300">{DETAILED_TEXT_WARNING}</p>
+            ) : null}
           </StepShell>
         );
       case 4:
@@ -878,6 +903,9 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const shouldShowFooter = !shouldShowResult && currentStep > 0;
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
+  const isCurrentDetailedTextInvalid =
+    (currentStep === 2 && answers.companyProduct.trim().length > 0 && !isDetailedText(answers.companyProduct)) ||
+    (currentStep === 3 && answers.mainProblem.trim().length > 0 && !isDetailedText(answers.mainProblem));
   const shouldShowContinue = !isChoiceStep && !isFinalStep;
 
   return (
@@ -908,7 +936,12 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#020617_0%,#000_100%)] px-4 py-4 sm:px-6 sm:py-6"
       >
         {shouldShowResult && lastPayload ? (
-          <div className="mx-auto flex w-full max-w-xl flex-col items-center py-8 text-center md:py-12">
+          <div
+            className={[
+              'mx-auto flex w-full max-w-xl flex-col items-center py-8 text-center md:py-12',
+              isQualified ? 'pb-44 md:pb-48' : '',
+            ].join(' ')}
+          >
             {isQualified ? (
               <>
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200 shadow-[0_0_34px_rgba(34,211,238,0.16)]">
@@ -931,18 +964,22 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                   </div>
                 ) : null}
 
-                <p className="mt-6 text-base font-semibold leading-relaxed text-slate-300">
-                  Redireccionando al canal oficial de WhatsApp en{' '}
-                  <span className="font-black text-cyan-200">{countdown}s</span> para coordinar tu sesión...
-                </p>
-                <a
-                  href={WHATSAPP_SUCCESS_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-6 inline-flex min-h-[68px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-4 text-lg font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99]"
-                >
-                  🟢 CONECTAR POR WHATSAPP AHORA
-                </a>
+                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/90 p-4 backdrop-blur-md">
+                  <div className="mx-auto w-full max-w-xl">
+                    <p className="text-center text-sm font-semibold leading-relaxed text-slate-300">
+                      Redireccionando al canal oficial de WhatsApp en{' '}
+                      <span className="font-black text-cyan-200">{countdown}s</span> para coordinar tu sesión...
+                    </p>
+                    <a
+                      href={WHATSAPP_SUCCESS_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-flex min-h-[68px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-4 text-lg font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99]"
+                    >
+                      🟢 CONECTAR POR WHATSAPP AHORA
+                    </a>
+                  </div>
+                </div>
               </>
             ) : (
               <>
@@ -990,7 +1027,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <button
                 type="button"
                 onClick={goToNextStep}
-                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] sm:flex-none"
+                disabled={isCurrentDetailedTextInvalid}
+                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 sm:flex-none"
               >
                 Continuar
                 <ArrowRight className="h-4 w-4" />
