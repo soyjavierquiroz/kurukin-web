@@ -7,9 +7,11 @@ import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm } from '../lib
 
 const TOTAL_STEPS = 7;
 const SUCCESS_COUNTDOWN_SECONDS = 20;
+const MIN_COMPANY_TEXT_LENGTH = 4;
 const MIN_DETAILED_TEXT_LENGTH = 15;
 const MIN_DETAILED_TEXT_WORDS = 3;
 const DETAILED_TEXT_WARNING = 'Por favor, introduce una respuesta detallada (mínimo 3 palabras) para procesar tu viabilidad.';
+const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const WEBHOOK_URL = 'https://webhooks.kuruk.in/webhook/leadflow-eval';
@@ -247,6 +249,10 @@ function isDetailedText(value: string): boolean {
   return normalized.length >= MIN_DETAILED_TEXT_LENGTH && wordCount >= MIN_DETAILED_TEXT_WORDS;
 }
 
+function isValidCompanyText(value: string): boolean {
+  return value.trim().length >= MIN_COMPANY_TEXT_LENGTH;
+}
+
 function buildUserData(answers: Answers) {
   return {
     em: answers.email.trim().toLowerCase(),
@@ -315,8 +321,8 @@ function validateStep(step: number, answers: Answers, isWhatsappValid: boolean):
     case 2:
       if (!answers.companyProduct.trim()) {
         nextErrors.companyProduct = 'Escribe la compañía donde estás corriendo.';
-      } else if (!isDetailedText(answers.companyProduct)) {
-        nextErrors.companyProduct = DETAILED_TEXT_WARNING;
+      } else if (!isValidCompanyText(answers.companyProduct)) {
+        nextErrors.companyProduct = COMPANY_TEXT_WARNING;
       }
       break;
     case 3:
@@ -371,8 +377,8 @@ function OptionButton({ option, selected, onClick }: OptionButtonProps) {
         'group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
-          ? 'border-cyan-300/80 bg-cyan-400/10 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
-          : 'border-white/10 bg-white/[0.04] hover:border-cyan-300/60 hover:bg-white/[0.07]',
+          ? 'border-cyan-500 bg-cyan-950/20 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
+          : 'border-white/10 bg-slate-900/40 hover:border-cyan-300/60 hover:bg-white/[0.07]',
       ].join(' ')}
       aria-pressed={selected}
     >
@@ -759,8 +765,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               onChange: (value) => updateAnswer('companyProduct', value),
               error: errors.companyProduct,
             })}
-            {answers.companyProduct.trim().length > 0 && !isDetailedText(answers.companyProduct) ? (
-              <p className="text-sm font-medium leading-relaxed text-amber-300">{DETAILED_TEXT_WARNING}</p>
+            {answers.companyProduct.trim().length > 0 && !isValidCompanyText(answers.companyProduct) ? (
+              <p className="text-sm font-medium leading-relaxed text-amber-300">{COMPANY_TEXT_WARNING}</p>
             ) : null}
           </StepShell>
         );
@@ -903,9 +909,9 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const shouldShowFooter = !shouldShowResult && currentStep > 0;
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
-  const isCurrentDetailedTextInvalid =
-    (currentStep === 2 && answers.companyProduct.trim().length > 0 && !isDetailedText(answers.companyProduct)) ||
-    (currentStep === 3 && answers.mainProblem.trim().length > 0 && !isDetailedText(answers.mainProblem));
+  const isCurrentTextInvalid =
+    (currentStep === 2 && !isValidCompanyText(answers.companyProduct)) ||
+    (currentStep === 3 && !isDetailedText(answers.mainProblem));
   const shouldShowContinue = !isChoiceStep && !isFinalStep;
 
   return (
@@ -1027,7 +1033,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <button
                 type="button"
                 onClick={goToNextStep}
-                disabled={isCurrentDetailedTextInvalid}
+                disabled={isCurrentTextInvalid}
                 className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 sm:flex-none"
               >
                 Continuar
