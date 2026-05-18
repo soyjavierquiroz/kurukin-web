@@ -134,6 +134,7 @@ const DECISION_OPTIONS = [
 
 type FinalStatus = 'calificado_llamada' | 'rechazado';
 type AnalyticsPayloadContext = ReturnType<typeof getAnalyticsContext>;
+type RadioAnswerKey = 'teamSize' | 'acquisitionThermometer' | 'investmentPosition' | 'purchaseDecision';
 
 interface Option {
   value: string;
@@ -202,7 +203,7 @@ interface LeadflowWebhookResponse {
 interface OptionButtonProps {
   option: Option;
   selected: boolean;
-  onClick: () => void;
+  handleSelectOption: (option: Option) => void;
 }
 
 const INITIAL_ANSWERS: Answers = {
@@ -255,6 +256,21 @@ function isDetailedText(value: string): boolean {
 
 function isValidCompanyText(value: string): boolean {
   return value.trim().length >= MIN_COMPANY_TEXT_LENGTH;
+}
+
+function getCurrentStepKey(step: number): RadioAnswerKey | null {
+  switch (step) {
+    case 1:
+      return 'teamSize';
+    case 4:
+      return 'acquisitionThermometer';
+    case 5:
+      return 'investmentPosition';
+    case 6:
+      return 'purchaseDecision';
+    default:
+      return null;
+  }
 }
 
 function buildUserData(answers: Answers) {
@@ -372,13 +388,19 @@ function InlineError({ message }: { message?: string }) {
   return <p className="mt-2 text-sm font-medium text-red-300">{message}</p>;
 }
 
-function OptionButton({ option, selected, onClick }: OptionButtonProps) {
+function OptionButton({ option, selected, handleSelectOption }: OptionButtonProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => handleSelectOption(option)}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        handleSelectOption(option);
+      }}
       className={[
-        'group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
+        'group flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
           ? 'border-cyan-500 bg-cyan-950/30 ring-1 ring-cyan-500 shadow-[0_0_28px_rgba(34,211,238,0.16)]'
@@ -396,7 +418,7 @@ function OptionButton({ option, selected, onClick }: OptionButtonProps) {
         <CheckCircle2 className="h-4 w-4" />
       </span>
       <span className="text-base font-semibold leading-snug text-white md:text-lg">{option.label}</span>
-    </button>
+    </div>
   );
 }
 
@@ -425,7 +447,8 @@ function renderAIText(text: string | null) {
 export function LeadflowApplicationForm({ className = '', onPayloadReady }: LeadflowApplicationFormProps) {
   const { visitorData, isLoading: isVisitorLoading } = useVisitor();
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Answers>(INITIAL_ANSWERS);
+  const [respuestas, setRespuestas] = useState<Answers>(INITIAL_ANSWERS);
+  const answers = respuestas;
   const [errors, setErrors] = useState<FieldErrors>({});
   const [selectedCountry, setSelectedCountry] = useState<Country>(FALLBACK_COUNTRY);
   const [isWhatsappValid, setIsWhatsappValid] = useState(false);
@@ -454,14 +477,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
     const detectedCountry = normalizeCountry(visitorData.country_code);
     setSelectedCountry(detectedCountry);
-    setAnswers((prev) => ({
+    setRespuestas((prev) => ({
       ...prev,
       country: detectedCountry,
     }));
   }, [visitorData?.country_code]);
 
   useEffect(() => {
-    setAnswers((prev) => {
+    setRespuestas((prev) => {
       if (prev.country === selectedCountry) return prev;
       return {
         ...prev,
@@ -499,28 +522,29 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   }, [isEvaluating]);
 
   useEffect(() => {
-    if (!lastPayload || !isQualified) {
-      setCountdown(SUCCESS_COUNTDOWN_SECONDS);
+    setCountdown(SUCCESS_COUNTDOWN_SECONDS);
+  }, [isQualified, lastPayload]);
+
+  const successState = Boolean(lastPayload && isQualified);
+
+  useEffect(() => {
+    if (!successState) return;
+
+    if (countdown === 0) {
+      window.location.href = `https://api.whatsapp.com/send?phone=59179790873&text=${encodeURIComponent(
+        WHATSAPP_SUCCESS_MESSAGE,
+      )}`;
       return;
     }
 
-    setCountdown(SUCCESS_COUNTDOWN_SECONDS);
-
-    const timer = window.setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          window.location.href = WHATSAPP_SUCCESS_URL;
-          return 0;
-        }
-
-        return prev - 1;
-      });
+    const timer = window.setTimeout(() => {
+      setCountdown((prev) => Math.max(prev - 1, 0));
     }, 1000);
 
     return () => {
-      window.clearInterval(timer);
+      window.clearTimeout(timer);
     };
-  }, [isQualified, lastPayload]);
+  }, [countdown, lastPayload, successState]);
 
   useEffect(() => {
     if (!isEvaluating) {
@@ -541,9 +565,10 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     if (lastPayload) return 100;
     return Math.round((currentStep / TOTAL_STEPS) * 100);
   }, [currentStep, lastPayload]);
+  const currentStepKey = getCurrentStepKey(currentStep);
 
   const updateAnswer = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
-    setAnswers((prev) => ({
+    setRespuestas((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -554,14 +579,29 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     setSubmissionError('');
   };
 
-  const selectAndAdvance = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
-    updateAnswer(key, value);
+  const handleSelectOption = (option: Option) => {
+    if (!currentStepKey) return;
+
+    setRespuestas((prev) => ({
+      ...prev,
+      [currentStepKey]: option,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      [currentStepKey]: undefined,
+    }));
+    setSubmissionError('');
 
     window.setTimeout(() => {
       startTransition(() => {
         setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
       });
     }, 140);
+  };
+
+  const isOptionSelected = (option: Option): boolean => {
+    if (!currentStepKey) return false;
+    return respuestas[currentStepKey]?.value === option.value;
   };
 
   const goToNextStep = () => {
@@ -592,12 +632,17 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   };
 
   const handleFinalSubmission = async () => {
+    setIsEvaluating(true);
+    setCurrentStep(99);
+
     const stepErrors = validateStep(7, answers, isWhatsappValid);
     if (Object.keys(stepErrors).length > 0) {
       setErrors((prev) => ({
         ...prev,
         ...stepErrors,
       }));
+      setIsEvaluating(false);
+      setCurrentStep(7);
       return;
     }
 
@@ -612,13 +657,16 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     const userData = buildUserData(answers);
 
     setIsSubmitting(true);
-    setIsEvaluating(true);
     setSubmissionError('');
     setAiResponse(null);
     setIsQualified(false);
     setLastPayload(null);
 
     try {
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+
       void trackSubmitForm(payload.analytics.eventId, userData).catch((error) => {
         console.error('[LeadflowApplicationForm] SubmitForm tracking failed', error);
       });
@@ -679,6 +727,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     } catch (error) {
       console.error('[LeadflowApplicationForm] submission failed', error);
       setSubmissionError('No pudimos procesar la auditoría en este momento. Inténtalo de nuevo en unos segundos.');
+      setCurrentStep(7);
     } finally {
       setIsEvaluating(false);
       setIsSubmitting(false);
@@ -791,8 +840,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.teamSize?.value === option.value}
-                onClick={() => selectAndAdvance('teamSize', { value: option.value, label: option.label })}
+                selected={isOptionSelected(option)}
+                handleSelectOption={handleSelectOption}
               />
             ))}
             <InlineError message={errors.teamSize} />
@@ -847,8 +896,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.acquisitionThermometer?.value === option.value}
-                onClick={() => selectAndAdvance('acquisitionThermometer', { value: option.value, label: option.label })}
+                selected={isOptionSelected(option)}
+                handleSelectOption={handleSelectOption}
               />
             ))}
             <InlineError message={errors.acquisitionThermometer} />
@@ -864,8 +913,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.investmentPosition?.value === option.value}
-                onClick={() => selectAndAdvance('investmentPosition', { value: option.value, label: option.label })}
+                selected={isOptionSelected(option)}
+                handleSelectOption={handleSelectOption}
               />
             ))}
             <InlineError message={errors.investmentPosition} />
@@ -881,8 +930,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <OptionButton
                 key={option.value}
                 option={option}
-                selected={answers.purchaseDecision?.value === option.value}
-                onClick={() => selectAndAdvance('purchaseDecision', { value: option.value, label: option.label })}
+                selected={isOptionSelected(option)}
+                handleSelectOption={handleSelectOption}
               />
             ))}
             <InlineError message={errors.purchaseDecision} />
