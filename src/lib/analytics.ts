@@ -183,7 +183,7 @@ export async function trackSubmitForm(customEventId?: string, userData?: Record<
 }
 
 export async function trackQualifiedLead(customEventId?: string, userData?: Record<string, any>, classification?: string): Promise<void> {
-  return trackEvent('CompleteRegistration', customEventId, userData, {
+  return trackEvent('SubmitForm', customEventId, userData, {
     content_name: 'qualified_lead',
     value: 10,
     currency: 'USD',

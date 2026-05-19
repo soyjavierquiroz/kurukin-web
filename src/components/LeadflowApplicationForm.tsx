@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, ShieldCheck, XCircle } fr
 import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
-import { getAnalyticsContext, trackQualifiedLead, trackSubmitForm } from '../lib/analytics';
+import { getAnalyticsContext, trackQualifiedLead } from '../lib/analytics';
 
 const TOTAL_STEPS = 7;
 const SUCCESS_COUNTDOWN_SECONDS = 20;
@@ -690,10 +690,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         window.requestAnimationFrame(() => resolve());
       });
 
-      void trackSubmitForm(payload.analytics.eventId, userData).catch((error) => {
-        console.error('[LeadflowApplicationForm] SubmitForm tracking failed', error);
-      });
-
       const minimumEvaluationDelay = new Promise((resolve) => {
         window.setTimeout(resolve, EVALUATION_MIN_DURATION_MS);
       });
@@ -711,12 +707,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (await response.json()) as LeadflowWebhookResponse;
       });
 
-      const [evaluationResult] = await Promise.allSettled([evaluationRequest, minimumEvaluationDelay]);
-      if (evaluationResult.status === 'rejected') {
-        throw evaluationResult.reason;
-      }
-
-      const evaluation = evaluationResult.value;
+      const evaluation = await evaluationRequest;
+      await minimumEvaluationDelay;
       const noBudget = payload.respuestas.posicion_frente_a_inversion?.value === 'no_budget';
       const approved = !noBudget && evaluation.es_valido === true;
       const classification = evaluation.clasificacion || evaluation.classification || 'Aprobado';
@@ -730,6 +722,9 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         void trackQualifiedLead(payload.analytics.eventId, userData, classification).catch((error) => {
           console.error('[LeadflowApplicationForm] QualifiedLead tracking failed', error);
         });
+        setIsQualified(true);
+      } else {
+        setIsQualified(false);
       }
 
       try {
@@ -739,7 +734,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       }
 
       setLastPayload(finalPayload);
-      setIsQualified(approved);
       setAiResponse(
         typeof evaluation.ai_consulting_text === 'string' && evaluation.ai_consulting_text.trim().length > 0
           ? evaluation.ai_consulting_text.trim()
