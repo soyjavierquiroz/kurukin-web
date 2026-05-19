@@ -4,6 +4,7 @@ const CAPI_RELAY_URL = import.meta.env.VITE_CAPI_RELAY_URL || 'https://relay.kur
 const SITE_ID = import.meta.env.VITE_SITE_ID || 'KURUKIN';
 const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
 const TIKTOK_PIXEL_ID = import.meta.env.VITE_TIKTOK_PIXEL_ID;
+const CLIENT_IP_LOOKUP_URL = 'https://api.ipify.org?format=json';
 
 type FbqFunction = {
   (...args: any[]): void;
@@ -68,6 +69,45 @@ interface PaidTrafficSignals {
   ttp: string | null;
 }
 
+let cachedClientIp: string | null = null;
+let clientIpPromise: Promise<string | null> | null = null;
+
+export async function captureClientIp(timeoutMs = 1500): Promise<string | null> {
+  if (cachedClientIp) return cachedClientIp;
+  if (clientIpPromise) return clientIpPromise;
+
+  clientIpPromise = (async () => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
+
+    try {
+      const response = await fetch(CLIENT_IP_LOOKUP_URL, {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`IP lookup failed with status ${response.status}`);
+      }
+
+      const data = (await response.json()) as { ip?: unknown };
+      const ip = typeof data.ip === 'string' ? data.ip.trim() : '';
+      cachedClientIp = ip || null;
+      return cachedClientIp;
+    } catch (error) {
+      console.warn('[Analytics] No se pudo capturar client_ip desde el navegador.', error);
+      return null;
+    } finally {
+      window.clearTimeout(timeout);
+      clientIpPromise = null;
+    }
+  })();
+
+  return clientIpPromise;
+}
+
 const getPaidTrafficSignals = (): PaidTrafficSignals => {
   const urlParams = new URLSearchParams(window.location.search);
   const fbclidParam = urlParams.get('fbclid');
@@ -113,6 +153,7 @@ const getSessionEventId = (): string => {
 interface AnalyticsContext {
   eventId: string;
   siteId: string;
+  client_ip: string | null;
   fbclid: string | null;
   fbp: string | null;
   fbc: string | null;
@@ -232,6 +273,8 @@ const initTikTokPixel = (): void => {
 
 // 1. Inicialización híbrida con filtro de pago: Browser Pixels + CAPI Relay
 export async function initPixels(): Promise<void> {
+  void captureClientIp();
+
   const signals = getPaidTrafficSignals();
 
   if (!signals.fbclid && !signals.ttclid) {
@@ -262,6 +305,7 @@ export function getAnalyticsContext(): AnalyticsContext {
   return {
     eventId: getSessionEventId(),
     siteId: SITE_ID,
+    client_ip: cachedClientIp,
     fbclid: signals.fbclid,
     fbp: signals.fbp,
     fbc: signals.fbc,
@@ -319,6 +363,7 @@ export async function trackEvent(
     event_source_url: window.location.href,
     action_source: 'website',
     user_data: {
+      client_ip: context.client_ip,
       fbclid: context.fbclid,
       fbp: context.fbp,
       fbc: context.fbc,

@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, ShieldCheck, XCircle } fr
 import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
-import { getAnalyticsContext, trackQualifiedLead } from '../lib/analytics';
+import { captureClientIp, getAnalyticsContext, trackQualifiedLead } from '../lib/analytics';
 
 const TOTAL_STEPS = 7;
 const SUCCESS_COUNTDOWN_SECONDS = 20;
@@ -492,6 +492,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       ...getAnalyticsContext(),
       siteId: SITE_ID,
     };
+
+    void captureClientIp().then((clientIp) => {
+      analyticsRef.current = {
+        ...getAnalyticsContext(),
+        siteId: SITE_ID,
+        client_ip: clientIp,
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -669,13 +677,21 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       return;
     }
 
+    const clientIp = await captureClientIp();
+    const analyticsContext = {
+      ...getAnalyticsContext(),
+      siteId: SITE_ID,
+      client_ip: clientIp,
+    };
+    analyticsRef.current = analyticsContext;
+
     const payload = buildPayload({
       answers: {
         ...answers,
         country: answers.country || selectedCountry,
       },
       visitorData,
-      analyticsContext: analyticsRef.current,
+      analyticsContext,
     });
     const userData = buildUserData(answers);
 
