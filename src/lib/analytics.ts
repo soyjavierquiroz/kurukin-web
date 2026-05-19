@@ -126,7 +126,7 @@ export async function trackEvent(
 ): Promise<void> {
   const context = getAnalyticsContext();
   const finalEventId = customEventId || context.eventId;
-  const metaEventName = eventName === 'SubmitForm' ? 'Lead_Calificado' : eventName;
+  const metaEventName = eventName;
 
   if (metaEventName === 'Lead_Calificado') {
     window.fbq?.('trackCustom', 'Lead_Calificado', customData, { eventID: finalEventId });
@@ -178,12 +178,12 @@ export async function trackPageView(): Promise<void> {
 }
 
 export async function trackSubmitForm(customEventId?: string, userData?: Record<string, any>): Promise<void> {
-  // Anti-Curiosos: SubmitForm se normaliza a Lead_Calificado para Browser Pixel y CAPI.
+  // Mantiene compatibilidad sin convertir formularios enviados en leads calificados.
   return trackEvent('SubmitForm', customEventId, userData);
 }
 
 export async function trackQualifiedLead(customEventId?: string, userData?: Record<string, any>, classification?: string): Promise<void> {
-  return trackEvent('SubmitForm', customEventId, userData, {
+  return trackEvent('Lead_Calificado', customEventId, userData, {
     content_name: 'qualified_lead',
     value: 10,
     currency: 'USD',
