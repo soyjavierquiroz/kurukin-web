@@ -126,9 +126,13 @@ export async function trackEvent(
 ): Promise<void> {
   const context = getAnalyticsContext();
   const finalEventId = customEventId || context.eventId;
-  const metaEventName = eventName === 'SubmitForm' ? 'Lead' : eventName;
+  const metaEventName = eventName === 'SubmitForm' ? 'Lead_Calificado' : eventName;
 
-  window.fbq?.('track', metaEventName, customData, { eventID: finalEventId });
+  if (metaEventName === 'Lead_Calificado') {
+    window.fbq?.('trackCustom', 'Lead_Calificado', customData, { eventID: finalEventId });
+  } else {
+    window.fbq?.('track', metaEventName, customData, { eventID: finalEventId });
+  }
 
   const payload = {
     siteId: SITE_ID,
@@ -174,7 +178,7 @@ export async function trackPageView(): Promise<void> {
 }
 
 export async function trackSubmitForm(customEventId?: string, userData?: Record<string, any>): Promise<void> {
-  // Meta espera 'Lead'; trackEvent normaliza el nombre también para CAPI.
+  // Anti-Curiosos: SubmitForm se normaliza a Lead_Calificado para Browser Pixel y CAPI.
   return trackEvent('SubmitForm', customEventId, userData);
 }
 
