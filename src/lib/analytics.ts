@@ -3,6 +3,7 @@
 const CAPI_RELAY_URL = import.meta.env.VITE_CAPI_RELAY_URL || 'https://relay.kuruk.in/v1/events';
 const SITE_ID = import.meta.env.VITE_SITE_ID || 'KURUKIN';
 const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
+const TIKTOK_PIXEL_ID = import.meta.env.VITE_TIKTOK_PIXEL_ID;
 
 type FbqFunction = {
   (...args: any[]): void;
@@ -13,11 +14,28 @@ type FbqFunction = {
   queue?: any[];
 };
 
+type TtqFunction = {
+  track?: (eventName: string, payload?: Record<string, any>, options?: Record<string, any>) => void;
+  load?: (pixelId: string, options?: Record<string, any>) => void;
+  page?: () => void;
+  push?: (...args: any[]) => number;
+  methods?: string[];
+  setAndDefer?: (target: Record<string, any>, methodName: string) => void;
+  instance?: (pixelId: string) => Record<string, any>;
+  _i?: Record<string, any>;
+  _t?: Record<string, number>;
+  _o?: Record<string, Record<string, any>>;
+  [key: string]: any;
+};
+
 declare global {
   interface Window {
     fbq?: FbqFunction;
     _fbq?: FbqFunction;
     __kurukinMetaPixelInitialized?: boolean;
+    ttq?: TtqFunction;
+    TiktokAnalyticsObject?: string;
+    __kurukinTikTokPixelInitialized?: boolean;
   }
 }
 
@@ -27,6 +45,54 @@ const getCookie = (name: string): string | null => {
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
   return null;
+};
+
+const setTrackingCookie = (name: string, value: string): void => {
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=7776000; SameSite=Lax`;
+};
+
+const extractFbclidFromFbc = (fbc: string | null): string | null => {
+  if (!fbc) return null;
+
+  const parts = fbc.split('.');
+  return parts.length >= 4 ? parts.slice(3).join('.') || null : null;
+};
+
+interface PaidTrafficSignals {
+  fbclid: string | null;
+  fbclidParam: string | null;
+  fbp: string | null;
+  fbc: string | null;
+  ttclid: string | null;
+  ttclidParam: string | null;
+  ttp: string | null;
+}
+
+const getPaidTrafficSignals = (): PaidTrafficSignals => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const fbclidParam = urlParams.get('fbclid');
+  const ttclidParam = urlParams.get('ttclid');
+  const fbp = getCookie('_fbp');
+  let fbc = getCookie('_fbc');
+
+  if (!fbc && fbclidParam) {
+    fbc = `fb.1.${Date.now()}.${fbclidParam}`;
+    setTrackingCookie('_fbc', fbc);
+  }
+
+  if (ttclidParam) {
+    setTrackingCookie('ttclid', ttclidParam);
+  }
+
+  return {
+    fbclid: fbclidParam || extractFbclidFromFbc(fbc),
+    fbclidParam,
+    fbp,
+    fbc,
+    ttclid: ttclidParam || getCookie('ttclid') || getCookie('_ttclid'),
+    ttclidParam,
+    ttp: getCookie('_ttp')
+  };
 };
 
 // Generador de UUID para persistir el eventId por sesión
@@ -47,18 +113,16 @@ const getSessionEventId = (): string => {
 interface AnalyticsContext {
   eventId: string;
   siteId: string;
+  fbclid: string | null;
   fbp: string | null;
   fbc: string | null;
   ttclid: string | null;
+  ttp: string | null;
+  hasMetaSignal: boolean;
+  hasTikTokSignal: boolean;
 }
 
-// 1. Inicialización híbrida: Browser Pixel + CAPI Relay
-export async function initPixels(): Promise<void> {
-  if (!META_PIXEL_ID) {
-    console.warn('[Analytics] VITE_META_PIXEL_ID no está configurado. Meta Pixel no será inicializado.');
-    return Promise.resolve();
-  }
-
+const initMetaPixel = (): void => {
   if (!window.fbq) {
     const fbq = function (...args: any[]) {
       if (fbq.callMethod) {
@@ -87,33 +151,124 @@ export async function initPixels(): Promise<void> {
     window.fbq('init', META_PIXEL_ID);
     window.__kurukinMetaPixelInitialized = true;
   }
+};
 
-  console.log(`[Analytics] Sistema inicializado en modo híbrido Browser Pixel + CAPI para el tenant: ${SITE_ID}`);
+const initTikTokPixel = (): void => {
+  if (!TIKTOK_PIXEL_ID) {
+    console.warn('[Analytics] VITE_TIKTOK_PIXEL_ID no está configurado. TikTok Pixel no será inicializado.');
+    return;
+  }
+
+  if (!window.ttq) {
+    const ttq = [] as unknown as TtqFunction;
+    const methods = [
+      'page',
+      'track',
+      'identify',
+      'instances',
+      'debug',
+      'on',
+      'off',
+      'once',
+      'ready',
+      'alias',
+      'group',
+      'enableCookie',
+      'disableCookie',
+      'holdConsent',
+      'revokeConsent',
+      'grantConsent',
+    ];
+
+    window.TiktokAnalyticsObject = 'ttq';
+    ttq.methods = methods;
+    ttq.setAndDefer = (target, methodName) => {
+      target[methodName] = (...args: any[]) => {
+        ttq.push?.([methodName, ...args]);
+      };
+    };
+
+    methods.forEach((methodName) => {
+      ttq.setAndDefer?.(ttq, methodName);
+    });
+
+    ttq.instance = (pixelId: string) => {
+      ttq._i = ttq._i || {};
+      ttq._i[pixelId] = ttq._i[pixelId] || [];
+      methods.forEach((methodName) => {
+        ttq.setAndDefer?.(ttq._i![pixelId], methodName);
+      });
+      return ttq._i[pixelId];
+    };
+
+    ttq.load = (pixelId: string, options: Record<string, any> = {}) => {
+      ttq._i = ttq._i || {};
+      ttq._i[pixelId] = [];
+      ttq._i[pixelId]._u = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+      ttq._t = ttq._t || {};
+      ttq._t[pixelId] = Date.now();
+      ttq._o = ttq._o || {};
+      ttq._o[pixelId] = options;
+
+      if (document.querySelector(`script[src*="sdkid=${pixelId}"]`)) return;
+
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.async = true;
+      script.src = `https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${pixelId}&lib=ttq`;
+      const firstScript = document.getElementsByTagName('script')[0];
+      firstScript.parentNode?.insertBefore(script, firstScript);
+    };
+
+    window.ttq = ttq;
+  }
+
+  if (!window.__kurukinTikTokPixelInitialized) {
+    window.ttq.load?.(TIKTOK_PIXEL_ID);
+    window.ttq.page?.();
+    window.__kurukinTikTokPixelInitialized = true;
+  }
+};
+
+// 1. Inicialización híbrida con filtro de pago: Browser Pixels + CAPI Relay
+export async function initPixels(): Promise<void> {
+  const signals = getPaidTrafficSignals();
+
+  if (!signals.fbclid && !signals.ttclid) {
+    console.log('[Analytics] Tráfico Orgánico detected. Píxeles de Meta y TikTok desactivados para proteger algoritmos.');
+    return Promise.resolve();
+  }
+
+  if (signals.fbclid) {
+    if (META_PIXEL_ID) {
+      initMetaPixel();
+    } else {
+      console.warn('[Analytics] VITE_META_PIXEL_ID no está configurado. Meta Pixel no será inicializado.');
+    }
+  }
+
+  if (signals.ttclid) {
+    initTikTokPixel();
+  }
+
+  console.log(`[Analytics] Sistema inicializado en modo Anti-Curiosos bi-plataforma para el tenant: ${SITE_ID}`);
   return Promise.resolve();
 }
 
 // 2. Captura y persistencia de contexto analítico para n8n/formularios
 export function getAnalyticsContext(): AnalyticsContext {
-  // Extraer parámetros URL si existen en el aterrizaje
-  const urlParams = new URLSearchParams(window.location.search);
-  const fbclid = urlParams.get('fbclid');
-  const ttclidParam = urlParams.get('ttclid');
-
-  // Priorizar cookies existentes o parámetros URL
-  const fbp = getCookie('_fbp');
-  let fbc = getCookie('_fbc');
-  if (!fbc && fbclid) {
-    fbc = `fb.1.${Date.now()}.${fbclid}`;
-  }
-
-  const ttclid = ttclidParam || getCookie('ttclid');
+  const signals = getPaidTrafficSignals();
 
   return {
     eventId: getSessionEventId(),
     siteId: SITE_ID,
-    fbp,
-    fbc,
-    ttclid
+    fbclid: signals.fbclid,
+    fbp: signals.fbp,
+    fbc: signals.fbc,
+    ttclid: signals.ttclid,
+    ttp: signals.ttp,
+    hasMetaSignal: Boolean(signals.fbclid),
+    hasTikTokSignal: Boolean(signals.ttclid)
   };
 }
 
@@ -127,11 +282,33 @@ export async function trackEvent(
   const context = getAnalyticsContext();
   const finalEventId = customEventId || context.eventId;
   const metaEventName = eventName;
+  const tiktokEventName = metaEventName === 'Lead_Calificado' ? 'CompleteRegistration' : metaEventName;
 
-  if (metaEventName === 'Lead_Calificado') {
-    window.fbq?.('trackCustom', 'Lead_Calificado', customData, { eventID: finalEventId });
-  } else {
-    window.fbq?.('track', metaEventName, customData, { eventID: finalEventId });
+  if (!context.hasMetaSignal && !context.hasTikTokSignal) {
+    console.log(`[Analytics] Evento '${metaEventName}' bloqueado: no hay señal pagada fbclid/ttclid.`);
+    return Promise.resolve();
+  }
+
+  const browserTasks: Promise<void>[] = [];
+
+  if (metaEventName === 'Lead_Calificado' && context.hasMetaSignal) {
+    browserTasks.push(Promise.resolve().then(() => {
+      window.fbq?.('trackCustom', 'Lead_Calificado', customData, { eventID: finalEventId });
+    }));
+  } else if (context.hasMetaSignal) {
+    browserTasks.push(Promise.resolve().then(() => {
+      window.fbq?.('track', metaEventName, customData, { eventID: finalEventId });
+    }));
+  }
+
+  if (metaEventName === 'Lead_Calificado' && context.hasTikTokSignal) {
+    browserTasks.push(Promise.resolve().then(() => {
+      window.ttq?.track?.('CompleteRegistration', { ...customData }, { event_id: finalEventId });
+    }));
+  } else if (context.hasTikTokSignal && metaEventName === 'PageView') {
+    browserTasks.push(Promise.resolve().then(() => {
+      window.ttq?.page?.();
+    }));
   }
 
   const payload = {
@@ -142,17 +319,40 @@ export async function trackEvent(
     event_source_url: window.location.href,
     action_source: 'website',
     user_data: {
+      fbclid: context.fbclid,
       fbp: context.fbp,
       fbc: context.fbc,
       ttclid: context.ttclid,
+      ttp: context.ttp,
       ...userData
     },
     custom_data: {
       ...customData
+    },
+    platforms: {
+      meta: context.hasMetaSignal
+        ? {
+            pixel_id: META_PIXEL_ID || null,
+            event_name: metaEventName,
+            event_id: finalEventId,
+            fbclid: context.fbclid,
+            fbp: context.fbp,
+            fbc: context.fbc
+          }
+        : null,
+      tiktok: context.hasTikTokSignal
+        ? {
+            pixel_id: TIKTOK_PIXEL_ID || null,
+            event_name: tiktokEventName,
+            event_id: finalEventId,
+            ttclid: context.ttclid,
+            ttp: context.ttp
+          }
+        : null
     }
   };
 
-  try {
+  const relayTask = (async () => {
     const response = await fetch(CAPI_RELAY_URL, {
       method: 'POST',
       headers: {
@@ -167,8 +367,12 @@ export async function trackEvent(
     } else {
       console.warn(`[CAPI Server-Side] El Relay rechazó el evento '${metaEventName}' con estatus: ${response.status}`);
     }
+  })();
+
+  try {
+    await Promise.all([...browserTasks, relayTask]);
   } catch (error) {
-    console.error(`[CAPI Server-Side] Error al conectar con el servidor de eventos:`, error);
+    console.error(`[Analytics] Error al disparar el evento '${metaEventName}':`, error);
   }
 }
 
