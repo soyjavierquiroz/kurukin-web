@@ -1179,7 +1179,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/95 p-3 backdrop-blur-md md:p-4">
                   <div className="mx-auto w-full max-w-xl">
                     <p className="text-sm font-semibold text-center mb-2">
-                      A continuación tienes que agendar tu sesión para conocer LeadFlow ahora mismo.
+                      A continuación tienes que agendar tu sesión para conocer LeadFlow.
                     </p>
                     <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-center text-xs font-black leading-snug text-red-200 md:text-sm">
                       ⚠️ ATENCIÓN: Tu lugar expira en{' '}
