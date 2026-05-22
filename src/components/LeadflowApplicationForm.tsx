@@ -10,9 +10,6 @@ const FIRST_FORM_STEP = 1;
 const SUCCESS_COUNTDOWN_SECONDS = 30;
 const EVALUATION_MIN_DURATION_MS = 5000;
 const MIN_COMPANY_TEXT_LENGTH = 4;
-const MIN_DETAILED_TEXT_LENGTH = 15;
-const MIN_DETAILED_TEXT_WORDS = 3;
-const DETAILED_TEXT_WARNING = 'Por favor, introduce una respuesta detallada (mínimo 3 palabras) para procesar tu viabilidad.';
 const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -97,6 +94,31 @@ const TEAM_SIZE_OPTIONS = [
   },
 ] as const;
 
+const MAIN_PROBLEM_OPTIONS = [
+  {
+    value: 'Dependen de mí para presentar y cerrar.',
+    label: 'Dependen de mí para presentar y cerrar.',
+  },
+  {
+    value: 'Se quedan sin prospectos muy rápido.',
+    label: 'Se quedan sin prospectos muy rápido.',
+  },
+  {
+    value: 'Tienen motivación, pero ningún sistema claro.',
+    label: 'Tienen motivación, pero ningún sistema claro.',
+  },
+  {
+    value: 'Se frustran y rinden al primer rechazo.',
+    label: 'Se frustran y rinden al primer rechazo.',
+  },
+  {
+    value: 'Recién empiezo, aún no tengo equipo.',
+    label: 'Recién empiezo, aún no tengo equipo.',
+  },
+] as const;
+
+const MAIN_PROBLEM_VALUES: ReadonlySet<string> = new Set(MAIN_PROBLEM_OPTIONS.map(({ value }) => value));
+
 const ACQUISITION_OPTIONS = [
   {
     value: 'no_survival',
@@ -149,16 +171,18 @@ const DECISION_OPTIONS = [
 type FinalStatus = 'calificado_llamada' | 'rechazado';
 type AnalyticsPayloadContext = ReturnType<typeof getAnalyticsContext>;
 type RadioAnswerKey = 'teamSize' | 'acquisitionThermometer' | 'investmentPosition' | 'purchaseDecision';
+type MainProblemOption = (typeof MAIN_PROBLEM_OPTIONS)[number]['value'];
 
 interface Option {
   value: string;
   label: string;
+  shortLabel?: string;
 }
 
 interface Answers {
   teamSize: Option | null;
   companyProduct: string;
-  mainProblem: string;
+  mainProblem: MainProblemOption | '';
   acquisitionThermometer: Option | null;
   investmentPosition: Option | null;
   purchaseDecision: Option | null;
@@ -282,15 +306,12 @@ function safeValidatePhone(value: string): boolean {
   }
 }
 
-function isDetailedText(value: string): boolean {
-  const normalized = value.trim();
-  const wordCount = normalized.split(/\s+/).filter(Boolean).length;
-
-  return normalized.length >= MIN_DETAILED_TEXT_LENGTH && wordCount >= MIN_DETAILED_TEXT_WORDS;
-}
-
 function isValidCompanyText(value: string): boolean {
   return value.trim().length >= MIN_COMPANY_TEXT_LENGTH;
+}
+
+function isMainProblemOption(value: string): value is MainProblemOption {
+  return MAIN_PROBLEM_VALUES.has(value);
 }
 
 function getCurrentStepKey(step: number): RadioAnswerKey | null {
@@ -346,21 +367,24 @@ function buildPayload({
     analytics,
     respuestas: {
       tamano_equipo: answers.teamSize
-        ? { value: answers.teamSize.value, label: (answers.teamSize as any).shortLabel }
+        ? { value: answers.teamSize.value, label: answers.teamSize.shortLabel ?? answers.teamSize.label }
         : null,
       compania_producto: answers.companyProduct.trim(),
       principal_problema: answers.mainProblem.trim(),
       inversion_ads: answers.acquisitionThermometer
         ? {
             value: answers.acquisitionThermometer.value,
-            label: (answers.acquisitionThermometer as any).shortLabel,
+            label: answers.acquisitionThermometer.shortLabel ?? answers.acquisitionThermometer.label,
           }
         : null,
       posicion_frente_a_inversion: answers.investmentPosition
-        ? { value: answers.investmentPosition.value, label: (answers.investmentPosition as any).shortLabel }
+        ? {
+            value: answers.investmentPosition.value,
+            label: answers.investmentPosition.shortLabel ?? answers.investmentPosition.label,
+          }
         : null,
       decision_de_compra: answers.purchaseDecision
-        ? { value: answers.purchaseDecision.value, label: (answers.purchaseDecision as any).shortLabel }
+        ? { value: answers.purchaseDecision.value, label: answers.purchaseDecision.shortLabel ?? answers.purchaseDecision.label }
         : null,
       contacto: {
         nombre_completo: nombreCompleto,
@@ -477,11 +501,8 @@ function validateStep(step: number, answers: Answers, isWhatsappValid: boolean):
       }
       break;
     case 3:
-      if (!answers.mainProblem.trim()) {
-        nextErrors.mainProblem = 'Describe el freno principal de tu equipo.';
-      } else if (!isDetailedText(answers.mainProblem)) {
-        nextErrors.mainProblem = DETAILED_TEXT_WARNING;
-      }
+      if (!answers.mainProblem) nextErrors.mainProblem = 'Selecciona el freno principal de tu equipo.';
+      else if (!isMainProblemOption(answers.mainProblem)) nextErrors.mainProblem = 'Selecciona una opción válida.';
       break;
     case 4:
       if (!answers.acquisitionThermometer) nextErrors.acquisitionThermometer = 'Selecciona el escenario más cercano.';
@@ -521,15 +542,9 @@ function InlineError({ message }: { message?: string }) {
 
 function OptionButton({ option, selected, handleSelectOption }: OptionButtonProps) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={() => handleSelectOption(option)}
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        handleSelectOption(option);
-      }}
       className={[
         'group flex min-h-[64px] w-full cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition duration-200 md:min-h-[72px] md:p-4',
         'border-white/10 bg-slate-900/30 shadow-[0_0_80px_rgba(0,0,0,0.16)] backdrop-blur-md',
@@ -550,7 +565,7 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
         <CheckCircle2 className="h-4 w-4" />
       </span>
       <span className="text-sm font-semibold leading-snug text-white md:text-lg">{option.label}</span>
-    </div>
+    </button>
   );
 }
 
@@ -739,6 +754,27 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     }, 140);
   };
 
+  const handleSelectMainProblem = (option: Option) => {
+    const mainProblem = option.value;
+    if (!isMainProblemOption(mainProblem)) return;
+
+    setRespuestas((prev) => ({
+      ...prev,
+      mainProblem,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      mainProblem: undefined,
+    }));
+    setSubmissionError('');
+
+    window.setTimeout(() => {
+      startTransition(() => {
+        setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+      });
+    }, 140);
+  };
+
   const isOptionSelected = (option: Option): boolean => {
     if (!currentStepKey) return false;
     return respuestas[currentStepKey]?.value === option.value;
@@ -897,41 +933,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     </div>
   );
 
-  const renderTextarea = ({
-    id,
-    label,
-    value,
-    placeholder,
-    onChange,
-    error,
-  }: {
-    id: string;
-    label: string;
-    value: string;
-    placeholder: string;
-    onChange: (value: string) => void;
-    error?: string;
-  }) => (
-    <div className="w-full">
-      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-        {label}
-      </label>
-      <textarea
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        rows={7}
-        className={[
-          'min-h-[160px] w-full rounded-xl border bg-white/[0.04] p-3 text-base font-semibold leading-relaxed text-white outline-none transition md:min-h-[200px] md:p-4 md:text-lg',
-          'placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20',
-          error ? 'border-red-400' : 'border-white/10',
-        ].join(' ')}
-      />
-      <InlineError message={error} />
-    </div>
-  );
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -978,18 +979,15 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
             eyebrow="PASO 3"
             title="Sé brutalmente honesto: ¿Cuál es el freno número uno en tu equipo por el cual tu gente no duplica y tu cheque se estancó?"
           >
-            {renderTextarea({
-              id: 'mainProblem',
-              label: 'Diagnóstico',
-              value: answers.mainProblem,
-              placeholder:
-                '¿Tu gente se raja a los 30 días? ¿Se quedaron sin lista de contactos? ¿Dependen de que tú les des las presentaciones para poder cerrar?...',
-              onChange: (value) => updateAnswer('mainProblem', value),
-              error: errors.mainProblem,
-            })}
-            {answers.mainProblem.trim().length > 0 && !isDetailedText(answers.mainProblem) ? (
-              <p className="text-sm font-medium leading-relaxed text-amber-300">{DETAILED_TEXT_WARNING}</p>
-            ) : null}
+            {MAIN_PROBLEM_OPTIONS.map((option) => (
+              <OptionButton
+                key={option.value}
+                option={option}
+                selected={answers.mainProblem === option.value}
+                handleSelectOption={handleSelectMainProblem}
+              />
+            ))}
+            <InlineError message={errors.mainProblem} />
           </StepShell>
         );
       case 4:
@@ -1110,10 +1108,9 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const shouldShowResult = Boolean(lastPayload);
   const shouldShowFooter = !isEvaluating && !shouldShowResult && currentStep > FIRST_FORM_STEP;
   const isFinalStep = currentStep === TOTAL_STEPS;
-  const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
+  const isChoiceStep = [1, 3, 4, 5, 6].includes(currentStep);
   const isCurrentTextInvalid =
-    (currentStep === 2 && !isValidCompanyText(answers.companyProduct)) ||
-    (currentStep === 3 && !isDetailedText(answers.mainProblem));
+    currentStep === 2 && !isValidCompanyText(answers.companyProduct);
   const shouldShowContinue = !isChoiceStep && !isFinalStep;
 
   return (
