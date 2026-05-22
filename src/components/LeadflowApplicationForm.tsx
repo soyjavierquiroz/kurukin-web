@@ -1167,7 +1167,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                   <ShieldCheck className="h-6 w-6 md:h-7 md:w-7" />
                 </div>
                 <h2 className="mt-3 text-2xl font-black leading-tight text-white md:mt-4 md:text-3xl">
-                  🔥 Estás Aprobado (Sigue al último paso)
+                  🔥 Tu equipo ha sido aprobado.
                 </h2>
 
                 <div className="mt-4 max-h-[32svh] w-full overflow-y-auto rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-left text-sm font-semibold leading-relaxed text-slate-200 shadow-[0_0_24px_rgba(34,211,238,0.1)] md:mt-5 md:max-h-none md:p-5 md:text-base">
@@ -1186,7 +1186,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                       <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
                         {countdown}s
                       </span>
-                      . Si esta página se cierra, cederemos tu cupo a otro líder.
+                      .</br> Si esta página se cierra, cederemos tu cupo a otro líder.
                     </p>
                     <button
                       type="button"
