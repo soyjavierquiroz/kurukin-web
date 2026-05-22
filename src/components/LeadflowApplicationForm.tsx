@@ -423,7 +423,7 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
         handleSelectOption(option);
       }}
       className={[
-        'group flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 text-left transition duration-200 md:p-4',
+        'group flex min-h-[64px] w-full cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition duration-200 md:min-h-[72px] md:p-4',
         'border-white/10 bg-slate-900/30 shadow-[0_0_80px_rgba(0,0,0,0.16)] backdrop-blur-md',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70',
         selected
@@ -441,7 +441,7 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
       >
         <CheckCircle2 className="h-4 w-4" />
       </span>
-      <span className="text-base font-semibold leading-snug text-white md:text-lg">{option.label}</span>
+      <span className="text-sm font-semibold leading-snug text-white md:text-lg">{option.label}</span>
     </div>
   );
 }
@@ -453,7 +453,7 @@ function renderAIText(text: string | null) {
     if (!paragraph.trim()) return null;
 
     return (
-      <p key={index} className="text-base leading-relaxed text-slate-300 sm:text-lg">
+      <p key={index} className="text-sm leading-relaxed text-slate-300 md:text-base">
         {paragraph.split('**').map((chunk, chunkIndex) =>
           chunkIndex % 2 === 1 ? (
             <span key={chunkIndex} className="font-bold text-white">
@@ -796,7 +796,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         className={[
-          'min-h-[64px] w-full rounded-xl border bg-white/[0.04] p-4 text-lg font-semibold text-white outline-none transition sm:p-5 sm:text-xl',
+          'min-h-[48px] w-full rounded-xl border bg-white/[0.04] p-3 text-base font-semibold text-white outline-none transition md:min-h-[56px] md:p-4 md:text-lg',
           'placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20',
           error ? 'border-red-400' : 'border-white/10',
         ].join(' ')}
@@ -831,7 +831,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         placeholder={placeholder}
         rows={7}
         className={[
-          'w-full rounded-xl border bg-white/[0.04] p-4 text-lg font-semibold leading-relaxed text-white outline-none transition sm:p-5 sm:text-xl',
+          'min-h-[160px] w-full rounded-xl border bg-white/[0.04] p-3 text-base font-semibold leading-relaxed text-white outline-none transition md:min-h-[200px] md:p-4 md:text-lg',
           'placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20',
           error ? 'border-red-400' : 'border-white/10',
         ].join(' ')}
@@ -983,10 +983,10 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 placeholder="Tu número con prefijo"
                 theme="dark"
                 className={[
-                  'text-lg',
-                  '[&_.PhoneInputCountry]:!h-16 [&_.PhoneInputCountry]:!min-w-[118px] [&_.PhoneInputCountry]:!px-4',
-                  '[&_.PhoneInputInput]:!h-16 [&_.PhoneInputInput]:!px-5 [&_.PhoneInputInput]:!text-lg [&_.PhoneInputInput]:!font-semibold',
-                  '[&_.SmartPhoneCallingCode]:!text-lg',
+                  'text-base',
+                  '[&_.PhoneInputCountry]:!h-12 [&_.PhoneInputCountry]:!min-h-[48px] [&_.PhoneInputCountry]:!min-w-[96px] [&_.PhoneInputCountry]:!px-3 md:[&_.PhoneInputCountry]:!min-w-[112px]',
+                  '[&_.PhoneInputInput]:!h-12 [&_.PhoneInputInput]:!min-h-[48px] [&_.PhoneInputInput]:!px-3 [&_.PhoneInputInput]:!text-base [&_.PhoneInputInput]:!font-semibold md:[&_.PhoneInputInput]:!px-4 md:[&_.PhoneInputInput]:!text-lg',
+                  '[&_.SmartPhoneCallingCode]:!text-sm md:[&_.SmartPhoneCallingCode]:!text-base',
                 ].join(' ')}
               />
 
@@ -1084,7 +1084,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
           <div
             className={[
               'mx-auto flex w-full max-w-xl flex-col items-center py-8 text-center md:py-12',
-              isQualified ? 'pb-44 md:pb-48' : '',
+              isQualified ? 'pb-56 md:pb-52' : 'pb-8',
             ].join(' ')}
           >
             {isQualified ? (
@@ -1095,7 +1095,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 <h2 className="mt-6 text-2xl font-black leading-tight text-white md:text-4xl">
                   🔥 ACCESO PRE-APROBADO
                 </h2>
-                <p className="mt-4 text-base font-semibold leading-relaxed text-slate-200 md:text-lg">
+                <p className="mt-4 text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
                   Tu perfil cuenta con la madurez operativa requerida. Tienes luz verde para la implementación del
                   sistema.
                 </p>
@@ -1105,13 +1105,13 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                     <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-cyan-200">
                       Diagnóstico operativo
                     </p>
-                    <div className="space-y-4">{renderAIText(aiResponse)}</div>
+                    <div className="space-y-3 md:space-y-4">{renderAIText(aiResponse)}</div>
                   </div>
                 ) : null}
 
                 <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/90 p-4 backdrop-blur-md">
                   <div className="mx-auto w-full max-w-xl">
-                    <p className="text-center text-sm font-semibold leading-relaxed text-slate-300">
+                    <p className="text-center text-xs font-semibold leading-relaxed text-slate-300 md:text-sm">
                       Redireccionando al canal oficial de WhatsApp en{' '}
                       <span className="font-black text-cyan-200">{countdown}s</span> para coordinar tu sesión...
                     </p>
@@ -1119,7 +1119,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                       href={WHATSAPP_SUCCESS_URL}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-3 inline-flex min-h-[68px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-4 text-lg font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99]"
+                      className="mt-3 inline-flex min-h-[60px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-base font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99] md:min-h-[68px] md:py-4 md:text-lg"
                     >
                       🟢 CONECTAR POR WHATSAPP AHORA
                     </a>
@@ -1134,7 +1134,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 <h2 className="mt-6 text-2xl font-black leading-tight text-white md:text-4xl">
                   ❌ EVALUACIÓN FINAL: PERFIL NO VIABLE
                 </h2>
-                <p className="mt-5 text-base font-medium leading-relaxed text-slate-300 md:text-lg">
+                <p className="mt-5 text-sm font-medium leading-relaxed text-slate-300 md:text-lg">
                   Tras procesar los datos operativos de tu organización, el sistema determinamos que tu estructura actual
                   no cuenta con la masa crítica o el flujo de caja mínimo indispensable para garantizar la duplicación con
                   la infraestructura de LeadFlow en este momento. Agradecemos tu interés.
@@ -1157,12 +1157,12 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       </div>
 
       {shouldShowFooter ? (
-        <footer className="relative z-10 shrink-0 border-t border-white/10 bg-slate-950/85 p-4 backdrop-blur-md">
-          <div className="flex items-center justify-between gap-3">
+        <footer className="relative z-10 mt-6 shrink-0 border-t border-white/10 bg-slate-950/85 p-4 backdrop-blur-md">
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
               onClick={goToPreviousStep}
-              className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 text-sm font-bold uppercase text-slate-400 transition hover:border-white/25 hover:text-white"
+              className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 text-sm font-bold uppercase text-slate-400 transition hover:border-white/25 hover:text-white sm:w-auto"
             >
               <ArrowLeft className="h-4 w-4" />
               Atrás
@@ -1173,7 +1173,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 type="button"
                 onClick={goToNextStep}
                 disabled={isCurrentTextInvalid}
-                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 sm:flex-none"
+                className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto sm:flex-none"
               >
                 Continuar
                 <ArrowRight className="h-4 w-4" />
@@ -1185,7 +1185,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 type="button"
                 onClick={() => void handleFinalSubmission()}
                 disabled={isSubmitting}
-                className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
+                className="inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 text-sm font-black uppercase text-white shadow-[0_0_24px_rgba(37,99,235,0.28)] transition hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:flex-none"
               >
                 {isSubmitting ? (
                   <>
@@ -1221,18 +1221,18 @@ function StepShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[430px] flex-col justify-center py-4 md:min-h-[520px] md:py-6">
+    <div className="flex min-h-full flex-col justify-start py-4 md:min-h-[520px] md:justify-center md:py-6">
       <p className="text-sm font-black uppercase tracking-[0.2em] text-cyan-300">{eyebrow}</p>
       {authorityText ? (
         <div className="mt-4 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 p-4 shadow-[0_0_30px_rgba(34,211,238,0.12)] md:p-5">
-          <p className="text-base font-black leading-relaxed text-cyan-50 md:text-lg">
+          <p className="text-base font-black leading-snug text-cyan-50 md:text-lg">
             {authorityText}
           </p>
         </div>
       ) : null}
-      <h2 className="mb-4 mt-3 text-xl font-bold leading-tight text-white md:text-2xl">{title}</h2>
-      {subtitle ? <p className="-mt-2 mb-4 text-base leading-relaxed text-slate-300 md:text-lg">{subtitle}</p> : null}
-      <div className="space-y-3 md:space-y-4">{children}</div>
+      <h2 className="mb-3 mt-4 text-lg font-bold leading-tight text-white md:mb-4 md:text-2xl">{title}</h2>
+      {subtitle ? <p className="-mt-1 mb-4 text-sm leading-relaxed text-slate-300">{subtitle}</p> : null}
+      <div className="space-y-4 md:space-y-5">{children}</div>
     </div>
   );
 }
