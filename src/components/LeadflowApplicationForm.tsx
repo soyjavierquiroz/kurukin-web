@@ -241,6 +241,10 @@ interface LocalLeadPayload {
   financiacion?: string;
   tomaDecision?: string;
   eventId?: string;
+  fbc?: string;
+  fbp?: string;
+  clientIp?: string;
+  userAgent?: string;
 }
 
 interface LocalLeadCreateResponse {
@@ -416,6 +420,10 @@ function buildLocalLeadPayload(payload: LeadflowPayload): LocalLeadPayload {
     financiacion: stringifyOption(payload.respuestas.posicion_frente_a_inversion),
     tomaDecision: stringifyOption(payload.respuestas.decision_de_compra),
     eventId: payload.analytics.eventId,
+    fbc: payload.fbc || undefined,
+    fbp: payload.fbp || undefined,
+    clientIp: payload.analytics.client_ip || undefined,
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
   };
 }
 
