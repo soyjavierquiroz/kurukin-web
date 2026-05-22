@@ -6,6 +6,7 @@ import { useVisitor, type VisitorData } from '../context/VisitorContext';
 import { captureClientIp, getAnalyticsContext, trackQualifiedLead } from '../lib/analytics';
 
 const TOTAL_STEPS = 7;
+const FIRST_FORM_STEP = 1;
 const SUCCESS_COUNTDOWN_SECONDS = 20;
 const EVALUATION_MIN_DURATION_MS = 5000;
 const MIN_COMPANY_TEXT_LENGTH = 4;
@@ -469,7 +470,7 @@ function renderAIText(text: string | null) {
 
 export function LeadflowApplicationForm({ className = '', onPayloadReady }: LeadflowApplicationFormProps) {
   const { visitorData, isLoading: isVisitorLoading } = useVisitor();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(FIRST_FORM_STEP);
   const [respuestas, setRespuestas] = useState<Answers>(INITIAL_ANSWERS);
   const answers = respuestas;
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -652,7 +653,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
   const goToPreviousStep = () => {
     startTransition(() => {
-      setCurrentStep((prev) => Math.max(prev - 1, 0));
+      setCurrentStep((prev) => Math.max(prev - 1, FIRST_FORM_STEP));
     });
   };
 
@@ -841,41 +842,12 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0:
-        return (
-          <div className="flex min-h-[460px] flex-col justify-center py-4">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/30 p-5 shadow-[0_0_80px_rgba(0,0,0,0.4)] backdrop-blur-md md:p-7">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_42%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.12),transparent_45%)]" />
-              <div className="relative">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">
-                  🔒 FILTRO DE ESCALA REAL
-                </p>
-                <h1 className="mt-3 text-3xl font-extrabold leading-tight text-white md:text-4xl">
-                  ¿Tu red realmente duplica... o eres el único en tu equipo que trabaja?
-                </h1>
-
-                <p className="mt-4 text-base font-semibold leading-relaxed text-slate-300 md:text-lg">
-                  LeadFlow no es un curso ni un truco gratis. Es la máquina de adquisición para líderes que van por
-                  rangos altos. En 60 segundos sabrás por qué tu cheque se estancó. Si buscas atajos, cierra esta
-                  pestaña.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="mt-6 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-xl border border-cyan-200/40 bg-gradient-to-r from-cyan-400 via-blue-600 to-fuchsia-600 bg-[length:220%_220%] p-4 text-base font-black uppercase text-white shadow-[0_0_34px_rgba(37,99,235,0.42)] transition hover:scale-[1.01] hover:shadow-[0_0_44px_rgba(34,211,238,0.46)] active:scale-[0.99] motion-safe:animate-[leadflowCtaGradient_4s_ease_infinite] md:text-lg"
-                >
-                  <span>⚡ PROBAR MI CAPACIDAD DE ESCALA</span>
-                  <ArrowRight className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        );
       case 1:
         return (
           <StepShell
             eyebrow="PASO 1"
-            title="¿De qué tamaño es tu organización activa actualmente?"
+            authorityText="Diseñar sistemas operativos que no dependan del tráfico orgánico requiere estructura. Comencemos por entender tus cimientos actuales."
+            title="¿Cuántas personas forman parte de tu equipo actualmente?"
             subtitle="Gente cobrando cheques y construyendo, no consumidores durmientes."
           >
             {TEAM_SIZE_OPTIONS.map((option) => (
@@ -1044,7 +1016,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   };
 
   const shouldShowResult = Boolean(lastPayload);
-  const shouldShowFooter = !isEvaluating && !shouldShowResult && currentStep > 0;
+  const shouldShowFooter = !isEvaluating && !shouldShowResult && currentStep > FIRST_FORM_STEP;
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 4, 5, 6].includes(currentStep);
   const isCurrentTextInvalid =
@@ -1079,7 +1051,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
           />
         </div>
         <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-          <span>{isEvaluating ? 'Evaluando' : shouldShowResult ? 'Resultado' : currentStep === 0 ? 'Auditoría LeadFlow' : `PASO ${currentStep} / ${TOTAL_STEPS}`}</span>
+          <span>{isEvaluating ? 'Evaluando' : shouldShowResult ? 'Resultado' : `PASO ${currentStep} / ${TOTAL_STEPS}`}</span>
           <span>{isEvaluating || shouldShowResult ? '100%' : `${progressPercentage}%`}</span>
         </div>
       </header>
@@ -1237,11 +1209,13 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
 function StepShell({
   eyebrow,
+  authorityText,
   title,
   subtitle,
   children,
 }: {
   eyebrow: string;
+  authorityText?: string;
   title: string;
   subtitle?: string;
   children: ReactNode;
@@ -1249,6 +1223,13 @@ function StepShell({
   return (
     <div className="flex min-h-[430px] flex-col justify-center py-4 md:min-h-[520px] md:py-6">
       <p className="text-sm font-black uppercase tracking-[0.2em] text-cyan-300">{eyebrow}</p>
+      {authorityText ? (
+        <div className="mt-4 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 p-4 shadow-[0_0_30px_rgba(34,211,238,0.12)] md:p-5">
+          <p className="text-base font-black leading-relaxed text-cyan-50 md:text-lg">
+            {authorityText}
+          </p>
+        </div>
+      ) : null}
       <h2 className="mb-4 mt-3 text-xl font-bold leading-tight text-white md:text-2xl">{title}</h2>
       {subtitle ? <p className="-mt-2 mb-4 text-base leading-relaxed text-slate-300 md:text-lg">{subtitle}</p> : null}
       <div className="space-y-3 md:space-y-4">{children}</div>
