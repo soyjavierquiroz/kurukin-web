@@ -16,7 +16,6 @@ const LEADS_API_URL = '/api/leads';
 const LEAD_STATUS_POLL_INTERVAL_MS = 2000;
 const LEAD_STATUS_MAX_ATTEMPTS = 45;
 const SITE_ID = 'KURUKIN';
-const WHATSAPP_PHONE = '59179890873';
 const WHATSAPP_SUCCESS_MESSAGE =
   'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo MLM y obtuve Luz Verde. Quiero agendar una reunión para conocer LeadFlow a la brevedad.';
 const WHATSAPP_ENCODED_MESSAGE = encodeURIComponent(WHATSAPP_SUCCESS_MESSAGE);
@@ -479,8 +478,9 @@ function getWhatsAppSuccessUrl(): string {
     typeof navigator !== 'undefined' &&
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
   const baseUrl = isMobile ? 'whatsapp://send' : 'https://web.whatsapp.com/send';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873';
 
-  return `${baseUrl}?phone=${WHATSAPP_PHONE}&text=${WHATSAPP_ENCODED_MESSAGE}`;
+  return `${baseUrl}?phone=${whatsappNumber}&text=${WHATSAPP_ENCODED_MESSAGE}`;
 }
 
 function isApprovedLeadStatus(status: LeadStatus): boolean {
@@ -1167,17 +1167,20 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                   <ShieldCheck className="h-6 w-6 md:h-7 md:w-7" />
                 </div>
                 <h2 className="mt-3 text-2xl font-black leading-tight text-white md:mt-4 md:text-3xl">
-                  🔥 APROBADO. (Aún no terminas)
+                  🔥 Estás Aprobado (Sigue al último paso)
                 </h2>
 
-                <div className="mt-4 max-h-[32svh] w-full overflow-y-auto rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-left shadow-[0_0_24px_rgba(34,211,238,0.1)] md:mt-5 md:max-h-none md:p-5">
-                  <p className="whitespace-pre-line text-sm font-semibold leading-relaxed text-slate-200 md:text-base">
-                    {aiConsultingText}
+                <div className="mt-4 max-h-[32svh] w-full overflow-y-auto rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-left text-sm font-semibold leading-relaxed text-slate-200 shadow-[0_0_24px_rgba(34,211,238,0.1)] md:mt-5 md:max-h-none md:p-5 md:text-base">
+                  <p>
+                    <strong>Tu diagnóstico es crudo: </strong> {aiConsultingText}
                   </p>
                 </div>
 
                 <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/95 p-3 backdrop-blur-md md:p-4">
                   <div className="mx-auto w-full max-w-xl">
+                    <p className="text-sm font-semibold text-center mb-2">
+                      A continuación tienes que agendar tu sesión para conocer LeadFlow ahora mismo.
+                    </p>
                     <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-center text-xs font-black leading-snug text-red-200 md:text-sm">
                       ⚠️ ATENCIÓN: Tu lugar expira en{' '}
                       <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
