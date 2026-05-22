@@ -1186,7 +1186,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                       <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
                         {countdown}s
                       </span>
-                      .<br> Si esta página se cierra, cederemos tu cupo a otro líder.
+                      .<br /> Si esta página se cierra, cederemos tu cupo a otro líder.
                     </p>
                     <button
                       type="button"
