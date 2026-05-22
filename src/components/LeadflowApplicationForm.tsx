@@ -7,7 +7,7 @@ import { captureClientIp, getAnalyticsContext, trackQualifiedLead } from '../lib
 
 const TOTAL_STEPS = 7;
 const FIRST_FORM_STEP = 1;
-const SUCCESS_COUNTDOWN_SECONDS = 30;
+const SUCCESS_REDIRECT_DELAY_MS = 30000;
 const EVALUATION_MIN_DURATION_MS = 5000;
 const MIN_COMPANY_TEXT_LENGTH = 4;
 const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
@@ -18,7 +18,7 @@ const LEAD_STATUS_POLL_INTERVAL_MS = 2000;
 const LEAD_STATUS_MAX_ATTEMPTS = 45;
 const SITE_ID = 'KURUKIN';
 const WHATSAPP_SUCCESS_MESSAGE =
-  'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo y obtuve Luz Verde. Quiero coordinar los detalles de la infraestructura.';
+  'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo MLM y obtuve Luz Verde. Quiero agendar una reunión para conocer LeadFlow a la brevedad.';
 const WHATSAPP_SUCCESS_URL = `https://api.whatsapp.com/send?phone=59179790873&text=${encodeURIComponent(
   WHATSAPP_SUCCESS_MESSAGE,
 )}`;
@@ -563,28 +563,6 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
   );
 }
 
-function renderAIText(text: string | null) {
-  if (!text) return null;
-
-  return text.split('\n').map((paragraph, index) => {
-    if (!paragraph.trim()) return null;
-
-    return (
-      <p key={index} className="text-sm leading-relaxed text-slate-300 md:text-base">
-        {paragraph.split('**').map((chunk, chunkIndex) =>
-          chunkIndex % 2 === 1 ? (
-            <span key={chunkIndex} className="font-bold text-white">
-              {chunk}
-            </span>
-          ) : (
-            chunk
-          ),
-        )}
-      </p>
-    );
-  });
-}
-
 export function LeadflowApplicationForm({ className = '', onPayloadReady }: LeadflowApplicationFormProps) {
   const { visitorData, isLoading: isVisitorLoading } = useVisitor();
   const [currentStep, setCurrentStep] = useState(FIRST_FORM_STEP);
@@ -600,7 +578,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isQualified, setIsQualified] = useState(false);
-  const [countdown, setCountdown] = useState(SUCCESS_COUNTDOWN_SECONDS);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -670,30 +647,19 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     }
   }, [isEvaluating]);
 
-  useEffect(() => {
-    setCountdown(SUCCESS_COUNTDOWN_SECONDS);
-  }, [isQualified, lastPayload]);
-
   const successState = Boolean(lastPayload && isQualified);
 
   useEffect(() => {
     if (!successState) return;
 
-    if (countdown === 0) {
-      window.location.href = `https://api.whatsapp.com/send?phone=59179790873&text=${encodeURIComponent(
-        WHATSAPP_SUCCESS_MESSAGE,
-      )}`;
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setCountdown((prev) => Math.max(prev - 1, 0));
-    }, 1000);
+    const redirectTimer = window.setTimeout(() => {
+      window.location.href = WHATSAPP_SUCCESS_URL;
+    }, SUCCESS_REDIRECT_DELAY_MS);
 
     return () => {
-      window.clearTimeout(timer);
+      window.clearTimeout(redirectTimer);
     };
-  }, [countdown, lastPayload, successState]);
+  }, [successState]);
 
   useEffect(() => {
     if (!isEvaluating) {
@@ -714,6 +680,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     if (lastPayload) return 100;
     return Math.round((currentStep / TOTAL_STEPS) * 100);
   }, [currentStep, lastPayload]);
+  const aiConsultingText = aiResponse?.trim() || '';
   const currentStepKey = getCurrentStepKey(currentStep);
 
   const updateAnswer = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
@@ -1175,28 +1142,27 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200 shadow-[0_0_34px_rgba(34,211,238,0.16)]">
                   <ShieldCheck className="h-8 w-8" />
                 </div>
-                <h2 className="mt-4 whitespace-nowrap text-xl font-black leading-tight text-white md:mt-6 md:text-4xl">
-                  🔥 ACCESO PRE-APROBADO
+                <h2 className="mt-4 text-2xl font-black leading-tight text-white md:mt-6 md:text-4xl">
+                  🔥 ESTÁS APROBADO. (Pero tu trabajo no ha terminado).
                 </h2>
-                <p className="mt-4 text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
-                  Tu perfil cuenta con la madurez operativa requerida. Tienes luz verde para la implementación del
-                  sistema.
-                </p>
 
-                {aiResponse ? (
-                  <div className="mt-6 w-full rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-5 text-left shadow-[0_0_30px_rgba(34,211,238,0.1)]">
-                    <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-cyan-200">
-                      Diagnóstico operativo
-                    </p>
-                    <div className="space-y-3 md:space-y-4">{renderAIText(aiResponse)}</div>
-                  </div>
-                ) : null}
+                <div className="mt-6 w-full rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-5 text-left shadow-[0_0_30px_rgba(34,211,238,0.1)]">
+                  <p className="whitespace-pre-line text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
+                    Tu diagnóstico es crudo: {aiConsultingText}
+                  </p>
+                  <p className="mt-5 text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
+                    Tienes luz verde para implementar nuestro sistema, pero solo trabajamos con líderes que toman
+                    decisiones rápidas.
+                  </p>
+                </div>
 
                 <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/90 p-4 backdrop-blur-md">
                   <div className="mx-auto w-full max-w-xl">
                     <p className="text-center text-xs font-semibold leading-relaxed text-slate-300 md:text-sm">
-                      Redireccionando al canal oficial de WhatsApp en{' '}
-                      <span className="font-black text-cyan-200">{countdown}s</span> para coordinar tu sesión...
+                      <span className="block font-black text-cyan-200">Tu siguiente paso:</span>
+                      Tienes que agendar tu sesión de instalación ahora mismo. Te estamos redirigiendo a nuestro
+                      WhatsApp privado en 30 segundos. Si cierras esta página o dejas pasar el tiempo, tu lugar será
+                      asignado a otro líder.
                     </p>
                     <a
                       href={WHATSAPP_SUCCESS_URL}
@@ -1204,7 +1170,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                       rel="noreferrer"
                       className="mt-3 inline-flex min-h-[60px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-base font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99] md:min-h-[68px] md:py-4 md:text-lg"
                     >
-                      🟢 CONECTAR POR WHATSAPP AHORA
+                      🟢 RECLAMAR MI LUGAR Y AGENDAR AHORA
                     </a>
                   </div>
                 </div>
