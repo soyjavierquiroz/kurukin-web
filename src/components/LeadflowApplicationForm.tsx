@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
 import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
@@ -7,7 +7,6 @@ import { captureClientIp, getAnalyticsContext, trackQualifiedLead } from '../lib
 
 const TOTAL_STEPS = 7;
 const FIRST_FORM_STEP = 1;
-const SUCCESS_REDIRECT_DELAY_MS = 30000;
 const EVALUATION_MIN_DURATION_MS = 5000;
 const MIN_COMPANY_TEXT_LENGTH = 4;
 const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
@@ -17,11 +16,10 @@ const LEADS_API_URL = '/api/leads';
 const LEAD_STATUS_POLL_INTERVAL_MS = 2000;
 const LEAD_STATUS_MAX_ATTEMPTS = 45;
 const SITE_ID = 'KURUKIN';
+const WHATSAPP_PHONE = '59179890873';
 const WHATSAPP_SUCCESS_MESSAGE =
   'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo MLM y obtuve Luz Verde. Quiero agendar una reunión para conocer LeadFlow a la brevedad.';
-const WHATSAPP_SUCCESS_URL = `https://api.whatsapp.com/send?phone=59179790873&text=${encodeURIComponent(
-  WHATSAPP_SUCCESS_MESSAGE,
-)}`;
+const WHATSAPP_ENCODED_MESSAGE = encodeURIComponent(WHATSAPP_SUCCESS_MESSAGE);
 const EVALUATION_MESSAGES = [
   '🤖 Inicializando motor de evaluación de estructuras...',
   '📊 Analizando métricas de duplicación y retención...',
@@ -476,6 +474,15 @@ function buildAiResponseText(result: LocalLeadStatusResponse): string | null {
   return result.aiConsultingText?.trim() || null;
 }
 
+function getWhatsAppSuccessUrl(): string {
+  const isMobile =
+    typeof navigator !== 'undefined' &&
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+  const baseUrl = isMobile ? 'whatsapp://send' : 'https://web.whatsapp.com/send';
+
+  return `${baseUrl}?phone=${WHATSAPP_PHONE}&text=${WHATSAPP_ENCODED_MESSAGE}`;
+}
+
 function isApprovedLeadStatus(status: LeadStatus): boolean {
   return status === 'ORO' || status === 'PLATA';
 }
@@ -578,9 +585,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isQualified, setIsQualified] = useState(false);
+  const [countdown, setCountdown] = useState(30);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const redirectToWhatsApp = useCallback(() => {
+    window.location.href = getWhatsAppSuccessUrl();
+  }, []);
 
   useEffect(() => {
     analyticsRef.current = {
@@ -650,16 +662,28 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const successState = Boolean(lastPayload && isQualified);
 
   useEffect(() => {
+    if (successState) {
+      setCountdown(30);
+    }
+  }, [successState]);
+
+  useEffect(() => {
     if (!successState) return;
 
-    const redirectTimer = window.setTimeout(() => {
-      window.location.href = WHATSAPP_SUCCESS_URL;
-    }, SUCCESS_REDIRECT_DELAY_MS);
+    const timer = window.setInterval(() => {
+      setCountdown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
 
     return () => {
-      window.clearTimeout(redirectTimer);
+      window.clearInterval(timer);
     };
   }, [successState]);
+
+  useEffect(() => {
+    if (!successState || countdown > 0) return;
+
+    redirectToWhatsApp();
+  }, [countdown, redirectToWhatsApp, successState]);
 
   useEffect(() => {
     if (!isEvaluating) {
@@ -1139,39 +1163,35 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
           >
             {isQualified ? (
               <>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200 shadow-[0_0_34px_rgba(34,211,238,0.16)]">
-                  <ShieldCheck className="h-8 w-8" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200 shadow-[0_0_28px_rgba(34,211,238,0.14)] md:h-14 md:w-14">
+                  <ShieldCheck className="h-6 w-6 md:h-7 md:w-7" />
                 </div>
-                <h2 className="mt-4 text-2xl font-black leading-tight text-white md:mt-6 md:text-4xl">
-                  🔥 ESTÁS APROBADO. (Pero tu trabajo no ha terminado).
+                <h2 className="mt-3 text-2xl font-black leading-tight text-white md:mt-4 md:text-3xl">
+                  🔥 APROBADO. (Aún no terminas)
                 </h2>
 
-                <div className="mt-6 w-full rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-5 text-left shadow-[0_0_30px_rgba(34,211,238,0.1)]">
-                  <p className="whitespace-pre-line text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
-                    Tu diagnóstico es crudo: {aiConsultingText}
-                  </p>
-                  <p className="mt-5 text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
-                    Tienes luz verde para implementar nuestro sistema, pero solo trabajamos con líderes que toman
-                    decisiones rápidas.
+                <div className="mt-4 max-h-[32svh] w-full overflow-y-auto rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-left shadow-[0_0_24px_rgba(34,211,238,0.1)] md:mt-5 md:max-h-none md:p-5">
+                  <p className="whitespace-pre-line text-sm font-semibold leading-relaxed text-slate-200 md:text-base">
+                    {aiConsultingText}
                   </p>
                 </div>
 
-                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/90 p-4 backdrop-blur-md">
+                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/95 p-3 backdrop-blur-md md:p-4">
                   <div className="mx-auto w-full max-w-xl">
-                    <p className="text-center text-xs font-semibold leading-relaxed text-slate-300 md:text-sm">
-                      <span className="block font-black text-cyan-200">Tu siguiente paso:</span>
-                      Tienes que agendar tu sesión de instalación ahora mismo. Te estamos redirigiendo a nuestro
-                      WhatsApp privado en 30 segundos. Si cierras esta página o dejas pasar el tiempo, tu lugar será
-                      asignado a otro líder.
+                    <p className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-center text-xs font-black leading-snug text-red-200 md:text-sm">
+                      ⚠️ ATENCIÓN: Tu lugar expira en{' '}
+                      <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
+                        {countdown}s
+                      </span>
+                      . Si esta página se cierra, cederemos tu cupo a otro líder.
                     </p>
-                    <a
-                      href={WHATSAPP_SUCCESS_URL}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex min-h-[60px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-base font-black uppercase leading-tight text-white shadow-[0_0_34px_rgba(37,99,235,0.38)] transition hover:scale-[1.01] active:scale-[0.99] md:min-h-[68px] md:py-4 md:text-lg"
+                    <button
+                      type="button"
+                      onClick={redirectToWhatsApp}
+                      className="mt-2 inline-flex min-h-[54px] w-full items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3 text-sm font-black uppercase leading-tight text-white shadow-[0_0_28px_rgba(37,99,235,0.34)] transition hover:scale-[1.01] active:scale-[0.99] md:mt-3 md:min-h-[62px] md:text-lg"
                     >
                       🟢 RECLAMAR MI LUGAR Y AGENDAR AHORA
-                    </a>
+                    </button>
                   </div>
                 </div>
               </>
