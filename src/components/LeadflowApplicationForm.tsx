@@ -16,7 +16,9 @@ const DETAILED_TEXT_WARNING = 'Por favor, introduce una respuesta detallada (mí
 const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const WEBHOOK_URL = 'https://webhooks.kuruk.in/webhook/leadflow-eval';
+const LEADS_API_URL = '/api/leads';
+const LEAD_STATUS_POLL_INTERVAL_MS = 2000;
+const LEAD_STATUS_MAX_ATTEMPTS = 45;
 const SITE_ID = 'KURUKIN';
 const WHATSAPP_SUCCESS_MESSAGE =
   'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo y obtuve Luz Verde. Quiero coordinar los detalles de la infraestructura.';
@@ -204,12 +206,33 @@ interface LeadflowApplicationFormProps {
   onPayloadReady?: (payload: LeadflowPayload) => Promise<void> | void;
 }
 
-interface LeadflowWebhookResponse {
-  es_valido?: boolean;
-  clasificacion?: string;
-  classification?: string;
-  ai_consulting_text?: string;
-  message?: string;
+type LeadStatus = 'PENDIENTE' | 'ORO' | 'PLATA' | 'TROLL' | 'BASURA';
+
+interface LocalLeadPayload {
+  nombre: string;
+  telefono: string;
+  email: string;
+  pais?: string;
+  compania?: string;
+  tamanoEquipo?: string;
+  origenLeadsRaw?: string;
+  frenoDuplicacionRaw?: string;
+  financiacion?: string;
+  tomaDecision?: string;
+  eventId?: string;
+}
+
+interface LocalLeadCreateResponse {
+  success: boolean;
+  localLeadId: string;
+}
+
+interface LocalLeadStatusResponse {
+  success: boolean;
+  status: LeadStatus;
+  aiConsultingText?: string | null;
+  dolorPsicologico?: string | null;
+  estrategiaCierre?: string | null;
 }
 
 interface OptionButtonProps {
@@ -352,6 +375,91 @@ function buildPayload({
     autoreject_triggered: noBudget,
     final_status: noBudget ? 'rechazado' : 'calificado_llamada',
   };
+}
+
+function stringifyOption(option: Option | null): string | undefined {
+  return option ? JSON.stringify({ value: option.value, label: option.label }) : undefined;
+}
+
+function buildLocalLeadPayload(payload: LeadflowPayload): LocalLeadPayload {
+  return {
+    nombre: payload.nombre_completo,
+    telefono: payload.telefono,
+    email: payload.email,
+    pais: payload.respuestas.contacto.pais.label || payload.respuestas.contacto.pais.code || undefined,
+    compania: payload.respuestas.compania_producto || undefined,
+    tamanoEquipo:
+      payload.respuestas.tamano_equipo?.label ?? payload.respuestas.tamano_equipo?.value ?? undefined,
+    origenLeadsRaw: stringifyOption(payload.respuestas.inversion_ads),
+    frenoDuplicacionRaw: payload.respuestas.principal_problema || undefined,
+    financiacion: stringifyOption(payload.respuestas.posicion_frente_a_inversion),
+    tomaDecision: stringifyOption(payload.respuestas.decision_de_compra),
+    eventId: payload.analytics.eventId,
+  };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+async function createLocalLead(payload: LocalLeadPayload): Promise<string> {
+  const response = await fetch(LEADS_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Local lead creation failed with status ${response.status}`);
+  }
+
+  const result = (await response.json()) as LocalLeadCreateResponse;
+
+  if (!result.success || !result.localLeadId) {
+    throw new Error('Local lead creation did not return localLeadId.');
+  }
+
+  return result.localLeadId;
+}
+
+async function waitForLeadDiagnosis(localLeadId: string): Promise<LocalLeadStatusResponse> {
+  for (let attempt = 0; attempt < LEAD_STATUS_MAX_ATTEMPTS; attempt += 1) {
+    if (attempt > 0) {
+      await delay(LEAD_STATUS_POLL_INTERVAL_MS);
+    }
+
+    const response = await fetch(`${LEADS_API_URL}/${encodeURIComponent(localLeadId)}/status`);
+
+    if (!response.ok) {
+      throw new Error(`Lead status polling failed with status ${response.status}`);
+    }
+
+    const result = (await response.json()) as LocalLeadStatusResponse;
+
+    if (result.success && result.status !== 'PENDIENTE') {
+      return result;
+    }
+  }
+
+  throw new Error('Lead diagnosis polling timed out.');
+}
+
+function buildAiResponseText(result: LocalLeadStatusResponse): string | null {
+  const blocks = [
+    result.aiConsultingText?.trim(),
+    result.dolorPsicologico?.trim() ? `Dolor psicológico detectado:\n${result.dolorPsicologico.trim()}` : null,
+    result.estrategiaCierre?.trim() ? `Estrategia de cierre:\n${result.estrategiaCierre.trim()}` : null,
+  ].filter((block): block is string => Boolean(block));
+
+  return blocks.length > 0 ? blocks.join('\n\n') : null;
+}
+
+function isApprovedLeadStatus(status: LeadStatus): boolean {
+  return status === 'ORO' || status === 'PLATA';
 }
 
 function validateStep(step: number, answers: Answers, isWhatsappValid: boolean): FieldErrors {
@@ -710,25 +818,15 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       const minimumEvaluationDelay = new Promise((resolve) => {
         window.setTimeout(resolve, EVALUATION_MIN_DURATION_MS);
       });
-      const evaluationRequest = fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      }).then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Leadflow webhook failed with status ${response.status}`);
-        }
+      const localLeadPayload = buildLocalLeadPayload(payload);
+      const localLeadId = await createLocalLead(localLeadPayload);
+      const evaluation = await waitForLeadDiagnosis(localLeadId);
 
-        return (await response.json()) as LeadflowWebhookResponse;
-      });
-
-      const evaluation = await evaluationRequest;
       await minimumEvaluationDelay;
+
       const noBudget = payload.respuestas.posicion_frente_a_inversion?.value === 'no_budget';
-      const approved = !noBudget && evaluation.es_valido === true;
-      const classification = evaluation.clasificacion || evaluation.classification || 'Aprobado';
+      const approved = !noBudget && isApprovedLeadStatus(evaluation.status);
+      const classification = evaluation.status;
       const finalPayload: LeadflowPayload = {
         ...payload,
         autoreject_triggered: noBudget,
@@ -751,13 +849,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       }
 
       setLastPayload(finalPayload);
-      setAiResponse(
-        typeof evaluation.ai_consulting_text === 'string' && evaluation.ai_consulting_text.trim().length > 0
-          ? evaluation.ai_consulting_text.trim()
-          : typeof evaluation.message === 'string' && evaluation.message.trim().length > 0
-            ? evaluation.message.trim()
-            : null,
-      );
+      setAiResponse(buildAiResponseText(evaluation));
     } catch (error) {
       console.error('[LeadflowApplicationForm] submission failed', error);
       setSubmissionError('No pudimos procesar la auditoría en este momento. Inténtalo de nuevo en unos segundos.');

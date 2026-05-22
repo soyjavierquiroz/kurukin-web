@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  PENDIENTE
+  ORO
+  PLATA
+  TROLL
+  BASURA
+}
+
+model Lead {
+  id                  String     @id @default(uuid()) @db.Uuid
+  fecha               DateTime   @default(now())
+  nombre              String
+  telefono            String
+  email               String
+  pais                String?
+  compania            String?
+  tamanoEquipo        String?
+  origenLeadsRaw      String?
+  frenoDuplicacionRaw String?
+  financiacion        String?
+  tomaDecision        String?
+  status              LeadStatus @default(PENDIENTE)
+  aiConsultingText    String?    @db.Text
+  dolorPsicologico    String?    @db.Text
+  estrategiaCierre    String?    @db.Text
+  eventId             String?
+}
