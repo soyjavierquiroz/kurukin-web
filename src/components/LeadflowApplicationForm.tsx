@@ -473,13 +473,7 @@ async function waitForLeadDiagnosis(localLeadId: string): Promise<LocalLeadStatu
 }
 
 function buildAiResponseText(result: LocalLeadStatusResponse): string | null {
-  const blocks = [
-    result.aiConsultingText?.trim(),
-    result.dolorPsicologico?.trim() ? `Dolor psicológico detectado:\n${result.dolorPsicologico.trim()}` : null,
-    result.estrategiaCierre?.trim() ? `Estrategia de cierre:\n${result.estrategiaCierre.trim()}` : null,
-  ].filter((block): block is string => Boolean(block));
-
-  return blocks.length > 0 ? blocks.join('\n\n') : null;
+  return result.aiConsultingText?.trim() || null;
 }
 
 function isApprovedLeadStatus(status: LeadStatus): boolean {
