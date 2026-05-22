@@ -7,7 +7,7 @@ import { captureClientIp, getAnalyticsContext, trackQualifiedLead } from '../lib
 
 const TOTAL_STEPS = 7;
 const FIRST_FORM_STEP = 1;
-const SUCCESS_COUNTDOWN_SECONDS = 20;
+const SUCCESS_COUNTDOWN_SECONDS = 30;
 const EVALUATION_MIN_DURATION_MS = 5000;
 const MIN_COMPANY_TEXT_LENGTH = 4;
 const MIN_DETAILED_TEXT_LENGTH = 15;
@@ -1083,7 +1083,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         ) : shouldShowResult && lastPayload ? (
           <div
             className={[
-              'mx-auto flex w-full max-w-xl flex-col items-center py-8 text-center md:py-12',
+              'mx-auto flex w-full max-w-xl flex-col items-center pt-4 text-center md:pt-8',
               isQualified ? 'pb-56 md:pb-52' : 'pb-8',
             ].join(' ')}
           >
@@ -1092,7 +1092,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/40 bg-cyan-300/10 text-cyan-200 shadow-[0_0_34px_rgba(34,211,238,0.16)]">
                   <ShieldCheck className="h-8 w-8" />
                 </div>
-                <h2 className="mt-6 text-2xl font-black leading-tight text-white md:text-4xl">
+                <h2 className="mt-4 whitespace-nowrap text-xl font-black leading-tight text-white md:mt-6 md:text-4xl">
                   🔥 ACCESO PRE-APROBADO
                 </h2>
                 <p className="mt-4 text-sm font-semibold leading-relaxed text-slate-200 md:text-lg">
