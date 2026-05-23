@@ -12,7 +12,7 @@ export function Benefits() {
 
   return (
     <section id="benefits" className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950"></div>
+      <div className="absolute inset-0 bg-black"></div>
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-14">
@@ -28,12 +28,12 @@ export function Benefits() {
           {benefits.map((text, idx) => (
             <div
               key={idx}
-              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-6 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/5 to-amber-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-zinc-900/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div className="relative flex gap-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-400/20 to-amber-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="w-5 h-5 text-amber-300" />
                 </div>
                 <p className="text-slate-200 text-lg leading-relaxed">{text}</p>

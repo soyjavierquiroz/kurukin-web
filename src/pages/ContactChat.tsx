@@ -66,7 +66,7 @@ export function ContactChat() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950">
+    <div className="min-h-screen bg-black">
       <header className="px-4 py-4 md:py-6 text-center border-b border-white/10">
         <div className="inline-flex items-center gap-2">
           <Bot className="w-6 h-6 text-amber-300" />
@@ -84,7 +84,7 @@ export function ContactChat() {
             Preparando tu asistente virtual...
           </p>
 
-          <div className="relative bg-slate-900/60 border border-white/10 rounded-2xl p-5 md:p-7 mb-6">
+          <div className="relative bg-zinc-900/70 border border-zinc-800 rounded-2xl p-5 md:p-7 mb-6">
             <p className="text-2xl md:text-4xl font-extrabold text-white mb-4">
               Conectando con WhatsApp en {countdown}...
             </p>
@@ -98,7 +98,7 @@ export function ContactChat() {
             </button>
           </div>
 
-          <div className="max-w-md mx-auto bg-[#0b141a]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-amber-950/20 overflow-hidden mb-2 text-left opacity-80">
+          <div className="max-w-md mx-auto bg-zinc-950 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden mb-2 text-left opacity-80">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
               <div className="w-3 h-3 rounded-full bg-red-500/90"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500/90"></div>
@@ -107,7 +107,7 @@ export function ContactChat() {
 
             <div className="flex flex-col gap-4 p-5">
               <div className="opacity-100 translate-y-0 animate-fade-in animate-slide-up transition-all duration-500">
-                <div className="self-start mr-auto w-fit max-w-[85%] bg-[#202c33] text-slate-100 p-3.5 rounded-2xl rounded-tl-sm shadow-md text-[15px] leading-relaxed">
+                <div className="self-start mr-auto w-fit max-w-[85%] bg-neutral-900 text-slate-100 p-3.5 rounded-2xl rounded-tl-sm shadow-md text-[15px] leading-relaxed">
                   Antes de empezar, ¿qué tipo de negocio tienes?
                 </div>
               </div>
@@ -118,7 +118,7 @@ export function ContactChat() {
                   showMessage2 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
                 ].join(' ')}
               >
-                <div className="self-end ml-auto w-fit max-w-[85%] bg-amber-700 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-md text-[15px] leading-relaxed">
+                <div className="self-end ml-auto w-fit max-w-[85%] border border-zinc-700 bg-zinc-800 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-md text-[15px] leading-relaxed">
                   Vendo servicios
                 </div>
               </div>
@@ -129,7 +129,7 @@ export function ContactChat() {
                   showMessage3 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
                 ].join(' ')}
               >
-                <div className="self-start mr-auto w-fit max-w-[85%] bg-[#202c33] text-slate-100 p-3.5 rounded-2xl rounded-tl-sm shadow-md text-[15px] leading-relaxed">
+                <div className="self-start mr-auto w-fit max-w-[85%] bg-neutral-900 text-slate-100 p-3.5 rounded-2xl rounded-tl-sm shadow-md text-[15px] leading-relaxed">
                   Perfecto. Entonces responderé como tu asistente comercial.
                 </div>
               </div>

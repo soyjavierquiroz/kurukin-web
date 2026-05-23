@@ -277,7 +277,7 @@ export function KurukinPlayer({
           )}
         </div>
       ) : (
-        <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_35%),linear-gradient(135deg,#0a0a0b,#111827)]" />
+        <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_35%),linear-gradient(135deg,#09090b,#171717)]" />
       )}
 
       <SmartPoster

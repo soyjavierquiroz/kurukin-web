@@ -22,7 +22,7 @@ export function PainPoints() {
 
   return (
     <section id="pain-points" className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950"></div>
+      <div className="absolute inset-0 bg-black"></div>
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12">
@@ -43,12 +43,12 @@ export function PainPoints() {
           {symptoms.map((item, index) => (
             <div
               key={index}
-              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-6 hover:border-amber-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/20 hover:-translate-y-2"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/20 hover:-translate-y-2"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/5 to-amber-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-zinc-900/60 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400/20 to-amber-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <item.icon className="w-6 h-6 text-amber-300" />
                 </div>
 

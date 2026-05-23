@@ -38,7 +38,7 @@ export function FinalCTA() {
 
   return (
     <section id="final-cta" className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-950/25 via-slate-950 to-slate-950"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/10 via-black to-black"></div>
 
       <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-amber-500/15 rounded-full blur-3xl animate-pulse"></div>
@@ -68,13 +68,13 @@ export function FinalCTA() {
           <p className="text-slate-400 text-sm mt-3">Respuesta inmediata. Sin registro.</p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm text-slate-200/90">
-            <span className="inline-flex items-center gap-2 bg-slate-900/40 border border-slate-800 rounded-full px-4 py-2">
+            <span className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2">
               ✅ Respuesta inmediata
             </span>
-            <span className="inline-flex items-center gap-2 bg-slate-900/40 border border-slate-800 rounded-full px-4 py-2">
+            <span className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2">
               ✅ Configuración guiada
             </span>
-            <span className="inline-flex items-center gap-2 bg-slate-900/40 border border-slate-800 rounded-full px-4 py-2">
+            <span className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2">
               ✅ Se adapta a tu negocio
             </span>
           </div>
@@ -82,7 +82,7 @@ export function FinalCTA() {
 
         {/* 7) PARA QUIÉN ES / NO ES */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8">
+          <div className="bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6">¿Kurukin es para ti?</h3>
             <ul className="space-y-4">
               {forYou.map((t, idx) => (
@@ -94,7 +94,7 @@ export function FinalCTA() {
             </ul>
           </div>
 
-          <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8">
+          <div className="bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6">No es para ti si:</h3>
             <ul className="space-y-4">
               {notForYou.map((t, idx) => (
@@ -119,9 +119,9 @@ export function FinalCTA() {
             {faqs.map((item, idx) => (
               <div
                 key={idx}
-                className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-6 hover:border-amber-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10"
+                className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/5 to-amber-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute inset-0 bg-zinc-900/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div className="relative">
                   <div className="flex items-start gap-3 mb-3">
@@ -139,7 +139,7 @@ export function FinalCTA() {
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
 
-          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-10 text-center">
+          <div className="relative bg-gradient-to-br from-zinc-900 to-neutral-900 border border-zinc-800 rounded-3xl p-10 text-center">
             <h3 className="text-3xl md:text-4xl font-bold text-white mb-8 leading-tight">
               Mientras tú respondes mensajes, alguien más está cerrando ventas.
             </h3>
@@ -159,7 +159,7 @@ export function FinalCTA() {
               <div className="flex flex-col items-center">
                 <a
                   href={CALL_LINK}
-                  className="text-white border-2 border-slate-700 hover:border-amber-500 px-12 py-5 rounded-lg font-semibold text-xl transition-all duration-300 hover:bg-amber-500/10 inline-flex items-center justify-center"
+                  className="text-white border-2 border-zinc-700 hover:border-amber-500 px-12 py-5 rounded-lg font-semibold text-xl transition-all duration-300 hover:bg-zinc-900 inline-flex items-center justify-center"
                 >
                   Agendar llamada
                 </a>
@@ -174,7 +174,7 @@ export function FinalCTA() {
         </div>
 
         {/* Footer */}
-        <footer className="relative mt-24 pt-12 border-t border-slate-800">
+        <footer className="relative mt-24 pt-12 border-t border-zinc-800">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-slate-400 text-sm">© 2026 Kurukin. Todos los derechos reservados.</div>
             <div className="flex gap-6 text-slate-400 text-sm">

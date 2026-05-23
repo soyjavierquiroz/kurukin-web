@@ -14,8 +14,8 @@ const ctaBaseClassName = [
 ].join(' ');
 
 const glassPanelClassName = [
-  'rounded-2xl border border-white/10 bg-slate-900/40 p-6 shadow-2xl backdrop-blur-md',
-  'transition duration-300 hover:border-amber-500/30',
+  'rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-2xl backdrop-blur-md',
+  'transition duration-300 hover:border-zinc-700',
 ].join(' ');
 
 const problemBullets = [
@@ -104,7 +104,7 @@ export default function LeadflowPage() {
   }, [isFormOpen]);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-zinc-950 to-black text-white">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       {/* Estilos inyectados para la animación del Marquee */}
       <style>{`
         @keyframes marquee {
@@ -118,7 +118,7 @@ export default function LeadflowPage() {
         }
       `}</style>
 
-      <div className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl">
+      <div className="sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 py-3 text-center text-xs font-medium text-white sm:px-6 sm:text-sm">
           🔒 Solo para líderes con equipos activos. Aceptamos 5 equipos listos para duplicación masiva este mes.
         </div>
@@ -158,7 +158,7 @@ export default function LeadflowPage() {
 
             <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
               <div className="absolute -inset-8 rounded-full bg-amber-500/5 blur-[120px]" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)] backdrop-blur-md">
+              <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)] backdrop-blur-md">
                 <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
                   <KurukinPlayer
                     provider="bunnynet"
@@ -202,7 +202,7 @@ export default function LeadflowPage() {
           </div>
 
           <div className="relative mx-auto flex max-w-7xl overflow-hidden">
-            <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-slate-950 to-transparent sm:w-32" />
+            <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-black to-transparent sm:w-32" />
             <div className="absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-black to-transparent sm:w-32" />
             {/* Contenedor animado */}
             <div className="animate-marquee items-center hover:[animation-play-state:paused]">
@@ -228,7 +228,7 @@ export default function LeadflowPage() {
                 <img 
                   src="https://cdn.kuruk.in/leadflow-assets/landing/dependencia.webp" 
                   alt="Duplicación bloqueada por dependencia" 
-                  className="relative rounded-[2rem] border border-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.55)]" 
+                  className="relative rounded-[2rem] border border-zinc-800 grayscale contrast-125 shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
                 />
               </div>
 
@@ -279,7 +279,7 @@ export default function LeadflowPage() {
             </div>
 
             <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)] lg:items-center">
-              <div className="ml-3 border-l-2 border-amber-500/30 pl-6 space-y-6">
+              <div className="ml-3 border-l-2 border-zinc-700 pl-6 space-y-6">
                 {[
                   ['01', 'Ayudamos a líderes MLM con +20 personas a generar 3–10 conversaciones diarias en 7 días', 'Sin perseguir, sin crear contenido diario.'],
                   ['02', 'LeadFlow asigna prospectos automáticamente a tu equipo', 'Cada miembro recibe conversaciones listas para activar seguimiento.'],
@@ -296,7 +296,7 @@ export default function LeadflowPage() {
 
               <div className="relative group">
                 <div className="absolute -inset-4 bg-amber-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img src="https://cdn.kuruk.in/leadflow-assets/landing/sindependencia.webp" alt="Diagrama de flujo" className="relative rounded-[2rem] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.6)] w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]" />
+                <img src="https://cdn.kuruk.in/leadflow-assets/landing/sindependencia.webp" alt="Diagrama de flujo" className="relative rounded-[2rem] border border-zinc-800 grayscale contrast-125 shadow-[0_20px_80px_rgba(0,0,0,0.6)] w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]" />
               </div>
             </div>
 
@@ -311,7 +311,7 @@ export default function LeadflowPage() {
         </section>
 
         <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute right-10 top-12 h-[420px] w-[420px] rounded-full bg-red-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute right-10 top-12 h-[420px] w-[420px] rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="pointer-events-none absolute -left-24 bottom-0 h-[420px] w-[420px] rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
@@ -325,7 +325,7 @@ export default function LeadflowPage() {
                 </p>
               </div>
 
-              <div className="rounded-[2rem] border border-white/10 bg-slate-900/40 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.45)] backdrop-blur-md md:p-8">
+              <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.45)] backdrop-blur-md md:p-8">
                 <div className="flex items-center justify-between gap-4">
                   <p className="text-sm font-black uppercase tracking-[0.22em] text-amber-300">
                     Simulador de duplicación muerta
@@ -341,7 +341,7 @@ export default function LeadflowPage() {
                   max={100}
                   value={distribuidoresActivos}
                   onChange={(event) => setDistribuidoresActivos(Number(event.target.value))}
-                  className="mt-8 h-3 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-amber-400 outline-none [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.08)] [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-amber-300 [&::-moz-range-thumb]:shadow-[0_0_24px_rgba(245,158,11,0.55)] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-amber-300 [&::-webkit-slider-thumb]:shadow-[0_0_24px_rgba(245,158,11,0.55)]"
+                  className="mt-8 h-3 w-full cursor-pointer appearance-none rounded-full bg-zinc-800 accent-amber-400 outline-none [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.08)] [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-amber-300 [&::-moz-range-thumb]:shadow-[0_0_24px_rgba(245,158,11,0.55)] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-amber-300 [&::-webkit-slider-thumb]:shadow-[0_0_24px_rgba(245,158,11,0.55)]"
                   aria-label="Cantidad de líderes activos"
                 />
 
@@ -352,11 +352,11 @@ export default function LeadflowPage() {
                     </p>
                     <p className="mt-3 text-3xl font-black text-white">{distribuidoresActivos} líderes</p>
                   </div>
-                  <div className="rounded-2xl border border-red-400/20 bg-red-950/30 p-6 shadow-2xl backdrop-blur-md transition duration-300 hover:border-red-300/40">
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-red-300">
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl backdrop-blur-md transition duration-300 hover:border-zinc-700">
+                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-amber-300">
                       Conversiones cualificadas que tu red deja morir por semana
                     </p>
-                    <p className="mt-3 text-4xl font-black text-red-300 md:text-5xl">{conversacionesMuertas}</p>
+                    <p className="mt-3 text-4xl font-black text-amber-400 md:text-5xl">{conversacionesMuertas}</p>
                   </div>
                 </div>
 
@@ -385,7 +385,7 @@ export default function LeadflowPage() {
         <section className="relative overflow-hidden">
           <div className="pointer-events-none absolute left-1/2 top-0 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
-            <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 p-8 text-white shadow-2xl backdrop-blur-md md:p-12">
+            <div className="overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-8 text-white shadow-2xl backdrop-blur-md md:p-12">
               <div className="flex flex-col items-center text-center">
                 <ShieldCheck className="h-16 w-16 text-amber-500" />
                 <h2 className="mt-6 text-3xl font-bold md:text-5xl">Si en 30 días tu equipo no está generando conversaciones diarias con prospectos reales, seguimos trabajando contigo hasta lograrlo.</h2>
@@ -434,7 +434,7 @@ export default function LeadflowPage() {
         {/* CTA STICKY MOBILE - Solo Móvil */}
         {showSticky && (
           <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
-            <div className="absolute inset-0 border-t border-white/10 bg-slate-950/80 backdrop-blur-lg" />
+            <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-lg" />
             <div className="relative">
               <button
                 onClick={() => setIsFormOpen(true)}

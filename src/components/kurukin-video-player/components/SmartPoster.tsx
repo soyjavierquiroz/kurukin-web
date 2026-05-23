@@ -29,7 +29,7 @@ export function SmartPoster({
       ].join(' ')}
     >
       {imageUrl ? <img src={imageUrl} alt={title} className="absolute inset-0 h-full w-full object-cover" /> : null}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.25),transparent_45%),linear-gradient(135deg,rgba(9,9,11,0.88),rgba(9,9,11,0.96))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_45%),linear-gradient(135deg,rgba(9,9,11,0.92),rgba(9,9,11,0.98))]" />
       <div className="absolute inset-0 bg-black/35" />
 
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-6 text-center text-white">

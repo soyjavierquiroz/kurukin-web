@@ -70,10 +70,10 @@ function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950">
+    <div className="min-h-screen bg-black">
       <header
         className={[
-          'fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-lg border-b border-slate-800 transition-transform duration-300',
+          'fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-b border-zinc-800 transition-transform duration-300',
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full',
         ].join(' ')}
       >
@@ -95,7 +95,7 @@ function HomePage() {
       </header>
 
       <section id="hero" className="relative overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-950/20 via-slate-950 to-slate-950"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-black to-black"></div>
 
         <div className="relative max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-20 text-center">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
@@ -111,15 +111,15 @@ function HomePage() {
           </p>
 
           <div className="max-w-2xl mx-auto mb-6 grid sm:grid-cols-3 gap-2">
-            <div className="inline-flex items-center justify-center gap-2 bg-slate-900/50 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
+            <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
               <Check className="w-4 h-4 text-amber-300" />
               Responde al instante
             </div>
-            <div className="inline-flex items-center justify-center gap-2 bg-slate-900/50 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
+            <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
               <Check className="w-4 h-4 text-amber-300" />
               Conversación natural
             </div>
-            <div className="inline-flex items-center justify-center gap-2 bg-slate-900/50 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
+            <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
               <Check className="w-4 h-4 text-amber-300" />
               Enfocado en vender
             </div>
@@ -140,7 +140,7 @@ function HomePage() {
 
       <section ref={chatRef} className="relative px-4 md:px-6 py-8 md:py-14">
         <div className="relative max-w-5xl mx-auto">
-          <div className="max-w-md mx-auto bg-[#0b141a]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-amber-950/20 overflow-hidden">
+          <div className="max-w-md mx-auto bg-zinc-950 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden">
             <div className="border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
@@ -151,7 +151,7 @@ function HomePage() {
 
             <div className="flex flex-col gap-4 w-full p-4">
               {chatStep >= 1 && (
-                <div className="self-end ml-auto max-w-[85%] bg-amber-700 text-white p-3 rounded-2xl rounded-tr-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
+                <div className="self-end ml-auto max-w-[85%] border border-zinc-700 bg-zinc-800 text-white p-3 rounded-2xl rounded-tr-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
                   <div>
                     Hola, ¿tienen disponibilidad para mañana?
                   </div>
@@ -159,7 +159,7 @@ function HomePage() {
               )}
 
               {chatStep >= 2 && (
-                <div className="self-start mr-auto max-w-[85%] bg-[#202c33] text-slate-100 p-3 rounded-2xl rounded-tl-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
+                <div className="self-start mr-auto max-w-[85%] bg-neutral-900 text-slate-100 p-3 rounded-2xl rounded-tl-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
                   <div>
                     ¡Claro! 🙌 Tengo espacios a las 10:00, 14:00 y 16:00.{'\n\n'}¿Quieres que te reserve uno ahora?
                   </div>
@@ -167,7 +167,7 @@ function HomePage() {
               )}
 
               {chatStep >= 3 && (
-                <div className="self-end ml-auto max-w-[85%] bg-amber-700 text-white p-3 rounded-2xl rounded-tr-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
+                <div className="self-end ml-auto max-w-[85%] border border-zinc-700 bg-zinc-800 text-white p-3 rounded-2xl rounded-tr-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
                   <div>
                     14:00 está perfecto.
                   </div>
@@ -175,7 +175,7 @@ function HomePage() {
               )}
 
               {chatStep >= 4 && (
-                <div className="self-start mr-auto max-w-[85%] bg-[#202c33] text-slate-100 p-3 rounded-2xl rounded-tl-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
+                <div className="self-start mr-auto max-w-[85%] bg-neutral-900 text-slate-100 p-3 rounded-2xl rounded-tl-sm shadow-md transition-opacity duration-500 animate-fade-in animate-slide-up whitespace-pre-line">
                   <div>
                     Listo ✅ Queda confirmada para mañana a las 14:00.{'\n\n'}¿Me compartes tu nombre para enviarte la
                     confirmación?
@@ -196,7 +196,7 @@ function HomePage() {
       <FinalCTA />
 
       {isFloatingButtonVisible && (
-        <div className="fixed bottom-0 left-0 w-full z-50 bg-slate-950/90 backdrop-blur-md border-t border-white/10 p-4 md:hidden">
+        <div className="fixed bottom-0 left-0 w-full z-50 bg-black/90 backdrop-blur-md border-t border-white/10 p-4 md:hidden">
           <Link
             to="/contactar/chatear"
             className="w-full min-h-[60px] rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase font-bold text-lg inline-flex flex-col items-center justify-center"

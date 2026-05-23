@@ -117,11 +117,11 @@ export function ContactForm() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-900">
-      <section className="mx-auto w-full max-w-5xl rounded-xl border border-slate-300 bg-white p-5 shadow-sm md:p-6">
-        <h1 className="text-3xl font-semibold text-slate-900">Probar Formulario (Nombre, Apellido, WhatsApp)</h1>
+    <main className="min-h-screen bg-black px-4 py-8 text-white">
+      <section className="mx-auto w-full max-w-5xl rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm md:p-6">
+        <h1 className="text-3xl font-semibold text-white">Probar Formulario (Nombre, Apellido, WhatsApp)</h1>
 
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+        <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-sm text-slate-300">
           <p className="font-semibold">Instrucciones precisas de verificación</p>
           <ol className="mt-2 list-decimal space-y-1 pl-5">
             <li>En el selector de país, confirma Bolivia (+591).</li>
@@ -135,7 +135,7 @@ export function ContactForm() {
         <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="firstName" className="mb-2 block text-sm font-medium text-slate-800">
+              <label htmlFor="firstName" className="mb-2 block text-sm font-medium text-slate-300">
                 Nombre
               </label>
               <input
@@ -147,18 +147,18 @@ export function ContactForm() {
                   setErrors((prev) => ({ ...prev, firstName: undefined }));
                 }}
                 className={[
-                  'h-11 w-full rounded-md border bg-slate-100 px-4 text-lg text-slate-900',
+                  'h-11 w-full rounded-md border bg-zinc-950 px-4 text-lg text-white',
                   'focus:outline-none focus:ring-2',
                   errors.firstName
                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
-                    : 'border-slate-300 focus:border-amber-500 focus:ring-amber-500/20',
+                    : 'border-zinc-700 focus:border-amber-500 focus:ring-amber-500/20',
                 ].join(' ')}
               />
               {errors.firstName ? <p className="mt-2 text-sm text-red-600">{errors.firstName}</p> : null}
             </div>
 
             <div>
-              <label htmlFor="lastName" className="mb-2 block text-sm font-medium text-slate-800">
+              <label htmlFor="lastName" className="mb-2 block text-sm font-medium text-slate-300">
                 Apellido
               </label>
               <input
@@ -170,11 +170,11 @@ export function ContactForm() {
                   setErrors((prev) => ({ ...prev, lastName: undefined }));
                 }}
                 className={[
-                  'h-11 w-full rounded-md border bg-slate-100 px-4 text-lg text-slate-900',
+                  'h-11 w-full rounded-md border bg-zinc-950 px-4 text-lg text-white',
                   'focus:outline-none focus:ring-2',
                   errors.lastName
                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
-                    : 'border-slate-300 focus:border-amber-500 focus:ring-amber-500/20',
+                    : 'border-zinc-700 focus:border-amber-500 focus:ring-amber-500/20',
                 ].join(' ')}
               />
               {errors.lastName ? <p className="mt-2 text-sm text-red-600">{errors.lastName}</p> : null}
@@ -210,7 +210,7 @@ export function ContactForm() {
           <input type="hidden" name="visitor_timezone" value={visitorData?.timezone || ''} />
           <input type="hidden" name="visitor_currency" value={visitorData?.currency || ''} />
 
-          <div className="border-t border-slate-200 pt-4">
+          <div className="border-t border-zinc-800 pt-4">
             <button
               type="submit"
               disabled={!canSubmit}
@@ -221,9 +221,9 @@ export function ContactForm() {
           </div>
         </form>
 
-        <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-semibold text-slate-800">Panel de depuración</h2>
-          <pre className="mt-2 overflow-x-auto text-xs text-slate-700">
+        <section className="mt-6 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+          <h2 className="text-sm font-semibold text-slate-200">Panel de depuración</h2>
+          <pre className="mt-2 overflow-x-auto text-xs text-slate-400">
 {JSON.stringify(
   {
     phone_input_value: phone,

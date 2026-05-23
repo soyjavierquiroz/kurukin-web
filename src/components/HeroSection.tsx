@@ -9,7 +9,7 @@ export function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-950/20 via-slate-950 to-slate-950"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-black to-black"></div>
 
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/30 rounded-full blur-3xl animate-pulse"></div>
@@ -17,7 +17,7 @@ export function HeroSection() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-6 py-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 mb-8 animate-fade-in">
+        <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2 mb-8 animate-fade-in">
           <Sparkles className="w-4 h-4 text-amber-300" />
           <span className="text-amber-300 text-sm font-medium">
             Respuesta inmediata en WhatsApp 24/7
@@ -73,7 +73,7 @@ export function HeroSection() {
           <div className="flex flex-col items-center">
             <a
               href={CALL_LINK}
-              className="text-white border-2 border-slate-700 hover:border-amber-500 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-amber-500/10 flex items-center justify-center"
+              className="text-white border-2 border-zinc-700 hover:border-amber-500 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-zinc-900 flex items-center justify-center"
             >
               Agendar llamada
             </a>
@@ -82,7 +82,7 @@ export function HeroSection() {
         </div>
 
         {/* Proof bar */}
-        <div className="inline-flex flex-wrap justify-center gap-x-4 gap-y-2 bg-slate-900/40 border border-slate-800 rounded-full px-5 py-2 text-sm text-slate-200/90 animate-fade-in delay-300">
+        <div className="inline-flex flex-wrap justify-center gap-x-4 gap-y-2 bg-zinc-900 border border-zinc-800 rounded-full px-5 py-2 text-sm text-slate-200/90 animate-fade-in delay-300">
           <span>✅ Respuesta inmediata</span>
           <span className="text-slate-500">|</span>
           <span>✅ Configuración guiada</span>
@@ -93,7 +93,7 @@ export function HeroSection() {
         {/* Demo visual */}
         <div className="relative max-w-4xl mx-auto mt-12 animate-fade-in delay-300">
           <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
-          <div className="relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 shadow-2xl">
+          <div className="relative bg-zinc-900/70 backdrop-blur border border-zinc-800 rounded-2xl p-8 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
@@ -101,22 +101,22 @@ export function HeroSection() {
             </div>
 
             <div className="space-y-3 text-left">
-              <div className="bg-slate-800/50 rounded-lg p-4 border-l-4 border-amber-500">
+              <div className="bg-neutral-900 rounded-lg p-4 border-l-4 border-zinc-700">
                 <p className="text-slate-400 text-sm mb-1">Cliente 23:47</p>
                 <p className="text-white">¿Tienen disponibilidad para mañana?</p>
               </div>
 
-              <div className="bg-gradient-to-r from-amber-950/50 to-amber-950/50 rounded-lg p-4 border-l-4 border-amber-500">
+              <div className="bg-zinc-950 rounded-lg p-4 border-l-4 border-amber-500">
                 <p className="text-slate-400 text-sm mb-1">Kurukin 23:47</p>
                 <p className="text-white">¡Sí! Tengo espacios a las 10:00, 14:00 y 16:00. ¿Cuál te conviene?</p>
               </div>
 
-              <div className="bg-slate-800/50 rounded-lg p-4 border-l-4 border-amber-500">
+              <div className="bg-neutral-900 rounded-lg p-4 border-l-4 border-zinc-700">
                 <p className="text-slate-400 text-sm mb-1">Cliente 23:48</p>
                 <p className="text-white">Las 14:00 está perfecto</p>
               </div>
 
-              <div className="bg-gradient-to-r from-amber-950/50 to-amber-950/50 rounded-lg p-4 border-l-4 border-amber-500">
+              <div className="bg-zinc-950 rounded-lg p-4 border-l-4 border-amber-500">
                 <p className="text-slate-400 text-sm mb-1">Kurukin 23:48</p>
                 <p className="text-white">
                   Listo ✅ Queda agendado para mañana a las 14:00. ¿Me confirmas tu nombre y el servicio que buscas?

@@ -25,7 +25,7 @@ export function DigitalArchitecture() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-20 px-6 overflow-hidden bg-slate-950">
+    <section id="how-it-works" className="relative py-20 px-6 overflow-hidden bg-black">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
 
       <div className="relative max-w-7xl mx-auto">
@@ -42,9 +42,9 @@ export function DigitalArchitecture() {
           {steps.map((step, index) => (
             <div
               key={index}
-              className="group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
+              className="group relative bg-gradient-to-br from-zinc-900 to-neutral-900 border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-400/20 to-amber-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <step.icon className="w-8 h-8 text-amber-300" />
               </div>
 
@@ -54,8 +54,8 @@ export function DigitalArchitecture() {
           ))}
         </div>
 
-        <div className="relative bg-gradient-to-r from-amber-400/10 to-amber-500/10 border border-amber-500/30 rounded-2xl p-10">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-400/20 via-transparent to-transparent rounded-2xl"></div>
+        <div className="relative bg-zinc-900/70 border border-zinc-800 rounded-2xl p-10">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent rounded-2xl"></div>
 
           <div className="relative grid md:grid-cols-2 gap-6 items-center">
             <div>
@@ -75,7 +75,7 @@ export function DigitalArchitecture() {
               <p className="text-slate-400 text-sm mt-3">Respuesta inmediata. Sin registro.</p>
             </div>
 
-            <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-6">
+            <div className="bg-zinc-950 backdrop-blur border border-zinc-800 rounded-xl p-6">
               <div className="space-y-4">
                 <div className="text-slate-200 font-semibold">Lo que queda definido contigo:</div>
                 <ul className="space-y-3 text-slate-300">

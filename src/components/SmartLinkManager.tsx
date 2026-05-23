@@ -77,7 +77,7 @@ export function SmartLinkManager() {
   };
 
   return (
-    <section className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-200 shadow-2xl shadow-black/30">
+    <section className="mx-auto w-full max-w-5xl rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-slate-200 shadow-2xl shadow-black/30">
       <header className="mb-6">
         <h2 className="text-2xl font-semibold tracking-tight">Smart Link Manager</h2>
         <p className="mt-2 text-sm text-slate-400">
@@ -94,7 +94,7 @@ export function SmartLinkManager() {
             value={longUrl}
             onChange={(event) => setLongUrl(event.target.value)}
             placeholder="https://ejemplo.com/oferta"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
           />
         </label>
 
@@ -105,7 +105,7 @@ export function SmartLinkManager() {
             value={customSlug}
             onChange={(event) => setCustomSlug(event.target.value)}
             placeholder="mi-campana"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
           />
         </label>
 
@@ -125,20 +125,20 @@ export function SmartLinkManager() {
       <div className="mt-8">
         <h3 className="mb-3 text-lg font-semibold text-slate-100">Enlaces Recientes</h3>
         {recentLinks.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-6 text-center text-sm text-slate-400">
+          <p className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-6 text-center text-sm text-slate-400">
             Aún no hay enlaces creados en esta sesión.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-800">
-            <table className="min-w-full divide-y divide-slate-800 text-sm">
-              <thead className="bg-slate-950/70 text-left text-slate-400">
+          <div className="overflow-x-auto rounded-xl border border-zinc-800">
+            <table className="min-w-full divide-y divide-zinc-800 text-sm">
+              <thead className="bg-zinc-950 text-left text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">Slug</th>
                   <th className="px-4 py-3 font-medium">URL Original</th>
                   <th className="px-4 py-3 font-medium">Acción</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 bg-slate-900">
+              <tbody className="divide-y divide-zinc-800 bg-zinc-900">
                 {recentLinks.map((link) => (
                   <tr key={link.protectedUrl}>
                     <td className="px-4 py-3 font-mono text-amber-300">/l/{link.keyword}</td>
@@ -149,7 +149,7 @@ export function SmartLinkManager() {
                       <button
                         type="button"
                         onClick={() => void handleCopy(link.protectedUrl, link.keyword)}
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-amber-400 hover:text-amber-300"
+                        className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-amber-400 hover:text-amber-300"
                       >
                         {copiedSlug === link.keyword ? 'Copiado' : 'Copiar enlace'}
                       </button>

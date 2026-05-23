@@ -33,7 +33,7 @@ export function SocialProof() {
 
   return (
     <section id="social-proof" className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950"></div>
+      <div className="absolute inset-0 bg-black"></div>
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12">
@@ -52,7 +52,7 @@ export function SocialProof() {
           {testimonials.map((t, index) => (
             <div
               key={index}
-              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
             >
               <div className="absolute top-6 right-6 text-amber-500/20">
                 <Quote className="w-12 h-12" />
@@ -71,7 +71,7 @@ export function SocialProof() {
                   <img
                     src={t.image}
                     alt={t.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-amber-500/30"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-zinc-700"
                     loading="lazy"
                   />
                   <div>
@@ -89,7 +89,7 @@ export function SocialProof() {
         </div>
 
         {/* Bloque inferior sin métricas inventadas */}
-        <div className="bg-gradient-to-r from-amber-400/10 to-amber-500/10 border border-amber-500/30 rounded-2xl p-10 text-center">
+        <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl p-10 text-center">
           <h3 className="text-3xl font-bold text-white mb-4">
             La diferencia es simple: responder a tiempo.
           </h3>

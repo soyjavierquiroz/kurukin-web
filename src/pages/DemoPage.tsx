@@ -5,7 +5,7 @@ export const DemoPage = () => {
   const [videoTime, setVideoTime] = useState(0);
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] px-4 text-slate-100">
+    <div className="min-h-screen bg-black px-4 text-slate-100">
       <div className="flex w-full max-w-4xl mx-auto flex-col items-center gap-16 py-12">
         <section className="w-full">
           <h1 className="mb-4 text-center text-3xl font-extrabold text-white">Motor Legacy (YouTube)</h1>

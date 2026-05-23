@@ -139,7 +139,7 @@ export const VideoTestPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] py-10 px-4 font-sans text-slate-100">
+    <div className="min-h-screen bg-black py-10 px-4 font-sans text-slate-100">
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <div className="text-center">
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
@@ -171,7 +171,7 @@ export const VideoTestPage = () => {
           </div>
         </div>
 
-        <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 shadow-xl backdrop-blur md:p-7">
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-xl backdrop-blur md:p-7">
           <h2 className="text-xl md:text-2xl font-bold text-amber-300">{dynamicHeadline}</h2>
 
           <form className="mt-5 space-y-5" onSubmit={handleSubmit} noValidate>
@@ -186,11 +186,11 @@ export const VideoTestPage = () => {
                   value={firstName}
                   onChange={(event) => handleInputChange(setFirstName, 'firstName', event)}
                   className={[
-                    'h-11 w-full rounded-md border bg-slate-950 px-4 text-base text-slate-100',
+                    'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.firstName
                       ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                      : 'border-slate-700 focus:border-amber-400 focus:ring-amber-500/30',
+                      : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
                   ].join(' ')}
                   placeholder="Tu nombre"
                 />
@@ -207,11 +207,11 @@ export const VideoTestPage = () => {
                   value={lastName}
                   onChange={(event) => handleInputChange(setLastName, 'lastName', event)}
                   className={[
-                    'h-11 w-full rounded-md border bg-slate-950 px-4 text-base text-slate-100',
+                    'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.lastName
                       ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                      : 'border-slate-700 focus:border-amber-400 focus:ring-amber-500/30',
+                      : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
                   ].join(' ')}
                   placeholder="Tu apellido"
                 />
@@ -229,11 +229,11 @@ export const VideoTestPage = () => {
                 value={email}
                 onChange={(event) => handleInputChange(setEmail, 'email', event)}
                 className={[
-                  'h-11 w-full rounded-md border bg-slate-950 px-4 text-base text-slate-100',
+                  'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                   'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                   errors.email
                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                    : 'border-slate-700 focus:border-amber-400 focus:ring-amber-500/30',
+                    : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
                 ].join(' ')}
                 placeholder="tu@email.com"
               />

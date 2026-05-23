@@ -27,14 +27,14 @@ export function PricingCard({ productName, basePriceUSD, checkoutUrl, scrapedDat
   const isStandardScrapedCase = countryCode !== 'AR' && countryCode !== 'US' && hasScrapedPrice;
 
   return (
-    <section className="rounded-2xl border border-amber-500/30 bg-slate-900/80 p-6 shadow-xl shadow-amber-950/20 backdrop-blur md:p-8">
+    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-xl shadow-black/30 backdrop-blur md:p-8">
       <div className="mb-5">
         <p className="text-xs uppercase tracking-[0.18em] text-amber-300/90">Oferta Especial</p>
         <h3 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">Activa {productName} hoy mismo</h3>
         <p className="mt-2 text-sm text-slate-300">Valor base: {basePriceUSD} USD</p>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-slate-950/70 p-5">
+      <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5">
         {isArgentinaCase ? (
           <div className="space-y-3 text-slate-100">
             <p className="text-base md:text-lg">
@@ -78,15 +78,15 @@ export function PricingCard({ productName, basePriceUSD, checkoutUrl, scrapedDat
         </a>
 
         <div className="mt-4 grid gap-2 text-xs text-slate-300 md:grid-cols-3 md:text-sm">
-          <p className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2">
+          <p className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
             Pago seguro
           </p>
-          <p className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2">
+          <p className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
             <Lock className="h-4 w-4 text-emerald-300" />
             Procesado por Hotmart
           </p>
-          <p className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2">
+          <p className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
             <BadgeCheck className="h-4 w-4 text-emerald-300" />
             Acceso inmediato
           </p>

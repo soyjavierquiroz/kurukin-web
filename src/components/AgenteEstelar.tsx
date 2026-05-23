@@ -35,7 +35,7 @@ export function AgenteEstelar() {
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 mb-6">
+          <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2 mb-6">
             <Sparkles className="w-4 h-4 text-amber-300" />
             <span className="text-amber-300 text-sm font-medium">La solución, simple</span>
           </div>
@@ -57,12 +57,12 @@ export function AgenteEstelar() {
           {cards.map((card, index) => (
             <div
               key={index}
-              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/5 to-amber-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-zinc-900/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-400/20 to-amber-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <card.icon className="w-8 h-8 text-amber-300" />
                 </div>
 
@@ -75,7 +75,7 @@ export function AgenteEstelar() {
 
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
-          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-10 text-center">
+          <div className="relative bg-gradient-to-br from-zinc-900 to-neutral-900 border border-zinc-800 rounded-3xl p-10 text-center">
             <h3 className="text-3xl font-bold text-white mb-4">
               Kurukin responde. Tú solo cierras.
             </h3>

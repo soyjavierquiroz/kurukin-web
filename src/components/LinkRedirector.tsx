@@ -34,9 +34,9 @@ export function LinkRedirector() {
   }, [slug, expandLink, navigate]);
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-slate-900">
+    <div className="h-screen w-full flex items-center justify-center bg-black">
       <div
-        className="h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-amber-400"
+        className="h-12 w-12 animate-spin rounded-full border-4 border-zinc-800 border-t-amber-400"
         role="status"
         aria-label="Redirigiendo enlace"
       />
