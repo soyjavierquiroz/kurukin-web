@@ -29,21 +29,21 @@ export function AgenteEstelar() {
   return (
     <section id="agente-estelar" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-zinc-900/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neutral-900/30 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-amber-300" />
-            <span className="text-amber-300 text-sm font-medium">La solución, simple</span>
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span className="text-amber-400 text-sm font-medium">La solución, simple</span>
           </div>
 
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Kurukin hace el trabajo de atención.
             <br />
-            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+            <span className="text-amber-400">
               Tú haces el trabajo de venta.
             </span>
           </h2>
@@ -57,13 +57,13 @@ export function AgenteEstelar() {
           {cards.map((card, index) => (
             <div
               key={index}
-              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
             >
               <div className="absolute inset-0 bg-zinc-900/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div className="relative">
                 <div className="w-16 h-16 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <card.icon className="w-8 h-8 text-amber-300" />
+                  <card.icon className="w-8 h-8 text-amber-400" />
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-4">{card.title}</h3>
@@ -74,7 +74,7 @@ export function AgenteEstelar() {
         </div>
 
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
+          <div className="absolute inset-0 bg-zinc-900/50 blur-3xl"></div>
           <div className="relative bg-gradient-to-br from-zinc-900 to-neutral-900 border border-zinc-800 rounded-3xl p-10 text-center">
             <h3 className="text-3xl font-bold text-white mb-4">
               Kurukin responde. Tú solo cierras.
@@ -85,7 +85,7 @@ export function AgenteEstelar() {
 
             <a
               href={WHATSAPP_LINK}
-              className="inline-flex items-center justify-center bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-10 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-10 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 transform hover:scale-105"
             >
               Ver Kurukin en Acción
             </a>

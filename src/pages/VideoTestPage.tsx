@@ -143,7 +143,7 @@ export const VideoTestPage = () => {
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <div className="text-center">
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
-            Laboratorio: Kurukin Player <span className="text-amber-500">Pro</span>
+            Laboratorio: Kurukin Player <span className="text-amber-400">Pro</span>
           </h1>
           <p className="text-slate-400">Prueba de video inteligente + formulario enriquecido con contexto global.</p>
         </div>
@@ -157,7 +157,7 @@ export const VideoTestPage = () => {
           </div>
 
           <div>
-            <h3 className="mb-2 text-xl font-bold text-amber-300">Motor Kurukin Pro (Bunny HLS)</h3>
+            <h3 className="mb-2 text-xl font-bold text-amber-400">Motor Kurukin Pro (Bunny HLS)</h3>
             <div className="aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
               <KurukinPlayer
                 provider="bunnynet"
@@ -167,12 +167,12 @@ export const VideoTestPage = () => {
                 onTimeUpdate={(time) => setVideoTime(time)}
               />
             </div>
-            <div className="mt-4 text-center font-mono text-green-400">Tiempo actual del VSL: {Math.floor(videoTime)}s</div>
+            <div className="mt-4 text-center font-mono text-amber-400">Tiempo actual del VSL: {Math.floor(videoTime)}s</div>
           </div>
         </div>
 
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-xl backdrop-blur md:p-7">
-          <h2 className="text-xl md:text-2xl font-bold text-amber-300">{dynamicHeadline}</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-amber-400">{dynamicHeadline}</h2>
 
           <form className="mt-5 space-y-5" onSubmit={handleSubmit} noValidate>
             <div className="grid gap-4 md:grid-cols-2">
@@ -189,12 +189,12 @@ export const VideoTestPage = () => {
                     'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.firstName
-                      ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/30'
-                      : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
+                      ? 'border-amber-500/30 focus:border-amber-500/30 focus:ring-white/10'
+                      : 'border-zinc-700 focus:border-amber-500/30 focus:ring-white/10',
                   ].join(' ')}
                   placeholder="Tu nombre"
                 />
-                {errors.firstName ? <p className="mt-2 text-xs text-amber-300">{errors.firstName}</p> : null}
+                {errors.firstName ? <p className="mt-2 text-xs text-amber-400">{errors.firstName}</p> : null}
               </div>
 
               <div>
@@ -210,12 +210,12 @@ export const VideoTestPage = () => {
                     'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.lastName
-                      ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/30'
-                      : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
+                      ? 'border-amber-500/30 focus:border-amber-500/30 focus:ring-white/10'
+                      : 'border-zinc-700 focus:border-amber-500/30 focus:ring-white/10',
                   ].join(' ')}
                   placeholder="Tu apellido"
                 />
-                {errors.lastName ? <p className="mt-2 text-xs text-amber-300">{errors.lastName}</p> : null}
+                {errors.lastName ? <p className="mt-2 text-xs text-amber-400">{errors.lastName}</p> : null}
               </div>
             </div>
 
@@ -232,12 +232,12 @@ export const VideoTestPage = () => {
                   'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                   'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                   errors.email
-                    ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/30'
-                    : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
+                    ? 'border-amber-500/30 focus:border-amber-500/30 focus:ring-white/10'
+                    : 'border-zinc-700 focus:border-amber-500/30 focus:ring-white/10',
                 ].join(' ')}
                 placeholder="tu@email.com"
               />
-              {errors.email ? <p className="mt-2 text-xs text-amber-300">{errors.email}</p> : null}
+              {errors.email ? <p className="mt-2 text-xs text-amber-400">{errors.email}</p> : null}
             </div>
 
             <SmartPhoneInput
@@ -273,9 +273,9 @@ export const VideoTestPage = () => {
           </form>
 
           {lastPayload ? (
-            <section className="mt-6 rounded-lg border border-emerald-400/40 bg-emerald-500/10 p-4">
-              <p className="text-sm font-semibold text-emerald-300">Payload de webhook (debug)</p>
-              <pre className="mt-2 overflow-x-auto text-xs text-emerald-100">{JSON.stringify(lastPayload, null, 2)}</pre>
+            <section className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+              <p className="text-sm font-semibold text-amber-400">Payload de webhook (debug)</p>
+              <pre className="mt-2 overflow-x-auto text-xs text-slate-300">{JSON.stringify(lastPayload, null, 2)}</pre>
             </section>
           ) : null}
         </section>

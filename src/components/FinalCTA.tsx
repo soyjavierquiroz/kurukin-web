@@ -38,10 +38,10 @@ export function FinalCTA() {
 
   return (
     <section id="final-cta" className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/10 via-black to-black"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/30 via-black to-black"></div>
 
       <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-amber-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-zinc-900/30 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       <div className="relative max-w-6xl mx-auto">
@@ -49,7 +49,7 @@ export function FinalCTA() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Pruébalo ahora{' '}
-            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+            <span className="text-amber-400">
               (en vivo)
             </span>
           </h2>
@@ -59,7 +59,7 @@ export function FinalCTA() {
 
           <a
             href={WHATSAPP_LINK}
-            className="inline-flex items-center justify-center gap-3 group bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-10 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center justify-center gap-3 group bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-10 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 transform hover:scale-105"
           >
             Probar Kurukin en WhatsApp
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -87,7 +87,7 @@ export function FinalCTA() {
             <ul className="space-y-4">
               {forYou.map((t, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-slate-200">
-                  <CheckCircle2 className="w-5 h-5 text-amber-300 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
                   <span className="text-lg leading-relaxed">{t}</span>
                 </li>
               ))}
@@ -119,13 +119,13 @@ export function FinalCTA() {
             {faqs.map((item, idx) => (
               <div
                 key={idx}
-                className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10"
+                className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
               >
                 <div className="absolute inset-0 bg-zinc-900/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div className="relative">
                   <div className="flex items-start gap-3 mb-3">
-                    <HelpCircle className="w-5 h-5 text-amber-300 mt-1 flex-shrink-0" />
+                    <HelpCircle className="w-5 h-5 text-amber-400 mt-1 flex-shrink-0" />
                     <h4 className="text-white font-bold text-lg">{item.q}</h4>
                   </div>
                   <p className="text-slate-300 leading-relaxed">{item.a}</p>
@@ -137,7 +137,7 @@ export function FinalCTA() {
 
         {/* 9) CTA FINAL */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
+          <div className="absolute inset-0 bg-zinc-900/40 blur-3xl"></div>
 
           <div className="relative bg-gradient-to-br from-zinc-900 to-neutral-900 border border-zinc-800 rounded-3xl p-10 text-center">
             <h3 className="text-3xl md:text-4xl font-bold text-white mb-8 leading-tight">
@@ -148,7 +148,7 @@ export function FinalCTA() {
               <div className="flex flex-col items-center">
                 <a
                   href={WHATSAPP_LINK}
-                  className="group bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-12 py-5 rounded-lg font-bold text-xl hover:shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-3"
+                  className="group bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-12 py-5 rounded-lg font-bold text-xl hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-3"
                 >
                   Probar en WhatsApp
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
@@ -159,7 +159,7 @@ export function FinalCTA() {
               <div className="flex flex-col items-center">
                 <a
                   href={CALL_LINK}
-                  className="text-white border-2 border-zinc-700 hover:border-amber-500 px-12 py-5 rounded-lg font-semibold text-xl transition-all duration-300 hover:bg-zinc-900 inline-flex items-center justify-center"
+                  className="text-white border-2 border-zinc-700 hover:border-amber-500/30 px-12 py-5 rounded-lg font-semibold text-xl transition-all duration-300 hover:bg-zinc-900 inline-flex items-center justify-center"
                 >
                   Agendar llamada
                 </a>
@@ -178,13 +178,13 @@ export function FinalCTA() {
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-slate-400 text-sm">© 2026 Kurukin. Todos los derechos reservados.</div>
             <div className="flex gap-6 text-slate-400 text-sm">
-              <a href="/terminos" className="hover:text-amber-300 transition-colors">
+              <a href="/terminos" className="hover:text-amber-400 transition-colors">
                 Términos
               </a>
-              <a href="/privacidad" className="hover:text-amber-300 transition-colors">
+              <a href="/privacidad" className="hover:text-amber-400 transition-colors">
                 Privacidad
               </a>
-              <a href="/contactar" className="hover:text-amber-300 transition-colors">
+              <a href="/contactar" className="hover:text-amber-400 transition-colors">
                 Contacto
               </a>
             </div>

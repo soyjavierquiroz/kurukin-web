@@ -28,7 +28,7 @@ export function PainPoints() {
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Tu negocio no necesita más mensajes.{' '}
-            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+            <span className="text-amber-400">
               Necesita responder mejor y más rápido.
             </span>
           </h2>
@@ -43,13 +43,13 @@ export function PainPoints() {
           {symptoms.map((item, index) => (
             <div
               key={index}
-              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/20 hover:-translate-y-2"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-2"
             >
               <div className="absolute inset-0 bg-zinc-900/60 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div className="relative">
                 <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <item.icon className="w-6 h-6 text-amber-300" />
+                  <item.icon className="w-6 h-6 text-amber-400" />
                 </div>
 
                 <p className="text-slate-200 text-lg leading-relaxed">{item.text}</p>

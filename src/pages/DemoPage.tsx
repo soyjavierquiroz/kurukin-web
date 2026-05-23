@@ -21,7 +21,7 @@ export const DemoPage = () => {
         </section>
 
         <section className="w-full">
-          <h2 className="mb-4 text-center text-3xl font-extrabold text-amber-300">Motor VSL Premium (Bunny HLS)</h2>
+          <h2 className="mb-4 text-center text-3xl font-extrabold text-amber-400">Motor VSL Premium (Bunny HLS)</h2>
           <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
             <KurukinPlayer
               provider="bunnynet"
@@ -31,7 +31,7 @@ export const DemoPage = () => {
               onTimeUpdate={(time) => setVideoTime(time)}
             />
           </div>
-          <div className="mt-4 text-center font-mono text-green-400">Tiempo actual del VSL: {Math.floor(videoTime)}s</div>
+          <div className="mt-4 text-center font-mono text-amber-400">Tiempo actual del VSL: {Math.floor(videoTime)}s</div>
         </section>
       </div>
     </div>

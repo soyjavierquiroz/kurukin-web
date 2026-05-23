@@ -150,11 +150,11 @@ export function ContactForm() {
                   'h-11 w-full rounded-md border bg-zinc-950 px-4 text-lg text-white',
                   'focus:outline-none focus:ring-2',
                   errors.firstName
-                    ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/20'
-                    : 'border-zinc-700 focus:border-amber-500 focus:ring-amber-500/20',
+                    ? 'border-amber-500/30 focus:border-amber-500/30 focus:ring-white/10'
+                    : 'border-zinc-700 focus:border-amber-500/30 focus:ring-white/10',
                 ].join(' ')}
               />
-              {errors.firstName ? <p className="mt-2 text-sm text-amber-300">{errors.firstName}</p> : null}
+              {errors.firstName ? <p className="mt-2 text-sm text-amber-400">{errors.firstName}</p> : null}
             </div>
 
             <div>
@@ -173,11 +173,11 @@ export function ContactForm() {
                   'h-11 w-full rounded-md border bg-zinc-950 px-4 text-lg text-white',
                   'focus:outline-none focus:ring-2',
                   errors.lastName
-                    ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/20'
-                    : 'border-zinc-700 focus:border-amber-500 focus:ring-amber-500/20',
+                    ? 'border-amber-500/30 focus:border-amber-500/30 focus:ring-white/10'
+                    : 'border-zinc-700 focus:border-amber-500/30 focus:ring-white/10',
                 ].join(' ')}
               />
-              {errors.lastName ? <p className="mt-2 text-sm text-amber-300">{errors.lastName}</p> : null}
+              {errors.lastName ? <p className="mt-2 text-sm text-amber-400">{errors.lastName}</p> : null}
             </div>
           </div>
 
@@ -201,7 +201,7 @@ export function ContactForm() {
           </div>
 
           {errors.phone ? (
-            <div className="rounded-md border-l-4 border-amber-400 bg-zinc-950 p-4 text-amber-300">{errors.phone}</div>
+            <div className="rounded-md border-l-4 border-amber-500/30 bg-zinc-950 p-4 text-amber-400">{errors.phone}</div>
           ) : null}
 
           <input type="hidden" name="visitor_ip" value={visitorData?.ip || ''} />
@@ -214,7 +214,7 @@ export function ContactForm() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="h-14 rounded-xl bg-amber-600 px-10 text-3xl font-semibold uppercase text-slate-950 shadow-sm transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-14 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-10 text-3xl font-semibold uppercase text-slate-950 shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? 'Enviando...' : 'Validar y Enviar'}
             </button>
@@ -240,9 +240,9 @@ export function ContactForm() {
         </section>
 
         {lastPayload ? (
-          <section className="mt-6 rounded-lg border border-emerald-300 bg-emerald-50 p-4">
-            <p className="text-sm font-semibold text-emerald-800">Payload final enviado</p>
-            <pre className="mt-2 overflow-x-auto text-xs text-emerald-900">{JSON.stringify(lastPayload, null, 2)}</pre>
+          <section className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            <p className="text-sm font-semibold text-amber-400">Payload final enviado</p>
+            <pre className="mt-2 overflow-x-auto text-xs text-slate-300">{JSON.stringify(lastPayload, null, 2)}</pre>
           </section>
         ) : null}
       </section>

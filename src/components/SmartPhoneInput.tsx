@@ -272,10 +272,10 @@ export function SmartPhoneInput({
   const phoneInputClasses = [
     'w-full max-w-full min-w-0 box-border rounded-xl border transition-all duration-200 overflow-hidden',
     showAutoInvalidState || error
-      ? 'border-amber-400 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20'
+      ? 'border-amber-500/30 focus-within:border-amber-500/30 focus-within:ring-2 focus-within:ring-white/10'
       : theme === 'dark'
-        ? 'border-white/10 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/25'
-        : 'border-zinc-700 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20',
+        ? 'border-white/10 focus-within:border-amber-500/30 focus-within:ring-2 focus-within:ring-white/10'
+        : 'border-zinc-700 focus-within:border-amber-500/30 focus-within:ring-2 focus-within:ring-white/10',
     disabled ? 'opacity-70' : '',
     '[&_.PhoneInputCountry]:m-0 [&_.PhoneInputCountry]:h-12 [&_.PhoneInputCountry]:min-w-[104px] sm:[&_.PhoneInputCountry]:min-w-[116px]',
     theme === 'dark'
@@ -308,7 +308,7 @@ export function SmartPhoneInput({
           className={theme === 'dark' ? 'mb-2 block text-sm font-medium text-slate-200' : 'mb-2 block text-sm font-medium text-slate-200'}
         >
           {label}
-          {required ? <span className="ml-1 text-amber-300">*</span> : null}
+          {required ? <span className="ml-1 text-amber-400">*</span> : null}
         </label>
       ) : null}
 
@@ -358,13 +358,13 @@ export function SmartPhoneInput({
       ) : null}
 
       {error ? (
-        <p id={errorId} className="mt-2 text-xs text-amber-300">
+        <p id={errorId} className="mt-2 text-xs text-amber-400">
           {error}
         </p>
       ) : null}
 
       {!error && showAutoInvalidState ? (
-        <p id={errorId} className="mt-2 text-xs text-amber-300">
+        <p id={errorId} className="mt-2 text-xs text-amber-400">
           Número inválido.
         </p>
       ) : null}

@@ -69,7 +69,7 @@ export function ContactChat() {
     <div className="min-h-screen bg-black">
       <header className="px-4 py-4 md:py-6 text-center border-b border-white/10">
         <div className="inline-flex items-center gap-2">
-          <Bot className="w-6 h-6 text-amber-300" />
+          <Bot className="w-6 h-6 text-amber-400" />
           <span className="text-white text-xl font-bold">Kurukin</span>
         </div>
       </header>
@@ -80,7 +80,7 @@ export function ContactChat() {
             Deja de perder ventas por responder tarde.
           </h1>
 
-          <p className="text-amber-300 text-base md:text-xl animate-pulse mb-6">
+          <p className="text-amber-400 text-base md:text-xl animate-pulse mb-6">
             Preparando tu asistente virtual...
           </p>
 
@@ -92,7 +92,7 @@ export function ContactChat() {
             <button
               type="button"
               onClick={handleImmediateRedirect}
-              className="w-full md:w-auto min-h-[56px] rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 font-bold text-lg text-slate-950 uppercase px-8 hover:shadow-2xl hover:shadow-amber-500/40 transition-all duration-300"
+              className="w-full md:w-auto min-h-[56px] rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 font-bold text-lg text-slate-950 uppercase px-8 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300"
             >
               No quiero esperar, abrir ahora ⚡
             </button>
@@ -101,8 +101,8 @@ export function ContactChat() {
           <div className="max-w-md mx-auto bg-zinc-950 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden mb-2 text-left opacity-80">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800 bg-zinc-900">
               <div className="w-3 h-3 rounded-full bg-zinc-500"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500/90"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500/90"></div>
+              <div className="w-3 h-3 rounded-full bg-zinc-600"></div>
+              <div className="w-3 h-3 rounded-full bg-zinc-600"></div>
             </div>
 
             <div className="flex flex-col gap-4 p-5">

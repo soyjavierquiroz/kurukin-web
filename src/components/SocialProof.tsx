@@ -39,7 +39,7 @@ export function SocialProof() {
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Casos reales.{' '}
-            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+            <span className="text-amber-400">
               Resultados reales.
             </span>
           </h2>
@@ -52,7 +52,7 @@ export function SocialProof() {
           {testimonials.map((t, index) => (
             <div
               key={index}
-              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
+              className="group relative bg-zinc-900/60 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-2"
             >
               <div className="absolute top-6 right-6 text-amber-500/20">
                 <Quote className="w-12 h-12" />
@@ -61,7 +61,7 @@ export function SocialProof() {
               <div className="relative">
                 <div className="flex gap-1 mb-6">
                   {[...Array(t.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
 

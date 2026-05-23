@@ -45,7 +45,7 @@ export function PlayerControls({
           step={0.1}
           value={Math.min(currentTime, safeDuration)}
           onChange={(event) => onSeek(Number(event.target.value))}
-          className="h-1.5 w-full cursor-pointer accent-emerald-400"
+          className="h-1.5 w-full cursor-pointer accent-zinc-300"
           aria-label="Buscar en el video"
         />
 

@@ -94,7 +94,7 @@ export function SmartLinkManager() {
             value={longUrl}
             onChange={(event) => setLongUrl(event.target.value)}
             placeholder="https://ejemplo.com/oferta"
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500/30 focus:outline-none"
           />
         </label>
 
@@ -105,21 +105,21 @@ export function SmartLinkManager() {
             value={customSlug}
             onChange={(event) => setCustomSlug(event.target.value)}
             placeholder="mi-campana"
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-amber-500/30 focus:outline-none"
           />
         </label>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center justify-center rounded-xl bg-amber-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-5 py-3 font-semibold text-slate-950 transition disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isLoading ? 'Acortando...' : 'Acortar y Proteger'}
         </button>
       </form>
 
       {activeError ? (
-        <p className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-amber-300">{activeError}</p>
+        <p className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-amber-400">{activeError}</p>
       ) : null}
 
       <div className="mt-8">
@@ -141,7 +141,7 @@ export function SmartLinkManager() {
               <tbody className="divide-y divide-zinc-800 bg-zinc-900">
                 {recentLinks.map((link) => (
                   <tr key={link.protectedUrl}>
-                    <td className="px-4 py-3 font-mono text-amber-300">/l/{link.keyword}</td>
+                    <td className="px-4 py-3 font-mono text-amber-400">/l/{link.keyword}</td>
                     <td className="max-w-md truncate px-4 py-3 text-slate-300" title={link.longUrl}>
                       {link.longUrl}
                     </td>
@@ -149,7 +149,7 @@ export function SmartLinkManager() {
                       <button
                         type="button"
                         onClick={() => void handleCopy(link.protectedUrl, link.keyword)}
-                        className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-amber-400 hover:text-amber-300"
+                        className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-amber-500/30 hover:text-amber-400"
                       >
                         {copiedSlug === link.keyword ? 'Copiado' : 'Copiar enlace'}
                       </button>

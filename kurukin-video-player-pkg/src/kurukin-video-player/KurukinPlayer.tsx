@@ -529,7 +529,7 @@ export function KurukinPlayer({
           )}
         </div>
       ) : (
-        <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_35%),linear-gradient(135deg,#0a0a0b,#111827)]" />
+        <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_35%),linear-gradient(135deg,#09090b,#171717)]" />
       )}
 
       <SmartPoster
@@ -648,7 +648,7 @@ export function KurukinPlayer({
       {!isProviderImplemented ? (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-6 text-center text-white">
           <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-300">Provider pendiente</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-400">Provider pendiente</p>
             <p className="mt-2 text-sm text-white/80">
               {provider} quedó preparado en la factory, pero su adapter aún no está implementado.
             </p>

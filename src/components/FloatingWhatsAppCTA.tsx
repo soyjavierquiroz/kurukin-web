@@ -26,7 +26,7 @@ export function FloatingWhatsAppCTA() {
     >
       <a
         href={WHATSAPP_LINK}
-        className="group inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-5 py-3 rounded-full font-bold shadow-2xl shadow-amber-500/30 active:scale-95 transition-transform"
+        className="group inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-5 py-3 rounded-full font-bold shadow-2xl shadow-black/50 active:scale-95 transition-transform"
         aria-label="Probar Kurukin en WhatsApp"
       >
         <MessageCircle className="w-5 h-5" />

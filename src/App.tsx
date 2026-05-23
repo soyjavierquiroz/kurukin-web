@@ -80,13 +80,13 @@ function HomePage() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <a href="#hero" className="flex items-center gap-2 flex-shrink-0">
-              <Bot className="w-7 h-7 text-amber-300" />
+              <Bot className="w-7 h-7 text-amber-400" />
               <span className="text-xl md:text-2xl font-bold text-white">Kurukin</span>
             </a>
 
             <Link
               to="/contactar/chatear"
-              className="bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-4 py-2 text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-amber-500/50 transition-all duration-300"
+              className="bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-4 py-2 text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-black/50 transition-all duration-300"
             >
               WhatsApp
             </Link>
@@ -95,13 +95,13 @@ function HomePage() {
       </header>
 
       <section id="hero" className="relative overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-black to-black"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/30 via-black to-black"></div>
 
         <div className="relative max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-20 text-center">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
             Deja de ser el secretario de tu negocio:
             <br />
-            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+            <span className="text-amber-400">
               vende mientras Kurukin responde.
             </span>
           </h1>
@@ -112,15 +112,15 @@ function HomePage() {
 
           <div className="max-w-2xl mx-auto mb-6 grid sm:grid-cols-3 gap-2">
             <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
-              <Check className="w-4 h-4 text-amber-300" />
+              <Check className="w-4 h-4 text-amber-400" />
               Responde al instante
             </div>
             <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
-              <Check className="w-4 h-4 text-amber-300" />
+              <Check className="w-4 h-4 text-amber-400" />
               Conversación natural
             </div>
             <div className="inline-flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-slate-200 text-sm">
-              <Check className="w-4 h-4 text-amber-300" />
+              <Check className="w-4 h-4 text-amber-400" />
               Enfocado en vender
             </div>
           </div>
@@ -128,7 +128,7 @@ function HomePage() {
           <div className="max-w-md mx-auto">
             <Link
               to="/contactar/chatear"
-              className="group w-full md:w-auto min-h-[56px] bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 inline-flex items-center justify-center gap-2"
+              className="group w-full md:w-auto min-h-[56px] bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 inline-flex items-center justify-center gap-2"
             >
               Ir a Probar Kurukin
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -144,8 +144,8 @@ function HomePage() {
             <div className="border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-zinc-500"></span>
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-                <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-600"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-600"></span>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ function HomePage() {
               )}
             </div>
           </div>
-          <p className="text-sm text-amber-300 text-center mt-4">Y eso es solo el inicio. ¡Imagina las posibilidades!</p>
+          <p className="text-sm text-amber-400 text-center mt-4">Y eso es solo el inicio. ¡Imagina las posibilidades!</p>
         </div>
       </section>
 
@@ -202,7 +202,7 @@ function HomePage() {
             className="w-full min-h-[60px] rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase font-bold text-lg inline-flex flex-col items-center justify-center"
           >
             <span>Probar Kurukin Ahora</span>
-            <span className="text-[11px] text-amber-100">Experiencia Instantánea</span>
+            <span className="text-[11px] text-zinc-800">Experiencia Instantánea</span>
           </Link>
         </div>
       )}
