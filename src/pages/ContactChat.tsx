@@ -66,10 +66,10 @@ export function ContactChat() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950">
       <header className="px-4 py-4 md:py-6 text-center border-b border-white/10">
         <div className="inline-flex items-center gap-2">
-          <Bot className="w-6 h-6 text-cyan-400" />
+          <Bot className="w-6 h-6 text-amber-300" />
           <span className="text-white text-xl font-bold">Kurukin</span>
         </div>
       </header>
@@ -80,7 +80,7 @@ export function ContactChat() {
             Deja de perder ventas por responder tarde.
           </h1>
 
-          <p className="text-cyan-400 text-base md:text-xl animate-pulse mb-6">
+          <p className="text-amber-300 text-base md:text-xl animate-pulse mb-6">
             Preparando tu asistente virtual...
           </p>
 
@@ -92,13 +92,13 @@ export function ContactChat() {
             <button
               type="button"
               onClick={handleImmediateRedirect}
-              className="w-full md:w-auto min-h-[56px] rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-lg text-white px-8 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300"
+              className="w-full md:w-auto min-h-[56px] rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 font-bold text-lg text-slate-950 uppercase px-8 hover:shadow-2xl hover:shadow-amber-500/40 transition-all duration-300"
             >
               No quiero esperar, abrir ahora ⚡
             </button>
           </div>
 
-          <div className="max-w-md mx-auto bg-[#0b141a]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-cyan-900/20 overflow-hidden mb-2 text-left opacity-80">
+          <div className="max-w-md mx-auto bg-[#0b141a]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-amber-950/20 overflow-hidden mb-2 text-left opacity-80">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
               <div className="w-3 h-3 rounded-full bg-red-500/90"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500/90"></div>
@@ -118,7 +118,7 @@ export function ContactChat() {
                   showMessage2 ? 'opacity-100 translate-y-0 animate-fade-in animate-slide-up' : 'opacity-0 translate-y-2',
                 ].join(' ')}
               >
-                <div className="self-end ml-auto w-fit max-w-[85%] bg-cyan-700 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-md text-[15px] leading-relaxed">
+                <div className="self-end ml-auto w-fit max-w-[85%] bg-amber-700 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-md text-[15px] leading-relaxed">
                   Vendo servicios
                 </div>
               </div>

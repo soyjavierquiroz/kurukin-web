@@ -8,7 +8,7 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between gap-6">
           <a href="#hero" className="flex items-center gap-2 flex-shrink-0">
-            <Bot className="w-8 h-8 text-cyan-400" />
+            <Bot className="w-8 h-8 text-amber-300" />
             <span className="text-2xl font-bold text-white">Kurukin</span>
           </a>
 
@@ -28,7 +28,7 @@ export function Navigation() {
           {/* CTA principal */}
           <a
             href={WHATSAPP_LINK}
-            className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
+            className="bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-6 py-2.5 rounded-lg font-semibold hover:shadow-lg hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105"
           >
             Probar en WhatsApp
           </a>

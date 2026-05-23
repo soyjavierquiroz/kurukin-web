@@ -33,13 +33,13 @@ export function SocialProof() {
 
   return (
     <section id="social-proof" className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950"></div>
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Casos reales.{' '}
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
               Resultados reales.
             </span>
           </h2>
@@ -52,9 +52,9 @@ export function SocialProof() {
           {testimonials.map((t, index) => (
             <div
               key={index}
-              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20 hover:-translate-y-2"
+              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
             >
-              <div className="absolute top-6 right-6 text-cyan-500/20">
+              <div className="absolute top-6 right-6 text-amber-500/20">
                 <Quote className="w-12 h-12" />
               </div>
 
@@ -71,7 +71,7 @@ export function SocialProof() {
                   <img
                     src={t.image}
                     alt={t.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-cyan-500/30"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-amber-500/30"
                     loading="lazy"
                   />
                   <div>
@@ -89,7 +89,7 @@ export function SocialProof() {
         </div>
 
         {/* Bloque inferior sin métricas inventadas */}
-        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-10 text-center">
+        <div className="bg-gradient-to-r from-amber-400/10 to-amber-500/10 border border-amber-500/30 rounded-2xl p-10 text-center">
           <h3 className="text-3xl font-bold text-white mb-4">
             La diferencia es simple: responder a tiempo.
           </h3>

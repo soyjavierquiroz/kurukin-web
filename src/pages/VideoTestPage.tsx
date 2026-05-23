@@ -143,7 +143,7 @@ export const VideoTestPage = () => {
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <div className="text-center">
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
-            Laboratorio: Kurukin Player <span className="text-blue-500">Pro</span>
+            Laboratorio: Kurukin Player <span className="text-amber-500">Pro</span>
           </h1>
           <p className="text-slate-400">Prueba de video inteligente + formulario enriquecido con contexto global.</p>
         </div>
@@ -157,7 +157,7 @@ export const VideoTestPage = () => {
           </div>
 
           <div>
-            <h3 className="mb-2 text-xl font-bold text-blue-400">Motor Kurukin Pro (Bunny HLS)</h3>
+            <h3 className="mb-2 text-xl font-bold text-amber-300">Motor Kurukin Pro (Bunny HLS)</h3>
             <div className="aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
               <KurukinPlayer
                 provider="bunnynet"
@@ -172,7 +172,7 @@ export const VideoTestPage = () => {
         </div>
 
         <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 shadow-xl backdrop-blur md:p-7">
-          <h2 className="text-xl md:text-2xl font-bold text-cyan-300">{dynamicHeadline}</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-amber-300">{dynamicHeadline}</h2>
 
           <form className="mt-5 space-y-5" onSubmit={handleSubmit} noValidate>
             <div className="grid gap-4 md:grid-cols-2">
@@ -190,7 +190,7 @@ export const VideoTestPage = () => {
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.firstName
                       ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                      : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-500/30',
+                      : 'border-slate-700 focus:border-amber-400 focus:ring-amber-500/30',
                   ].join(' ')}
                   placeholder="Tu nombre"
                 />
@@ -211,7 +211,7 @@ export const VideoTestPage = () => {
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.lastName
                       ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                      : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-500/30',
+                      : 'border-slate-700 focus:border-amber-400 focus:ring-amber-500/30',
                   ].join(' ')}
                   placeholder="Tu apellido"
                 />
@@ -233,7 +233,7 @@ export const VideoTestPage = () => {
                   'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                   errors.email
                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
-                    : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-500/30',
+                    : 'border-slate-700 focus:border-amber-400 focus:ring-amber-500/30',
                 ].join(' ')}
                 placeholder="tu@email.com"
               />
@@ -266,7 +266,7 @@ export const VideoTestPage = () => {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="h-12 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 text-base font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
+              className="h-12 w-full rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-6 text-base font-semibold text-slate-950 uppercase transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
             >
               {isSubmitting ? 'Enviando...' : 'Validar y Enviar'}
             </button>

@@ -32,7 +32,7 @@ export function DigitalArchitecture() {
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Cómo funciona{' '}
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
               (en 3 pasos)
             </span>
           </h2>
@@ -42,10 +42,10 @@ export function DigitalArchitecture() {
           {steps.map((step, index) => (
             <div
               key={index}
-              className="group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20 hover:-translate-y-2"
+              className="group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-8 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-2"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <step.icon className="w-8 h-8 text-cyan-400" />
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-400/20 to-amber-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <step.icon className="w-8 h-8 text-amber-300" />
               </div>
 
               <h3 className="text-2xl font-bold text-white mb-4">{step.title}</h3>
@@ -54,8 +54,8 @@ export function DigitalArchitecture() {
           ))}
         </div>
 
-        <div className="relative bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-10">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-500/20 via-transparent to-transparent rounded-2xl"></div>
+        <div className="relative bg-gradient-to-r from-amber-400/10 to-amber-500/10 border border-amber-500/30 rounded-2xl p-10">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-400/20 via-transparent to-transparent rounded-2xl"></div>
 
           <div className="relative grid md:grid-cols-2 gap-6 items-center">
             <div>
@@ -66,7 +66,7 @@ export function DigitalArchitecture() {
 
               <a
                 href={WHATSAPP_LINK}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105"
               >
                 Probar Kurukin en WhatsApp
                 <ArrowRight className="w-5 h-5" />
@@ -80,15 +80,15 @@ export function DigitalArchitecture() {
                 <div className="text-slate-200 font-semibold">Lo que queda definido contigo:</div>
                 <ul className="space-y-3 text-slate-300">
                   <li className="flex items-start gap-3">
-                    <span className="mt-1 text-cyan-400">•</span>
+                    <span className="mt-1 text-amber-300">•</span>
                     Respuestas clave (precios, horarios, stock, servicios)
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="mt-1 text-cyan-400">•</span>
+                    <span className="mt-1 text-amber-300">•</span>
                     Reglas de filtrado (qué es “listo para comprar”)
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="mt-1 text-cyan-400">•</span>
+                    <span className="mt-1 text-amber-300">•</span>
                     Cuándo agenda y cuándo pasa a humano
                   </li>
                 </ul>

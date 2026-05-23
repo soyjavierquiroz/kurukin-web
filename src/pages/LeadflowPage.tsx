@@ -8,14 +8,14 @@ const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/1ef89dab-10dc-4838
 
 const ctaBaseClassName = [
   'group inline-flex w-full min-h-[64px] items-center justify-center gap-3 rounded-2xl',
-  'bg-blue-600 px-8 py-4 text-center text-lg font-bold text-white',
-  'shadow-[0_0_28px_rgba(37,99,235,0.5)] animate-pulse transition-all hover:scale-105',
-  'sm:w-auto sm:bg-gradient-to-r sm:from-cyan-500 sm:to-blue-600',
+  'bg-amber-600 px-8 py-4 text-center text-lg font-bold uppercase text-slate-950',
+  'shadow-[0_0_28px_rgba(245,158,11,0.5)] animate-pulse transition-all hover:scale-105',
+  'sm:w-auto sm:bg-gradient-to-r sm:from-amber-400 sm:to-amber-600',
 ].join(' ');
 
 const glassPanelClassName = [
   'rounded-2xl border border-white/10 bg-slate-900/40 p-6 shadow-2xl backdrop-blur-md',
-  'transition duration-300 hover:border-cyan-500/30',
+  'transition duration-300 hover:border-amber-500/30',
 ].join(' ');
 
 const problemBullets = [
@@ -127,19 +127,19 @@ export default function LeadflowPage() {
       <main>
         {/* HERO SECTION - CTA Visible en todo dispositivo */}
         <section id="hero" className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.1),transparent_26%)]" />
-          <div className="pointer-events-none absolute right-0 top-20 h-[420px] w-[420px] rounded-full bg-cyan-500/5 blur-[120px]" />
-          <div className="pointer-events-none absolute left-1/2 top-44 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-blue-600/5 blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.14),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.1),transparent_26%)]" />
+          <div className="pointer-events-none absolute right-0 top-20 h-[420px] w-[420px] rounded-full bg-amber-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute left-1/2 top-44 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-amber-600/5 blur-[120px]" />
           
           <div className="relative mx-auto grid max-w-7xl gap-5 px-4 pt-8 pb-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
             <div className="max-w-none">
-              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-300">
+              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-amber-300">
                 ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
               </p>
 
               <h1 className="mt-5 text-3xl font-bold leading-[1.02] text-white md:text-6xl">
                 Si tu equipo MLM no prospecta sin ti...{' '}
-                <span className="text-cyan-300">tienes un empleo disfrazado.</span>
+                <span className="text-amber-300">tienes un empleo disfrazado.</span>
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
@@ -157,7 +157,7 @@ export default function LeadflowPage() {
             </div>
 
             <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
-              <div className="absolute -inset-8 rounded-full bg-cyan-500/5 blur-[120px]" />
+              <div className="absolute -inset-8 rounded-full bg-amber-500/5 blur-[120px]" />
               <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/50 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.65)] backdrop-blur-md">
                 <div className="aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-black">
                   <KurukinPlayer
@@ -218,13 +218,13 @@ export default function LeadflowPage() {
         {/* SECCIÓN DEPENDENCIA - RESTAURADA E INVERTIDA */}
         <section className="relative overflow-hidden">
           <div className="pointer-events-none absolute -left-32 top-24 h-[360px] w-[360px] rounded-full bg-red-500/5 blur-[120px]" />
-          <div className="pointer-events-none absolute right-0 bottom-10 h-[420px] w-[420px] rounded-full bg-cyan-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute right-0 bottom-10 h-[420px] w-[420px] rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
               
               {/* Bloque de Imagen - Izquierda en desktop */}
               <div className="relative lg:order-1 order-2">
-                <div className="absolute -inset-6 rounded-full bg-cyan-500/5 blur-[120px]" />
+                <div className="absolute -inset-6 rounded-full bg-amber-500/5 blur-[120px]" />
                 <img 
                   src="https://cdn.kuruk.in/leadflow-assets/landing/dependencia.webp" 
                   alt="Duplicación bloqueada por dependencia" 
@@ -266,12 +266,12 @@ export default function LeadflowPage() {
 
         {/* SECCIÓN SISTEMA - CTA Solo Desktop */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.1),transparent_32%)]" />
-          <div className="pointer-events-none absolute left-1/4 top-20 h-[380px] w-[380px] rounded-full bg-blue-600/5 blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.1),transparent_32%)]" />
+          <div className="pointer-events-none absolute left-1/4 top-20 h-[380px] w-[380px] rounded-full bg-amber-600/5 blur-[120px]" />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="max-w-4xl">
               <h2 className="text-3xl font-bold leading-tight text-white md:text-5xl">
-                Así es como tu equipo empieza a moverse y <span className="text-cyan-300">crecer de forma predecible mes a mes</span>
+                Así es como tu equipo empieza a moverse y <span className="text-amber-300">crecer de forma predecible mes a mes</span>
               </h2>
               <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-300">
                 Funciona porque es simple: cuando tu equipo recibe conversaciones todos los días, la tracción deja de depender de unos pocos y empieza a correr como sistema.
@@ -279,15 +279,15 @@ export default function LeadflowPage() {
             </div>
 
             <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)] lg:items-center">
-              <div className="ml-3 border-l-2 border-blue-500/30 pl-6 space-y-6">
+              <div className="ml-3 border-l-2 border-amber-500/30 pl-6 space-y-6">
                 {[
                   ['01', 'Ayudamos a líderes MLM con +20 personas a generar 3–10 conversaciones diarias en 7 días', 'Sin perseguir, sin crear contenido diario.'],
                   ['02', 'LeadFlow asigna prospectos automáticamente a tu equipo', 'Cada miembro recibe conversaciones listas para activar seguimiento.'],
                   ['03', 'Tu equipo inicia conversaciones y da seguimiento a prospectos todos los días', 'Guiones simples + seguimiento automático = conversaciones diarias.'],
                 ].map(([number, title, description]) => (
                   <div key={number} className={`${glassPanelClassName} relative rounded-xl`}>
-                    <div className="absolute -left-[34px] top-6 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 shadow-[0_0_16px_rgba(59,130,246,0.5)]" />
-                    <div className="text-sm font-bold tracking-[0.28em] text-blue-300">{number}</div>
+                    <div className="absolute -left-[34px] top-6 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 shadow-[0_0_16px_rgba(245,158,11,0.5)]" />
+                    <div className="text-sm font-bold tracking-[0.28em] text-amber-300">{number}</div>
                     <h3 className="mt-3 text-2xl font-bold text-white">{title}</h3>
                     <p className="mt-3 text-base leading-relaxed text-slate-400 md:text-lg">{description}</p>
                   </div>
@@ -295,7 +295,7 @@ export default function LeadflowPage() {
               </div>
 
               <div className="relative group">
-                <div className="absolute -inset-4 bg-cyan-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -inset-4 bg-amber-600/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <img src="https://cdn.kuruk.in/leadflow-assets/landing/sindependencia.webp" alt="Diagrama de flujo" className="relative rounded-[2rem] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.6)] w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.02]" />
               </div>
             </div>
@@ -312,7 +312,7 @@ export default function LeadflowPage() {
 
         <section className="relative overflow-hidden">
           <div className="pointer-events-none absolute right-10 top-12 h-[420px] w-[420px] rounded-full bg-red-500/5 blur-[120px]" />
-          <div className="pointer-events-none absolute -left-24 bottom-0 h-[420px] w-[420px] rounded-full bg-cyan-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute -left-24 bottom-0 h-[420px] w-[420px] rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
               <div>
@@ -327,7 +327,7 @@ export default function LeadflowPage() {
 
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/40 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.45)] backdrop-blur-md md:p-8">
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-300">
+                  <p className="text-sm font-black uppercase tracking-[0.22em] text-amber-300">
                     Simulador de duplicación muerta
                   </p>
                   <p className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-sm font-black text-white">
@@ -341,7 +341,7 @@ export default function LeadflowPage() {
                   max={100}
                   value={distribuidoresActivos}
                   onChange={(event) => setDistribuidoresActivos(Number(event.target.value))}
-                  className="mt-8 h-3 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-cyan-400 outline-none [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.08)] [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-cyan-300 [&::-moz-range-thumb]:shadow-[0_0_24px_rgba(34,211,238,0.55)] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-cyan-300 [&::-webkit-slider-thumb]:shadow-[0_0_24px_rgba(34,211,238,0.55)]"
+                  className="mt-8 h-3 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-amber-400 outline-none [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.08)] [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-amber-300 [&::-moz-range-thumb]:shadow-[0_0_24px_rgba(245,158,11,0.55)] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-amber-300 [&::-webkit-slider-thumb]:shadow-[0_0_24px_rgba(245,158,11,0.55)]"
                   aria-label="Cantidad de líderes activos"
                 />
 
@@ -383,11 +383,11 @@ export default function LeadflowPage() {
 
         {/* SECCIÓN GARANTÍA - CTA Solo Desktop */}
         <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute left-1/2 top-0 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-cyan-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute left-1/2 top-0 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
             <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 p-8 text-white shadow-2xl backdrop-blur-md md:p-12">
               <div className="flex flex-col items-center text-center">
-                <ShieldCheck className="h-16 w-16 text-blue-500" />
+                <ShieldCheck className="h-16 w-16 text-amber-500" />
                 <h2 className="mt-6 text-3xl font-bold md:text-5xl">Si en 30 días tu equipo no está generando conversaciones diarias con prospectos reales, seguimos trabajando contigo hasta lograrlo.</h2>
                 <div className="mt-10">
                   <LeadflowCta 
@@ -423,9 +423,9 @@ export default function LeadflowPage() {
               </div>
               
               <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-medium uppercase tracking-wider text-slate-500">
-                <a href="#" className="hover:text-cyan-400 transition-colors">Políticas de Privacidad</a>
-                <a href="#" className="hover:text-cyan-400 transition-colors">Términos de Servicio</a>
-                <a href="#" className="hover:text-cyan-400 transition-colors">Cookies</a>
+                <a href="#" className="hover:text-amber-300 transition-colors">Políticas de Privacidad</a>
+                <a href="#" className="hover:text-amber-300 transition-colors">Términos de Servicio</a>
+                <a href="#" className="hover:text-amber-300 transition-colors">Cookies</a>
               </div>
             </div>
           </div>
@@ -438,7 +438,7 @@ export default function LeadflowPage() {
             <div className="relative">
               <button
                 onClick={() => setIsFormOpen(true)}
-                className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-blue-600 py-3 font-bold text-white shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-95 transition-transform"
+                className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-amber-600 py-3 font-bold uppercase text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.5)] active:scale-95 transition-transform"
               >
                 <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
                 <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
@@ -452,7 +452,7 @@ export default function LeadflowPage() {
         {/* MODAL FORMULARIO */}
         {isFormOpen && (
           <div className="fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#050505]/95 backdrop-blur-md">
-            <div className="pointer-events-none absolute inset-x-0 top-1/4 mx-auto h-[520px] w-[520px] rounded-full bg-cyan-500/5 blur-[120px]" />
+            <div className="pointer-events-none absolute inset-x-0 top-1/4 mx-auto h-[520px] w-[520px] rounded-full bg-amber-500/5 blur-[120px]" />
             <div className="mx-auto flex w-full max-w-3xl justify-end p-4">
               <button onClick={() => setIsFormOpen(false)} className="text-sm font-medium text-slate-400 hover:text-white">✕ Cerrar</button>
             </div>

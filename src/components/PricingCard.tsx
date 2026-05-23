@@ -27,9 +27,9 @@ export function PricingCard({ productName, basePriceUSD, checkoutUrl, scrapedDat
   const isStandardScrapedCase = countryCode !== 'AR' && countryCode !== 'US' && hasScrapedPrice;
 
   return (
-    <section className="rounded-2xl border border-cyan-500/30 bg-slate-900/80 p-6 shadow-xl shadow-cyan-900/20 backdrop-blur md:p-8">
+    <section className="rounded-2xl border border-amber-500/30 bg-slate-900/80 p-6 shadow-xl shadow-amber-950/20 backdrop-blur md:p-8">
       <div className="mb-5">
-        <p className="text-xs uppercase tracking-[0.18em] text-cyan-300/90">Oferta Especial</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-amber-300/90">Oferta Especial</p>
         <h3 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">Activa {productName} hoy mismo</h3>
         <p className="mt-2 text-sm text-slate-300">Valor base: {basePriceUSD} USD</p>
       </div>

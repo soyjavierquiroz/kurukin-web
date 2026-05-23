@@ -29,21 +29,21 @@ export function AgenteEstelar() {
   return (
     <section id="agente-estelar" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span className="text-cyan-300 text-sm font-medium">La solución, simple</span>
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 mb-6">
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            <span className="text-amber-300 text-sm font-medium">La solución, simple</span>
           </div>
 
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Kurukin hace el trabajo de atención.
             <br />
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
               Tú haces el trabajo de venta.
             </span>
           </h2>
@@ -57,13 +57,13 @@ export function AgenteEstelar() {
           {cards.map((card, index) => (
             <div
               key={index}
-              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/20"
+              className="group relative bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-8 hover:border-amber-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/20"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/5 to-amber-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <card.icon className="w-8 h-8 text-cyan-400" />
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-400/20 to-amber-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <card.icon className="w-8 h-8 text-amber-300" />
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-4">{card.title}</h3>
@@ -74,7 +74,7 @@ export function AgenteEstelar() {
         </div>
 
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 blur-3xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
           <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-3xl p-10 text-center">
             <h3 className="text-3xl font-bold text-white mb-4">
               Kurukin responde. Tú solo cierras.
@@ -85,7 +85,7 @@ export function AgenteEstelar() {
 
             <a
               href={WHATSAPP_LINK}
-              className="inline-flex items-center justify-center bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-10 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 uppercase px-10 py-4 rounded-lg font-bold text-lg hover:shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105"
             >
               Ver Kurukin en Acción
             </a>

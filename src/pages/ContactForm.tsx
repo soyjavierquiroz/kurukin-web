@@ -121,7 +121,7 @@ export function ContactForm() {
       <section className="mx-auto w-full max-w-5xl rounded-xl border border-slate-300 bg-white p-5 shadow-sm md:p-6">
         <h1 className="text-3xl font-semibold text-slate-900">Probar Formulario (Nombre, Apellido, WhatsApp)</h1>
 
-        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
           <p className="font-semibold">Instrucciones precisas de verificación</p>
           <ol className="mt-2 list-decimal space-y-1 pl-5">
             <li>En el selector de país, confirma Bolivia (+591).</li>
@@ -151,7 +151,7 @@ export function ContactForm() {
                   'focus:outline-none focus:ring-2',
                   errors.firstName
                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
-                    : 'border-slate-300 focus:border-blue-500 focus:ring-blue-500/20',
+                    : 'border-slate-300 focus:border-amber-500 focus:ring-amber-500/20',
                 ].join(' ')}
               />
               {errors.firstName ? <p className="mt-2 text-sm text-red-600">{errors.firstName}</p> : null}
@@ -174,7 +174,7 @@ export function ContactForm() {
                   'focus:outline-none focus:ring-2',
                   errors.lastName
                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
-                    : 'border-slate-300 focus:border-blue-500 focus:ring-blue-500/20',
+                    : 'border-slate-300 focus:border-amber-500 focus:ring-amber-500/20',
                 ].join(' ')}
               />
               {errors.lastName ? <p className="mt-2 text-sm text-red-600">{errors.lastName}</p> : null}
@@ -214,7 +214,7 @@ export function ContactForm() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="h-14 rounded-xl bg-blue-600 px-10 text-3xl font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-14 rounded-xl bg-amber-600 px-10 text-3xl font-semibold uppercase text-slate-950 shadow-sm transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? 'Enviando...' : 'Validar y Enviar'}
             </button>

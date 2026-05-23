@@ -21,7 +21,7 @@ export const DemoPage = () => {
         </section>
 
         <section className="w-full">
-          <h2 className="mb-4 text-center text-3xl font-extrabold text-cyan-300">Motor VSL Premium (Bunny HLS)</h2>
+          <h2 className="mb-4 text-center text-3xl font-extrabold text-amber-300">Motor VSL Premium (Bunny HLS)</h2>
           <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
             <KurukinPlayer
               provider="bunnynet"

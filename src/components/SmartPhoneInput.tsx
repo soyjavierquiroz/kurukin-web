@@ -274,8 +274,8 @@ export function SmartPhoneInput({
     showAutoInvalidState || error
       ? 'border-red-500 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20'
       : theme === 'dark'
-        ? 'border-white/10 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-400/25'
-        : 'border-slate-300 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/20',
+        ? 'border-white/10 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/25'
+        : 'border-slate-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20',
     disabled ? 'opacity-70' : '',
     '[&_.PhoneInputCountry]:m-0 [&_.PhoneInputCountry]:h-12 [&_.PhoneInputCountry]:min-w-[104px] sm:[&_.PhoneInputCountry]:min-w-[116px]',
     theme === 'dark'
