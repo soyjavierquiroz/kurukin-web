@@ -207,8 +207,8 @@ export default function LeadflowPage() {
             {/* Contenedor animado */}
             <div className="animate-marquee items-center hover:[animation-play-state:paused]">
               {[...mlmLogos, ...mlmLogos].map((logo, index) => (
-                <div key={index} className="mx-6 flex w-24 flex-shrink-0 items-center justify-center transition-all duration-300 hover:opacity-100 sm:mx-10 sm:w-32 opacity-40 grayscale hover:grayscale-0">
-                  <img src={logo} alt={`Logo MLM ${index}`} className="h-auto w-full object-contain" loading="lazy" />
+                <div key={index} className="mx-6 flex w-24 flex-shrink-0 items-center justify-center opacity-55 transition-all duration-300 hover:opacity-90 sm:mx-10 sm:w-32">
+                  <img src={logo} alt={`Logo MLM ${index}`} className="h-auto w-full object-contain grayscale brightness-200" loading="lazy" />
                 </div>
               ))}
             </div>
@@ -217,7 +217,7 @@ export default function LeadflowPage() {
 
         {/* SECCIÓN DEPENDENCIA - RESTAURADA E INVERTIDA */}
         <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -left-32 top-24 h-[360px] w-[360px] rounded-full bg-red-500/5 blur-[120px]" />
+          <div className="pointer-events-none absolute -left-32 top-24 h-[360px] w-[360px] rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="pointer-events-none absolute right-0 bottom-10 h-[420px] w-[420px] rounded-full bg-amber-500/5 blur-[120px]" />
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24">
             <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -235,7 +235,7 @@ export default function LeadflowPage() {
               {/* Bloque de Texto - Derecha en desktop */}
               <div className="lg:order-2 order-1">
                 <h2 className="text-3xl font-bold leading-[1.1] text-white md:text-5xl">
-                  Si hoy el equipo no se mueve sin ti, no tienes duplicación. <span className="text-red-300">Tienes dependencia.</span>
+                  Si hoy el equipo no se mueve sin ti, no tienes duplicación. <span className="text-amber-300">Tienes dependencia.</span>
                 </h2>
                 <p className="mt-8 text-lg font-bold text-slate-300">
                   👉 Esto es lo que realmente está pasando en tu equipo:
@@ -244,7 +244,7 @@ export default function LeadflowPage() {
                   {problemBullets.map((item) => (
                     <div key={item} className={`${glassPanelClassName} group flex items-center gap-4`}>
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
-                        <XCircle className="h-6 w-6 text-red-500 transition-transform group-hover:scale-110" />
+                        <XCircle className="h-6 w-6 text-amber-300 transition-transform group-hover:scale-110" />
                       </div>
                       <p className="text-lg font-medium text-slate-300">{item}</p>
                     </div>
@@ -371,9 +371,9 @@ export default function LeadflowPage() {
 
         <section>
           <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-24">
-            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-red-300">⚠️ Esto no es para todos</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-amber-300">⚠️ Esto no es para todos</p>
             <h2 className="mt-4 text-3xl font-bold leading-tight text-white md:text-5xl">LeadFlow es para líderes con equipo que están listos para duplicación masiva. Si estás empezando, esto no es para ti.</h2>
-            <div className="mt-10 divide-y divide-white/10 rounded-2xl border border-red-900/30 bg-red-950/20 p-6">
+            <div className="mt-10 divide-y divide-white/10 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
               {filterBullets.map((item) => (
                 <div key={item} className="py-5 text-lg text-slate-300">{item}</div>
               ))}
@@ -451,7 +451,7 @@ export default function LeadflowPage() {
 
         {/* MODAL FORMULARIO */}
         {isFormOpen && (
-          <div className="fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#050505]/95 backdrop-blur-md">
+          <div className="fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col overflow-hidden bg-black/95 backdrop-blur-md">
             <div className="pointer-events-none absolute inset-x-0 top-1/4 mx-auto h-[520px] w-[520px] rounded-full bg-amber-500/5 blur-[120px]" />
             <div className="mx-auto flex w-full max-w-3xl justify-end p-4">
               <button onClick={() => setIsFormOpen(false)} className="text-sm font-medium text-slate-400 hover:text-white">✕ Cerrar</button>

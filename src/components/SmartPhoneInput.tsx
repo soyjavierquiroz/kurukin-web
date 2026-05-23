@@ -272,30 +272,30 @@ export function SmartPhoneInput({
   const phoneInputClasses = [
     'w-full max-w-full min-w-0 box-border rounded-xl border transition-all duration-200 overflow-hidden',
     showAutoInvalidState || error
-      ? 'border-red-500 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20'
+      ? 'border-amber-400 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20'
       : theme === 'dark'
         ? 'border-white/10 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/25'
-        : 'border-slate-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20',
+        : 'border-zinc-700 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20',
     disabled ? 'opacity-70' : '',
     '[&_.PhoneInputCountry]:m-0 [&_.PhoneInputCountry]:h-12 [&_.PhoneInputCountry]:min-w-[104px] sm:[&_.PhoneInputCountry]:min-w-[116px]',
     theme === 'dark'
-      ? '[&_.PhoneInputCountry]:border-r [&_.PhoneInputCountry]:border-white/10 [&_.PhoneInputCountry]:bg-white/5'
-      : '[&_.PhoneInputCountry]:border-r [&_.PhoneInputCountry]:border-slate-300 [&_.PhoneInputCountry]:bg-gray-100',
+      ? '[&_.PhoneInputCountry]:border-r [&_.PhoneInputCountry]:border-zinc-800 [&_.PhoneInputCountry]:bg-zinc-900'
+      : '[&_.PhoneInputCountry]:border-r [&_.PhoneInputCountry]:border-zinc-700 [&_.PhoneInputCountry]:bg-zinc-900',
     '[&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:flex [&_.PhoneInputCountry]:items-center [&_.PhoneInputCountry]:gap-2',
     '[&_.PhoneInputCountryIcon]:h-4 [&_.PhoneInputCountryIcon]:w-6 [&_.PhoneInputCountryIcon]:rounded-sm [&_.PhoneInputCountryIcon]:shadow-sm',
     theme === 'dark'
       ? '[&_.SmartPhoneCallingCode]:text-[18px] [&_.SmartPhoneCallingCode]:text-sm [&_.SmartPhoneCallingCode]:font-medium [&_.SmartPhoneCallingCode]:text-slate-200'
-      : '[&_.SmartPhoneCallingCode]:text-[18px] [&_.SmartPhoneCallingCode]:text-sm [&_.SmartPhoneCallingCode]:font-medium [&_.SmartPhoneCallingCode]:text-slate-700',
+      : '[&_.SmartPhoneCallingCode]:text-[18px] [&_.SmartPhoneCallingCode]:text-sm [&_.SmartPhoneCallingCode]:font-medium [&_.SmartPhoneCallingCode]:text-slate-200',
     theme === 'dark'
       ? '[&_.PhoneInputCountrySelectArrow]:ml-auto [&_.PhoneInputCountrySelectArrow]:mt-0 [&_.PhoneInputCountrySelectArrow]:h-2.5 [&_.PhoneInputCountrySelectArrow]:w-2.5 [&_.PhoneInputCountrySelectArrow]:opacity-100 [&_.PhoneInputCountrySelectArrow]:border-slate-400'
-      : '[&_.PhoneInputCountrySelectArrow]:ml-auto [&_.PhoneInputCountrySelectArrow]:mt-0 [&_.PhoneInputCountrySelectArrow]:h-2.5 [&_.PhoneInputCountrySelectArrow]:w-2.5 [&_.PhoneInputCountrySelectArrow]:opacity-100 [&_.PhoneInputCountrySelectArrow]:border-slate-500',
+      : '[&_.PhoneInputCountrySelectArrow]:ml-auto [&_.PhoneInputCountrySelectArrow]:mt-0 [&_.PhoneInputCountrySelectArrow]:h-2.5 [&_.PhoneInputCountrySelectArrow]:w-2.5 [&_.PhoneInputCountrySelectArrow]:opacity-100 [&_.PhoneInputCountrySelectArrow]:border-slate-400',
     theme === 'dark'
       ? '[&_.PhoneInputInput]:h-12 [&_.PhoneInputInput]:min-w-0 [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:px-4 [&_.PhoneInputInput]:text-base [&_.PhoneInputInput]:text-white'
-      : '[&_.PhoneInputInput]:h-12 [&_.PhoneInputInput]:min-w-0 [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-white [&_.PhoneInputInput]:px-4 [&_.PhoneInputInput]:text-base [&_.PhoneInputInput]:text-slate-800',
+      : '[&_.PhoneInputInput]:h-12 [&_.PhoneInputInput]:min-w-0 [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-zinc-950 [&_.PhoneInputInput]:px-4 [&_.PhoneInputInput]:text-base [&_.PhoneInputInput]:text-white',
     theme === 'dark'
       ? '[&_.PhoneInputInput]:placeholder:text-slate-500 [&_.PhoneInputInput]:focus:outline-none'
       : '[&_.PhoneInputInput]:placeholder:text-slate-500 [&_.PhoneInputInput]:focus:outline-none',
-    theme === 'dark' ? 'bg-white/5 backdrop-blur-sm' : 'bg-white',
+    theme === 'dark' ? 'bg-zinc-950 backdrop-blur-sm' : 'bg-zinc-950',
   ]
     .filter(Boolean)
     .join(' ');
@@ -305,10 +305,10 @@ export function SmartPhoneInput({
       {label ? (
         <label
           htmlFor={inputId}
-          className={theme === 'dark' ? 'mb-2 block text-sm font-medium text-slate-200' : 'mb-2 block text-sm font-medium text-slate-800'}
+          className={theme === 'dark' ? 'mb-2 block text-sm font-medium text-slate-200' : 'mb-2 block text-sm font-medium text-slate-200'}
         >
           {label}
-          {required ? <span className="ml-1 text-red-500">*</span> : null}
+          {required ? <span className="ml-1 text-amber-300">*</span> : null}
         </label>
       ) : null}
 
@@ -358,13 +358,13 @@ export function SmartPhoneInput({
       ) : null}
 
       {error ? (
-        <p id={errorId} className="mt-2 text-xs text-red-500">
+        <p id={errorId} className="mt-2 text-xs text-amber-300">
           {error}
         </p>
       ) : null}
 
       {!error && showAutoInvalidState ? (
-        <p id={errorId} className="mt-2 text-xs text-red-500">
+        <p id={errorId} className="mt-2 text-xs text-amber-300">
           Número inválido.
         </p>
       ) : null}

@@ -143,7 +143,7 @@ function HomePage() {
           <div className="max-w-md mx-auto bg-zinc-950 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden">
             <div className="border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-500"></span>
                 <span className="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
                 <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
               </div>

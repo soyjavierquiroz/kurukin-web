@@ -189,12 +189,12 @@ export const VideoTestPage = () => {
                     'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.firstName
-                      ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
+                      ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/30'
                       : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
                   ].join(' ')}
                   placeholder="Tu nombre"
                 />
-                {errors.firstName ? <p className="mt-2 text-xs text-red-400">{errors.firstName}</p> : null}
+                {errors.firstName ? <p className="mt-2 text-xs text-amber-300">{errors.firstName}</p> : null}
               </div>
 
               <div>
@@ -210,12 +210,12 @@ export const VideoTestPage = () => {
                     'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                     'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                     errors.lastName
-                      ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
+                      ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/30'
                       : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
                   ].join(' ')}
                   placeholder="Tu apellido"
                 />
-                {errors.lastName ? <p className="mt-2 text-xs text-red-400">{errors.lastName}</p> : null}
+                {errors.lastName ? <p className="mt-2 text-xs text-amber-300">{errors.lastName}</p> : null}
               </div>
             </div>
 
@@ -232,12 +232,12 @@ export const VideoTestPage = () => {
                   'h-11 w-full rounded-md border bg-zinc-950 px-4 text-base text-slate-100',
                   'placeholder:text-slate-500 focus:outline-none focus:ring-2',
                   errors.email
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500/30'
+                    ? 'border-amber-400 focus:border-amber-400 focus:ring-amber-400/30'
                     : 'border-zinc-700 focus:border-amber-400 focus:ring-amber-500/30',
                 ].join(' ')}
                 placeholder="tu@email.com"
               />
-              {errors.email ? <p className="mt-2 text-xs text-red-400">{errors.email}</p> : null}
+              {errors.email ? <p className="mt-2 text-xs text-amber-300">{errors.email}</p> : null}
             </div>
 
             <SmartPhoneInput

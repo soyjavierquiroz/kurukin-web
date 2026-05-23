@@ -95,7 +95,7 @@ export function HeroSection() {
           <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl"></div>
           <div className="relative bg-zinc-900/70 backdrop-blur border border-zinc-800 rounded-2xl p-8 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <div className="w-3 h-3 rounded-full bg-zinc-500"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
             </div>

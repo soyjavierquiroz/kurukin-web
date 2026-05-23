@@ -119,7 +119,7 @@ export function SmartLinkManager() {
       </form>
 
       {activeError ? (
-        <p className="mt-4 rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{activeError}</p>
+        <p className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-amber-300">{activeError}</p>
       ) : null}
 
       <div className="mt-8">

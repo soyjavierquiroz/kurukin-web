@@ -37,7 +37,7 @@ export function PlayerControls({
 
   return (
     <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 via-black/65 to-transparent px-4 pb-4 pt-8">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3 backdrop-blur-md">
         <input
           type="range"
           min={0}
@@ -53,7 +53,7 @@ export function PlayerControls({
           <button
             type="button"
             onClick={onTogglePlay}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 transition hover:bg-white/15"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition hover:bg-neutral-900"
             aria-label={isPlaying ? 'Pausar video' : 'Reproducir video'}
           >
             {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="ml-0.5 h-5 w-5" fill="currentColor" />}
@@ -62,7 +62,7 @@ export function PlayerControls({
           <button
             type="button"
             onClick={onToggleMute}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 transition hover:bg-white/15"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition hover:bg-neutral-900"
             aria-label={isMuted ? 'Activar sonido' : 'Silenciar video'}
           >
             {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
@@ -71,7 +71,7 @@ export function PlayerControls({
           <button
             type="button"
             onClick={onRestart}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 transition hover:bg-white/15"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition hover:bg-neutral-900"
             aria-label="Reiniciar video"
           >
             <RotateCcw className="h-4 w-4" />

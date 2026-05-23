@@ -311,7 +311,7 @@ export function KurukinPlayer({
             }
           }}
         >
-          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-1 ring-white/30 backdrop-blur">
+          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-900 ring-1 ring-zinc-700 backdrop-blur">
             <Play className="h-10 w-10 fill-white text-white" />
           </span>
         </div>
@@ -332,7 +332,7 @@ export function KurukinPlayer({
 
       {!isProviderImplemented ? (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-6 text-center text-white">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur-sm">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 px-6 py-4 backdrop-blur-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-300">Provider pendiente</p>
             <p className="mt-2 text-sm text-white/80">
               {provider} quedó preparado en la factory, pero su adapter aún no está implementado.

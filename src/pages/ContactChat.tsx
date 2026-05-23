@@ -99,8 +99,8 @@ export function ContactChat() {
           </div>
 
           <div className="max-w-md mx-auto bg-zinc-950 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden mb-2 text-left opacity-80">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/5">
-              <div className="w-3 h-3 rounded-full bg-red-500/90"></div>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+              <div className="w-3 h-3 rounded-full bg-zinc-500"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500/90"></div>
               <div className="w-3 h-3 rounded-full bg-green-500/90"></div>
             </div>
