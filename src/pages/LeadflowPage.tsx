@@ -4,6 +4,7 @@ import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
 import { trackPageView } from '../lib/analytics';
 
+const VSL_REVEAL_SECONDS = 60; // Cambiar este valor para ajustar el tiempo de aparición del botón y contenido
 const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/82f82aa1-a2a3-43f9-862b-f60fadc0fdc0/playlist.m3u8';
 
 const ctaBaseClassName = [
@@ -71,6 +72,7 @@ function LeadflowCta({
 export default function LeadflowPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
+  const [isContentRevealed, setIsContentRevealed] = useState(false);
   const [distribuidoresActivos, setDistribuidoresActivos] = useState(20);
   const conversacionesMuertas = distribuidoresActivos * 5;
 
@@ -118,11 +120,13 @@ export default function LeadflowPage() {
         }
       `}</style>
 
-      <div className="sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 py-3 text-center text-xs font-medium text-white sm:px-6 sm:text-sm">
-          🔒 Solo para líderes con equipos activos. Aceptamos 5 equipos listos para duplicación masiva este mes.
+      {isContentRevealed && (
+        <div className="sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
+          <div className="mx-auto max-w-7xl px-4 py-3 text-center text-xs font-medium text-white sm:px-6 sm:text-sm">
+            🔒 Solo para líderes con equipos activos. Aceptamos 5 equipos listos para duplicación masiva este mes.
+          </div>
         </div>
-      </div>
+      )}
 
       <main>
         {/* HERO SECTION - CTA Visible en todo dispositivo */}
@@ -145,15 +149,6 @@ export default function LeadflowPage() {
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl">
                 Con LeadFlow genera de 5 a 10 interesados diarios para cada miembro de tu equipo - sin crear contenido ni depender de algoritmos.
               </p>
-
-              <div className="mt-8">
-                <LeadflowCta
-                  text="Quiero ver si mi equipo califica para LeadFlow"
-                  microCopy="Toma menos de 1 minuto. Solo trabajamos con equipos listos para escalar adquisición y duplicación."
-                  onClick={() => setIsFormOpen(true)}
-                  className="block" 
-                />
-              </div>
             </div>
 
             <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
@@ -166,6 +161,9 @@ export default function LeadflowPage() {
                     vslMode={true}
                     resumePlayback={true}
                     vslProgressBarColor="#dc2626"
+                    onTimeUpdate={(currentTime) => {
+                      if (currentTime >= VSL_REVEAL_SECONDS && !isContentRevealed) setIsContentRevealed(true);
+                    }}
                     smartPoster={{
                       eyebrow: 'Mensaje Urgente',
                       title: 'Haz clic para ver por qué tu equipo no crece',
@@ -180,8 +178,10 @@ export default function LeadflowPage() {
           </div>
         </section>
 
-        {/* FRANJA DE VALIDACIÓN CON ANIMACIÓN MARQUEE */}
-        <section className="overflow-hidden border-y border-white/5 py-12">
+        {isContentRevealed && (
+          <div className="animate-in fade-in duration-1000">
+            {/* FRANJA DE VALIDACIÓN CON ANIMACIÓN MARQUEE */}
+            <section className="overflow-hidden border-y border-white/5 py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="mb-12 text-center">
               <p className="text-lg font-medium leading-relaxed text-slate-300 md:text-xl lg:text-2xl">
@@ -426,21 +426,23 @@ export default function LeadflowPage() {
         </footer>
 
         {/* CTA STICKY MOBILE - Solo Móvil */}
-        {showSticky && (
-          <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
-            <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-lg" />
-            <div className="relative">
-              <button
-                onClick={() => setIsFormOpen(true)}
-                className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] active:scale-95 transition-transform"
-              >
-                <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
-                  Solo 5 equipos este mes
-                </span>
-              </button>
+            {showSticky && (
+              <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
+                <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-lg" />
+                <div className="relative">
+                  <button
+                    onClick={() => setIsFormOpen(true)}
+                    className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] active:scale-95 transition-transform"
+                  >
+                    <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
+                    <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
+                      Solo 5 equipos este mes
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
             </div>
-          </div>
         )}
 
         {/* MODAL FORMULARIO */}
