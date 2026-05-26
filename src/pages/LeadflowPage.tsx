@@ -4,7 +4,7 @@ import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
 import { trackPageView } from '../lib/analytics';
 
-const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/1ef89dab-10dc-4838-941b-47f059ac8b5f/playlist.m3u8';
+const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/82f82aa1-a2a3-43f9-862b-f60fadc0fdc0/playlist.m3u8';
 
 const ctaBaseClassName = [
   'group inline-flex w-full min-h-[64px] items-center justify-center gap-3 rounded-2xl',
