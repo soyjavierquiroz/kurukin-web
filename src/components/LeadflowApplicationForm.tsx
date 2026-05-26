@@ -496,15 +496,6 @@ function isApprovedLeadStatus(status: LeadStatus): boolean {
   return status === 'ORO' || status === 'PLATA';
 }
 
-function isDisqualifiedByHardKills(answers: Answers): boolean {
-  // REGLAS DE GUILLOTINA (Hard Kills)
-  return (
-    answers.teamSize?.value === 'less_than_15' ||
-    answers.mainProblem === 'Recién empiezo, aún no tengo equipo.' ||
-    answers.investmentPosition?.value === 'no_budget'
-  );
-}
-
 function validateStep(step: number, answers: Answers, isWhatsappValid: boolean): FieldErrors {
   const nextErrors: FieldErrors = {};
 
@@ -825,8 +816,25 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       return;
     }
 
-    if (isDisqualifiedByHardKills(answers)) {
-      window.location.href = LEADFLOW_DOWNSELL_URL;
+    const teamSize = answers.teamSize ? JSON.stringify(answers.teamSize) : '';
+    const mainProblem = answers.mainProblem;
+    const investmentPosition = answers.investmentPosition ? JSON.stringify(answers.investmentPosition) : '';
+
+    // REGLAS DE GUILLOTINA A PRUEBA DE BALAS
+    const isDisqualified =
+      String(teamSize).includes('Menos de 15') ||
+      String(mainProblem).includes('Recién empiezo') ||
+      String(investmentPosition).includes('No cuento con más de $100') ||
+      String(investmentPosition).includes('no_budget');
+
+    if (isDisqualified) {
+      // Congelamos la interfaz y simulamos procesamiento cognitivo antes del downsell.
+      setIsSubmitting(true);
+
+      window.setTimeout(() => {
+        window.location.href = LEADFLOW_DOWNSELL_URL || 'URL_DEL_DOWNSELL';
+      }, 3000);
+
       return;
     }
 
