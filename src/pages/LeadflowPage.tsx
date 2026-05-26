@@ -135,8 +135,19 @@ export default function LeadflowPage() {
           <div className="pointer-events-none absolute right-0 top-20 h-[420px] w-[420px] rounded-full bg-zinc-900/30 blur-[120px]" />
           <div className="pointer-events-none absolute left-1/2 top-44 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-neutral-900/30 blur-[120px]" />
           
-          <div className="relative mx-auto grid max-w-7xl gap-5 px-4 pt-8 pb-16 sm:px-6 md:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14">
-            <div className="max-w-none">
+          <div className="relative mx-auto grid max-w-7xl gap-5 px-4 pt-4 pb-16 sm:px-6 sm:pt-6 md:pt-8 md:pb-20 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-14 lg:py-24">
+            <div className="text-center lg:hidden">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400 sm:text-sm sm:tracking-[0.32em]">
+                ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
+              </p>
+
+              <h1 className="mt-4 text-3xl font-bold leading-[1.02] text-white sm:text-4xl md:text-5xl">
+                Si tu equipo MLM no prospecta sin ti...{' '}
+                <span className="text-amber-400">tienes un empleo disfrazado.</span>
+              </h1>
+            </div>
+
+            <div className="hidden max-w-none lg:block">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-amber-400">
                 ATENCIÓN LÍDERES SERIOS DE MULTINIVEL
               </p>
@@ -175,6 +186,10 @@ export default function LeadflowPage() {
                 </div>
               </div>
             </div>
+
+            <p className="mx-auto max-w-2xl text-center text-base leading-relaxed text-slate-300 sm:text-lg md:text-xl lg:hidden">
+              Con LeadFlow genera de 5 a 10 interesados diarios para cada miembro de tu equipo - sin crear contenido ni depender de algoritmos.
+            </p>
           </div>
         </section>
 
