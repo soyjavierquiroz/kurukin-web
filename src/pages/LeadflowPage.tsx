@@ -71,27 +71,12 @@ function LeadflowCta({
 
 export default function LeadflowPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [showSticky, setShowSticky] = useState(false);
   const [isContentRevealed, setIsContentRevealed] = useState(false);
   const [distribuidoresActivos, setDistribuidoresActivos] = useState(20);
   const conversacionesMuertas = distribuidoresActivos * 5;
 
   useEffect(() => {
     void trackPageView();
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      // Se activa a los 250px de scroll
-      if (window.scrollY > 250) {
-        setShowSticky(true);
-      } else {
-        setShowSticky(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -441,23 +426,21 @@ export default function LeadflowPage() {
         </footer>
 
         {/* CTA STICKY MOBILE - Solo Móvil */}
-            {showSticky && (
-              <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
-                <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-lg" />
-                <div className="relative">
-                  <button
-                    onClick={() => setIsFormOpen(true)}
-                    className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] active:scale-95 transition-transform"
-                  >
-                    <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
-                    <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
-                      Solo 5 equipos este mes
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
-            </div>
+        <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
+          <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-lg" />
+          <div className="relative">
+            <button
+              onClick={() => setIsFormOpen(true)}
+              className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] active:scale-95 transition-transform"
+            >
+              <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
+                Solo 5 equipos este mes
+              </span>
+            </button>
+          </div>
+        </div>
+          </div>
         )}
 
         {/* MODAL FORMULARIO */}
