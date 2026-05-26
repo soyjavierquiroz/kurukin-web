@@ -1,79 +1,100 @@
-import { ShieldCheck } from 'lucide-react';
+import { ShieldAlert, Zap, Bot, LayoutTemplate, CheckCircle2 } from 'lucide-react';
 
 export default function DownsellPage() {
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white py-12 sm:py-20 px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.03),transparent_40%)]" />
+    <div className="min-h-screen bg-black text-white py-12 px-4 selection:bg-amber-500/30">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.02),transparent_50%)] pointer-events-none" />
 
       <main className="relative mx-auto max-w-3xl">
-        {/* Cabecera / Reframing */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center p-3 bg-red-500/10 rounded-full mb-6">
-            <ShieldCheck className="w-10 h-10 text-red-500" />
+        {/* CABECERA DE ALERTA */}
+        <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="inline-flex items-center justify-center p-4 bg-red-500/10 rounded-2xl mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
+            <ShieldAlert className="w-12 h-12 text-red-500" />
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight text-white mb-4">
-            <span className="text-red-500">🛑 RESULTADO DE TU DIAGNÓSTICO:</span><br />
-            Acceso a Consultoría Privada PAUSADO
+          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight text-white mb-4">
+            <span className="text-red-500">Diagnóstico:</span><br />
+            Acceso VIP Pausado
           </h1>
-          <p className="text-lg md:text-xl font-medium text-slate-400">
-            (Lee esto con atención)
-          </p>
+          <p className="text-lg text-slate-400 font-medium tracking-wide">(Lee esto con atención antes de cerrar)</p>
         </div>
 
-        {/* Carta de Ventas - Panel de Cristal */}
-        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-900/60 p-6 md:p-12 shadow-2xl backdrop-blur-md space-y-6 text-lg leading-relaxed text-slate-300">
-          <p>
-            Hola. Basado en las respuestas que nuestra Inteligencia Artificial acaba de evaluar, hemos decidido <strong className="text-white">no habilitar tu acceso</strong> a nuestra implementación privada 1-a-1.
-          </p>
-          <p>
-            Pero no te preocupes, esto no es algo malo. <strong className="text-amber-400">Es para proteger tu bolsillo.</strong>
-          </p>
-          <p>
-            Nuestra consultoría premium (de $3,000+ USD) está diseñada para líderes que ya tienen redes enormes y necesitan automatizar a escala masiva. Venderte ese sistema a ti en esta etapa de tu negocio sería como venderte un cohete de la NASA para ir a la esquina. Sería un desperdicio de tu dinero, y nosotros no operamos así.
-          </p>
+        {/* CONTENEDOR PRINCIPAL */}
+        <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 p-6 md:p-10 shadow-2xl relative overflow-hidden">
 
-          <div className="h-px w-full bg-white/10 my-8" />
-
-          <h2 className="text-2xl font-bold text-white">Tienes algo que el 90% no tiene</h2>
-          <p>
-            Dicho esto, tienes algo que el 90% de los networkers allá afuera no tienen: <strong className="text-white">Tomaste acción.</strong>
-          </p>
-          <p>
-            Entiendes perfectamente que perseguir a tu familia, mandar mensajes en frío y rogar por atención en redes sociales ya no funciona. Tienes la mentalidad correcta, solo te falta la infraestructura.
-          </p>
-          <p>
-            No vamos a dejarte con las manos vacías para que vuelvas a hacer listas de contactos. Para líderes con iniciativa como tú, hemos habilitado una <strong className="text-white">"Puerta Trasera" a nuestra tecnología: El Motor de Prospección Agnóstico (Versión Hazlo-Tú-Mismo).</strong>
-          </p>
-          <p>
-            En lugar de cobrarte miles de dólares por instalártelo nosotros, te damos los planos exactos, las páginas y el Bot de WhatsApp para que lo uses en tu propia red hoy mismo, sin importar en qué compañía estés.
-          </p>
-
-          <div className="rounded-2xl bg-black/50 p-6 border border-zinc-800 my-8">
-            <p className="text-center font-bold text-white text-xl mb-2">No cuesta miles.</p>
-            <p className="text-center text-slate-300">
-              Solo cuesta <strong className="text-amber-400 text-2xl">$30 USD</strong> por un acceso completo de 90 Días (Apenas $10 al mes).
+          {/* EL DIAGNÓSTICO CRUDO */}
+          <div className="space-y-4 text-lg text-slate-300 leading-relaxed mb-10">
+            <p>
+              Basado en el análisis de tu perfil, <strong className="text-white">hemos bloqueado tu acceso</strong> a nuestra implementación privada 1-a-1.
+            </p>
+            <div className="border-l-4 border-amber-500 pl-4 bg-amber-500/5 p-4 rounded-r-lg">
+              <p className="text-amber-400 font-bold mb-1">Es para proteger tu bolsillo.</p>
+              <p className="text-sm md:text-base text-slate-300">
+                Venderte un sistema corporativo de $3,000+ USD en tu etapa actual sería como venderte un cohete para ir a la esquina. Sería un robo, y nosotros no operamos así.
+              </p>
+            </div>
+            <p>
+              Sin embargo, tienes la mentalidad correcta. Entiendes que <strong className="text-white">perseguir amigos y rogar en redes sociales ya no funciona.</strong> Solo te falta la infraestructura.
             </p>
           </div>
 
-          <p>
-            ¿Por qué 90 días? Porque es el tiempo exacto que necesitas para aplicar un plan de acción real en multinivel, subir de rango y empezar a facturar de verdad.
-          </p>
-          <p className="font-bold text-white">
-            Este es nuestro trato: Entra hoy por $30. Usa nuestro sistema. Deja de rogarle a la gente. Construye tu equipo de 15 a 50 personas. Y cuando tengas el volumen y el cheque que mereces... vuelves a llenar nuestro formulario, aplicas al programa VIP y escalamos juntos.
-          </p>
-          <p className="text-center font-bold text-xl text-white pt-4">
-            Tu nueva etapa empieza aquí.
-          </p>
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-700 to-transparent mb-10" />
 
-          <div className="pt-6">
-            {/* Reemplaza '#' por tu link de pago real de Hotmart/Stripe */}
+          {/* LA OFERTA - ESCANEABLE */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+              Tu "Puerta Trasera" a la tecnología LeadFlow
+            </h2>
+            <p className="text-center text-slate-400 mb-8">
+              Te entregamos el Motor de Prospección (Versión DIY) para que lo instales hoy mismo en tu red.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col items-center text-center">
+                <LayoutTemplate className="w-8 h-8 text-amber-500 mb-3" />
+                <h3 className="font-bold text-white text-sm mb-1">Embudos de Captura</h3>
+                <p className="text-xs text-slate-400">Páginas exactas para filtrar prospectos.</p>
+              </div>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col items-center text-center">
+                <Bot className="w-8 h-8 text-amber-500 mb-3" />
+                <h3 className="font-bold text-white text-sm mb-1">Bot de WhatsApp</h3>
+                <p className="text-xs text-slate-400">Automatización de seguimiento 24/7.</p>
+              </div>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col items-center text-center">
+                <Zap className="w-8 h-8 text-amber-500 mb-3" />
+                <h3 className="font-bold text-white text-sm mb-1">Planos de Acción</h3>
+                <p className="text-xs text-slate-400">Instrucciones tácticas paso a paso.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CAJA DE PRECIO PREMIUM */}
+          <div className="relative rounded-2xl border-2 border-emerald-500/30 bg-emerald-500/5 p-8 text-center mb-8 overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest py-1 px-4 rounded-b-lg">
+              Oferta Única
+            </div>
+            <p className="text-slate-300 font-medium mb-2 mt-2">Acceso completo por 90 Días</p>
+            <div className="flex justify-center items-end gap-2 mb-4">
+              <span className="text-5xl font-black text-white">$30</span>
+              <span className="text-emerald-400 font-bold mb-1">USD</span>
+            </div>
+
+            <ul className="text-sm text-slate-300 space-y-2 flex flex-col items-center mb-8">
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Cero cuotas mensuales ocultas</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Escala de 15 a 50 personas</li>
+            </ul>
+
             <a
-              href="#"
-              className="flex w-full flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-700 px-8 py-5 text-center font-bold uppercase text-white shadow-[0_16px_32px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-95"
+              href={import.meta.env.VITE_LEADFLOW_DOWNSELL_URL || '#'}
+              className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 p-4 font-bold uppercase text-black transition-all hover:bg-emerald-400 hover:scale-[1.02] active:scale-95"
             >
-              <span className="text-lg md:text-xl tracking-tight">Quiero mis 90 días de acceso por $30 USD ahora</span>
+              <span className="text-lg md:text-xl tracking-tight">Sí, quiero la infraestructura</span>
             </a>
           </div>
+
+          <p className="text-center text-sm text-slate-500">
+            Sube de rango, factura y luego vuelve a aplicar al programa VIP.
+          </p>
+
         </div>
       </main>
     </div>
