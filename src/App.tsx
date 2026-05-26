@@ -15,6 +15,7 @@ import { LinkRedirector } from './components/LinkRedirector';
 import { DemoPage } from './pages/DemoPage';
 import LeadflowPage from './pages/LeadflowPage';
 import { VideoTestPage } from './pages/VideoTestPage';
+import DownsellPage from './pages/DownsellPage';
 
 function HomePage() {
   const chatRef = useRef<HTMLDivElement | null>(null);
@@ -218,7 +219,8 @@ function App() {
       <Route path="/contactar/chatear" element={<ContactChat />} />
       <Route path="/contactar/formulario" element={<ContactForm />} />
       <Route path="/leadflow" element={<LeadflowPage />} />
-      
+      <Route path="/downsell" element={<DownsellPage />} />
+
       {/* RUTA AÑADIDA: Tu laboratorio de pruebas */}
       <Route path="/video" element={<VideoTestPage />} />
       <Route path="/demo" element={<DemoPage />} />

@@ -1151,7 +1151,10 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       <header className="relative z-10 shrink-0 border-b border-zinc-800 bg-zinc-950/90 px-4 py-3 backdrop-blur-md sm:px-6">
         <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-zinc-300 transition-all duration-500 ease-out"
+            className={[
+              'h-full rounded-full transition-all duration-500 ease-out',
+              isEvaluating ? 'bg-red-600' : 'bg-zinc-300',
+            ].join(' ')}
             style={{ width: `${isEvaluating || shouldShowResult ? 100 : progressPercentage}%` }}
           />
         </div>
