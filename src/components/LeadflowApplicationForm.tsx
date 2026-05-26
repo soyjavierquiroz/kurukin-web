@@ -16,6 +16,7 @@ const LEADS_API_URL = '/api/leads';
 const LEAD_STATUS_POLL_INTERVAL_MS = 2000;
 const LEAD_STATUS_MAX_ATTEMPTS = 45;
 const SITE_ID = 'KURUKIN';
+const LEADFLOW_DOWNSELL_URL = import.meta.env.VITE_LEADFLOW_DOWNSELL_URL || 'URL_DEL_DOWNSELL';
 const WHATSAPP_SUCCESS_MESSAGE =
   'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo MLM y obtuve Luz Verde. Quiero agendar una reunión para conocer LeadFlow a la brevedad.';
 const WHATSAPP_ENCODED_MESSAGE = encodeURIComponent(WHATSAPP_SUCCESS_MESSAGE);
@@ -138,7 +139,7 @@ const INVESTMENT_OPTIONS = [
   {
     value: 'capital_ready',
     shortLabel: 'Capital listo',
-    label: 'Tengo el dinero listo para pagarlo yo mismo si el sistema me convence en la llamada',
+    label: 'Tengo el capital listo (Inversión superior a $2,000 USD) si el sistema me convence.',
   },
   {
     value: 'team_pool',
@@ -148,7 +149,7 @@ const INVESTMENT_OPTIONS = [
   {
     value: 'no_budget',
     shortLabel: 'Sin presupuesto',
-    label: 'No tenemos ese presupuesto en el equipo en este momento',
+    label: 'No cuento con más de $100 USD en este momento.',
   },
 ] as const;
 
@@ -495,6 +496,15 @@ function isApprovedLeadStatus(status: LeadStatus): boolean {
   return status === 'ORO' || status === 'PLATA';
 }
 
+function isDisqualifiedByHardKills(answers: Answers): boolean {
+  // REGLAS DE GUILLOTINA (Hard Kills)
+  return (
+    answers.teamSize?.value === 'less_than_15' ||
+    answers.mainProblem === 'Recién empiezo, aún no tengo equipo.' ||
+    answers.investmentPosition?.value === 'no_budget'
+  );
+}
+
 function validateStep(step: number, answers: Answers, isWhatsappValid: boolean): FieldErrors {
   const nextErrors: FieldErrors = {};
 
@@ -812,6 +822,11 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       }));
       setIsEvaluating(false);
       setCurrentStep(7);
+      return;
+    }
+
+    if (isDisqualifiedByHardKills(answers)) {
+      window.location.href = LEADFLOW_DOWNSELL_URL;
       return;
     }
 
