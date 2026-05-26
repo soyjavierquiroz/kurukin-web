@@ -105,14 +105,6 @@ export default function LeadflowPage() {
         }
       `}</style>
 
-      {isContentRevealed && (
-        <div className="sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
-          <div className="mx-auto max-w-7xl px-4 py-3 text-center text-xs font-medium text-white sm:px-6 sm:text-sm">
-            🔒 Solo para líderes con equipos activos. Aceptamos 5 equipos listos para duplicación masiva este mes.
-          </div>
-        </div>
-      )}
-
       <main>
         {/* HERO SECTION - CTA Visible en todo dispositivo */}
         <section id="hero" className="relative overflow-hidden">
@@ -425,21 +417,32 @@ export default function LeadflowPage() {
           </div>
         </footer>
 
-        {/* CTA STICKY MOBILE - Solo Móvil */}
-        <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in fade-in slide-in-from-bottom-10 duration-300 md:hidden">
-          <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-lg" />
-          <div className="relative">
-            <button
-              onClick={() => setIsFormOpen(true)}
-              className="flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] active:scale-95 transition-transform"
-            >
-              <span className="text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
-              <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90">
-                Solo 5 equipos este mes
-              </span>
-            </button>
           </div>
-        </div>
+        )}
+
+        {/* CTA STICKY UNIVERSAL - Aparece por VSL Timer */}
+        {isContentRevealed && (
+          <div className="fixed bottom-0 left-0 right-0 z-[60] animate-in fade-in slide-in-from-bottom-10 duration-700">
+            <div className="absolute inset-0 border-t border-white/10 bg-black/90 backdrop-blur-xl" />
+            <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 p-4 md:flex-row md:px-6 md:py-4">
+              
+              {/* Texto visible solo en Desktop */}
+              <div className="hidden md:block">
+                <p className="text-lg font-bold text-white">Tu equipo necesita infraestructura, no más motivación.</p>
+                <p className="text-sm font-medium text-slate-400">Solo aceptamos 5 equipos listos para duplicación masiva este mes.</p>
+              </div>
+
+              {/* Botón de Acción */}
+              <button
+                onClick={() => setIsFormOpen(true)}
+                className="flex w-full flex-col items-center justify-center gap-0.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-8 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] transition-transform active:scale-95 md:w-auto hover:scale-105"
+              >
+                <span className="text-base md:text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
+                <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90 md:hidden">
+                  Solo 5 equipos este mes
+                </span>
+              </button>
+            </div>
           </div>
         )}
 
