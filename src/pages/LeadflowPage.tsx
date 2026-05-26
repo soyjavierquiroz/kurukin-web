@@ -165,8 +165,11 @@ export default function LeadflowPage() {
                     videoId={LEADFLOW_VIDEO_URL}
                     vslMode={true}
                     resumePlayback={true}
+                    primaryColor="#dc2626"
+                    theme={{ primary: '#dc2626' }}
                     mutedPreview={{
                       enabled: true,
+                      blur: false,
                       overlayPosition: 'center',
                       buttonText: 'MENSAJE URGENTE - ACTIVA EL AUDIO',
                       fallbackText1: 'MENSAJE URGENTE',
@@ -178,7 +181,7 @@ export default function LeadflowPage() {
                       description: 'Haz clic y escucha el punto exacto que está matando la duplicación.',
                       buttonText: 'Ver mensaje',
                     }}
-                    className="h-full w-full [&_video]:object-cover" 
+                    className="h-full w-full [&_video]:object-cover [&_video]:!filter-none [&_.backdrop-blur-md]:!backdrop-blur-none [&_.backdrop-blur-sm]:!backdrop-blur-none [&_.blur]:!blur-none [&_[role=progressbar]>div]:!bg-red-600 [&_.bg-green-500]:!bg-red-600 [&_.bg-green-400]:!bg-red-600 [&_.bg-emerald-500]:!bg-red-600" 
                   />
                 </div>
               </div>
