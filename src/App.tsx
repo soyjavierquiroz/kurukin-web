@@ -219,6 +219,7 @@ function App() {
       <Route path="/contactar/chatear" element={<ContactChat />} />
       <Route path="/contactar/formulario" element={<ContactForm />} />
       <Route path="/leadflow" element={<LeadflowPage />} />
+      <Route path="/getleadflow" element={<DownsellPage />} />
       <Route path="/downsell" element={<DownsellPage />} />
 
       {/* RUTA AÑADIDA: Tu laboratorio de pruebas */}

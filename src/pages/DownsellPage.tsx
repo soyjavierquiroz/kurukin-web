@@ -1,5 +1,8 @@
 import { ShieldAlert, Zap, Bot, LayoutTemplate, CheckCircle2 } from 'lucide-react';
 
+const LEADFLOW_DOWNSELL_CHECKOUT_URL =
+  import.meta.env.VITE_LEADFLOW_DOWNSELL_CHECKOUT_URL || 'https://pay.hotmart.com/Y43592026T?off=6t8e22na';
+
 export default function DownsellPage() {
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 selection:bg-amber-500/30">
@@ -72,19 +75,19 @@ export default function DownsellPage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest py-1 px-4 rounded-b-lg">
               Oferta Única
             </div>
-            <p className="text-slate-300 font-medium mb-2 mt-2">Acceso completo por 90 Días</p>
+            <p className="text-slate-300 font-medium mb-2 mt-2">Acceso completo mensual</p>
             <div className="flex justify-center items-end gap-2 mb-4">
-              <span className="text-5xl font-black text-white">$30</span>
-              <span className="text-emerald-400 font-bold mb-1">USD</span>
+              <span className="text-5xl font-black text-white">$37</span>
+              <span className="text-emerald-400 font-bold mb-1">USD/MES</span>
             </div>
 
             <ul className="text-sm text-slate-300 space-y-2 flex flex-col items-center mb-8">
-              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Cero cuotas mensuales ocultas</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Suscripción mensual clara de 37 USD</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Escala de 15 a 50 personas</li>
             </ul>
 
             <a
-              href={import.meta.env.VITE_LEADFLOW_DOWNSELL_URL || '#'}
+              href={LEADFLOW_DOWNSELL_CHECKOUT_URL}
               className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 p-4 font-bold uppercase text-black transition-all hover:bg-emerald-400 hover:scale-[1.02] active:scale-95"
             >
               <span className="text-lg md:text-xl tracking-tight">Sí, quiero la infraestructura</span>
