@@ -11,7 +11,7 @@ const EVALUATION_MIN_DURATION_MS = 5000;
 const WHATSAPP_AUTO_OPEN_DELAY_SECONDS = 30;
 const WHATSAPP_BLOCKED_FALLBACK_DELAY_MS = 800;
 const MIN_COMPANY_TEXT_LENGTH = 4;
-const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
+const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres.';
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LEADFLOW_EVALUATE_API_URL = '/api/leadflow/evaluate';
@@ -93,40 +93,48 @@ const TEAM_SIZE_OPTIONS = [
   {
     value: 'less_than_15',
     shortLabel: 'Menos de 15 personas',
-    label: 'Menos de 15 personas (Sigo haciendo todo el trabajo solo)',
+    label: 'Menos de 15 personas',
+    subcopy: 'Todavía cargo gran parte del negocio.',
   },
   {
     value: '15_to_50',
     shortLabel: '15 a 50 personas',
-    label: 'Entre 15 y 50 personas (Tengo equipo, pero nos estancamos)',
+    label: 'Entre 15 y 50 personas',
+    subcopy: 'Ya hay equipo, pero falta duplicación real.',
   },
   {
     value: 'more_than_50',
     shortLabel: 'Más de 50 personas',
-    label: 'Más de 50 personas (Tengo líneas sólidas y líderes corriendo)',
+    label: 'Más de 50 personas',
+    subcopy: 'Tengo base sólida y líderes en movimiento.',
   },
 ] as const;
 
 const MAIN_PROBLEM_OPTIONS = [
   {
     value: 'Dependen de mí para presentar y cerrar.',
-    label: 'Dependen de mí para presentar y cerrar.',
+    label: 'Dependen de mí para presentar y cerrar',
+    subcopy: 'Si no aparezco, el negocio se enfría.',
   },
   {
     value: 'Se quedan sin prospectos muy rápido.',
-    label: 'Se quedan sin prospectos muy rápido.',
+    label: 'Se quedan sin prospectos muy rápido',
+    subcopy: 'Queman su lista y se frenan.',
   },
   {
     value: 'Tienen motivación, pero ningún sistema claro.',
-    label: 'Tienen motivación, pero ningún sistema claro.',
+    label: 'Tienen motivación, pero no sistema',
+    subcopy: 'Hay ganas, pero no proceso.',
   },
   {
     value: 'Se frustran y rinden al primer rechazo.',
-    label: 'Se frustran y rinden al primer rechazo.',
+    label: 'Se frustran con el rechazo',
+    subcopy: 'Arrancan, pero no sostienen el ritmo.',
   },
   {
     value: 'Recién empiezo, aún no tengo equipo.',
-    label: 'Recién empiezo, aún no tengo equipo.',
+    label: 'Recién empiezo, aún no tengo equipo',
+    subcopy: 'Todavía estoy construyendo la base.',
   },
 ] as const;
 
@@ -136,17 +144,20 @@ const ACQUISITION_OPTIONS = [
   {
     value: 'no_survival',
     shortLabel: 'Mensajes en frío',
-    label: 'No. Dependemos 100% de perseguir amigos, familiares y mandar mensajes en frío',
+    label: 'No. Dependemos de conocidos y mensajes en frío',
+    subcopy: 'Si la lista se acaba, el negocio se detiene.',
   },
   {
     value: 'organic_hope',
     shortLabel: 'Orgánico (TikTok/Reels)',
-    label: 'Dependemos de subir Reels y TikToks rezando para que el algoritmo nos traiga interesados',
+    label: 'Dependemos de Reels y TikToks',
+    subcopy: 'Esperamos que el algoritmo nos mande gente.',
   },
   {
     value: 'paid_no_system',
     shortLabel: 'Tráfico pago sin cierre',
-    label: 'Ya metemos publicidad pagada, pero mi equipo no sabe cómo cerrar prospectos en frío',
+    label: 'Ya usamos publicidad, pero no cerramos frío',
+    subcopy: 'Hay tráfico, pero la conversión está rota.',
   },
 ] as const;
 
@@ -154,17 +165,20 @@ const INVESTMENT_OPTIONS = [
   {
     value: 'capital_ready',
     shortLabel: 'Capital listo',
-    label: 'Tengo el capital listo (Inversión superior a $2,000 USD) si el sistema me convence.',
+    label: 'Tengo el capital listo',
+    subcopy: 'Si los números tienen sentido, puedo avanzar.',
   },
   {
     value: 'team_pool',
     shortLabel: 'Co-inversión (Vaca)',
-    label: "Voy a armar una 'vaca' (co-inversión) con mis líderes clave para dividir el costo de las licencias",
+    label: "Haría una 'vaca' con mis líderes",
+    subcopy: 'Lo dividimos entre quienes sí construyen.',
   },
   {
     value: 'no_budget',
     shortLabel: 'Sin presupuesto',
-    label: 'No cuento con más de $100 USD en este momento.',
+    label: 'Hoy no tengo el capital disponible',
+    subcopy: 'Pero si veo una ruta clara, buscaría cómo conseguirlo.',
   },
 ] as const;
 
@@ -172,12 +186,14 @@ const DECISION_OPTIONS = [
   {
     value: 'yes',
     shortLabel: 'Decisión propia',
-    label: 'Depende 100% de mí. Yo decido qué herramientas usa mi organización',
+    label: 'Sí. Yo decido',
+    subcopy: 'Elijo las herramientas de mi organización.',
   },
   {
     value: 'need_upline',
     shortLabel: 'Consulta Upline/Socios',
-    label: 'Tengo que consultarlo con mi línea ascendente, socios o patrocinador',
+    label: 'Tengo que consultarlo',
+    subcopy: 'Necesito hablarlo con mi upline, socios o patrocinador.',
   },
 ] as const;
 
@@ -190,6 +206,7 @@ interface Option {
   value: string;
   label: string;
   shortLabel?: string;
+  subcopy?: string;
 }
 
 interface Answers {
@@ -618,7 +635,7 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
       type="button"
       onClick={() => handleSelectOption(option)}
       className={[
-        'group flex min-h-[64px] w-full cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition duration-200 md:min-h-[72px] md:p-4',
+        'group flex min-h-[54px] w-full cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-left transition duration-200 md:min-h-[72px] md:gap-3 md:p-4',
         'border-zinc-800 bg-zinc-900/60 shadow-[0_0_80px_rgba(0,0,0,0.16)] backdrop-blur-md',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15',
         selected
@@ -629,15 +646,36 @@ function OptionButton({ option, selected, handleSelectOption }: OptionButtonProp
     >
       <span
         className={[
-          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition',
+          'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition md:h-7 md:w-7',
           selected ? 'border-amber-500/30 bg-zinc-950 text-amber-400' : 'border-zinc-700 bg-zinc-950 text-transparent',
         ].join(' ')}
         aria-hidden="true"
       >
-        <CheckCircle2 className="h-4 w-4" />
+        <CheckCircle2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
       </span>
-      <span className="text-sm font-semibold leading-snug text-white md:text-lg">{option.label}</span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold leading-snug text-white md:text-lg">{option.label}</span>
+        {option.subcopy ? (
+          <span className="mt-0.5 block text-xs font-medium leading-snug text-slate-400 md:mt-1 md:text-base md:leading-relaxed">
+            {option.subcopy}
+          </span>
+        ) : null}
+      </span>
     </button>
+  );
+}
+
+function FormIntro() {
+  return (
+    <div className="mb-3 space-y-1.5 border-b border-zinc-800 pb-3 md:mb-6 md:space-y-3 md:pb-6">
+      <p className="text-sm font-black leading-snug text-white md:text-lg">Este diagnóstico responde una pregunta:</p>
+      <p className="text-lg font-black leading-tight text-white md:text-3xl">
+        ¿Tu red puede escalar… o todavía dependes de ti para todo?
+      </p>
+      <p className="text-xs font-semibold leading-snug text-slate-300 md:text-base md:leading-relaxed">
+        Responde con honestidad. Si calificas, veremos cómo ayudarte a crecer y duplicar mejor.
+      </p>
+    </div>
   );
 }
 
@@ -1021,10 +1059,10 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       case 1:
         return (
           <StepShell
+            intro={<FormIntro />}
             eyebrow="PASO 1"
-            authorityText="Diseñar sistemas operativos que no dependan del tráfico orgánico requiere estructura. Comencemos por entender tus cimientos actuales."
-            title="¿Cuántas personas forman parte de tu equipo actualmente?"
-            subtitle="Gente cobrando cheques y construyendo, no consumidores durmientes."
+            title="¿Cuánta gente REAL está construyendo contigo hoy?"
+            subtitle="No inscritos dormidos. Gente que realmente mueve el negocio."
           >
             {TEAM_SIZE_OPTIONS.map((option) => (
               <OptionButton
@@ -1041,7 +1079,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <StepShell
             eyebrow="PASO 2"
-            title="¿En qué compañía de MLM / Redes de Mercadeo estás corriendo tu negocio hoy?"
+            title="¿En qué compañía estás construyendo tu red?"
+            subtitle="Queremos entender el vehículo donde estás moviendo volumen."
           >
             {renderTextInput({
               id: 'companyProduct',
@@ -1060,7 +1099,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <StepShell
             eyebrow="PASO 3"
-            title="Sé brutalmente honesto: ¿Cuál es el freno número uno en tu equipo por el cual tu gente no duplica y tu cheque se estancó?"
+            title="Sé honesto: ¿qué frena la duplicación de tu equipo?"
+            subtitle="Marca el cuello de botella principal."
           >
             {MAIN_PROBLEM_OPTIONS.map((option) => (
               <OptionButton
@@ -1077,7 +1117,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <StepShell
             eyebrow="PASO 4"
-            title="Si hoy mismo te apagamos tu lista de contactos conocidos y tus redes sociales personales... ¿Tu red sigue registrando gente mañana?"
+            title="Si mañana se acaba tu lista caliente… ¿sigues registrando gente?"
+            subtitle="Aquí vemos si tienes sistema o solo contactos."
           >
             {ACQUISITION_OPTIONS.map((option) => (
               <OptionButton
@@ -1094,7 +1135,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <StepShell
             eyebrow="PASO 5"
-            title="¿Cómo planeas financiar esta infraestructura para tu organización?"
+            title="¿Cómo financiarías una implementación grupal desde $1,500 USD?"
+            subtitle="Infraestructura para un grupo comprometido, no una app para probar suerte."
           >
             {INVESTMENT_OPTIONS.map((option) => (
               <OptionButton
@@ -1111,7 +1153,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <StepShell
             eyebrow="PASO 6"
-            title="Si vemos que tu equipo califica para el sistema... ¿La decisión de compra depende 100% de ti o tienes que pedirle permiso a tu Upline o rango superior?"
+            title="Si tu equipo califica, ¿puedes decidir tú?"
+            subtitle="No es ego. Es velocidad de implementación."
           >
             {DECISION_OPTIONS.map((option) => (
               <OptionButton
@@ -1128,7 +1171,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         return (
           <StepShell
             eyebrow="PASO 7"
-            title="Escribe tu datos de contacto para coordinar la sesión de viabilidad para verificar si LeadFlow es el vehículo de duplicación correcto para tu equipo."
+            title="Déjanos tus datos para enviarte el resultado."
+            subtitle="Si calificas, coordinamos el siguiente paso para revisar viabilidad."
           >
             <div className="space-y-5">
               {renderTextInput({
@@ -1251,7 +1295,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
       <div
         ref={scrollContainerRef}
-        className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] sm:px-6 sm:py-6 [&::-webkit-scrollbar]:hidden"
+        className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-3 [scrollbar-width:none] [-ms-overflow-style:none] sm:px-6 sm:py-6 [&::-webkit-scrollbar]:hidden"
       >
         {isEvaluating ? (
           <div className="flex min-h-[520px] flex-col items-center justify-center py-10 text-center">
@@ -1381,12 +1425,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 }
 
 function StepShell({
+  intro,
   eyebrow,
   authorityText,
   title,
   subtitle,
   children,
 }: {
+  intro?: ReactNode;
   eyebrow: string;
   authorityText?: string;
   title: string;
@@ -1394,8 +1440,9 @@ function StepShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-full flex-col justify-start py-4 md:min-h-[520px] md:justify-center md:py-6">
-      <p className="text-sm font-black uppercase tracking-[0.2em] text-amber-400">{eyebrow}</p>
+    <div className="flex min-h-full flex-col justify-start py-2 md:min-h-[520px] md:justify-center md:py-6">
+      {intro}
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-400 md:text-sm md:tracking-[0.2em]">{eyebrow}</p>
       {authorityText ? (
         <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.3)] md:p-5">
           <p className="text-base font-black leading-snug text-white md:text-lg">
@@ -1403,9 +1450,9 @@ function StepShell({
           </p>
         </div>
       ) : null}
-      <h2 className="mb-3 mt-4 text-lg font-bold leading-tight text-white md:mb-4 md:text-2xl">{title}</h2>
-      {subtitle ? <p className="-mt-1 mb-4 text-sm leading-relaxed text-white">{subtitle}</p> : null}
-      <div className="space-y-4 md:space-y-5">{children}</div>
+      <h2 className="mb-2 mt-2.5 text-base font-bold leading-tight text-white md:mb-4 md:mt-4 md:text-2xl">{title}</h2>
+      {subtitle ? <p className="mb-3 text-xs leading-snug text-white md:-mt-1 md:mb-4 md:text-sm md:leading-relaxed">{subtitle}</p> : null}
+      <div className="space-y-2.5 md:space-y-5">{children}</div>
     </div>
   );
 }
