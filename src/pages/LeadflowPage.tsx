@@ -4,7 +4,7 @@ import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
 import { trackPageView } from '../lib/analytics';
 
-const LEADFLOW_CTA_REVEAL_SECONDS = 10; // Cambiar este valor para ajustar el tiempo de aparición del botón y contenido
+const LEADFLOW_CTA_REVEAL_SECONDS = 30; // Cambiar este valor para ajustar el tiempo de aparición del botón y contenido
 const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/82f82aa1-a2a3-43f9-862b-f60fadc0fdc0/playlist.m3u8';
 
 const ctaBaseClassName = [
@@ -437,7 +437,7 @@ export default function LeadflowPage() {
                 onClick={() => setIsFormOpen(true)}
                 className="flex w-full flex-col items-center justify-center gap-0.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-8 py-3 font-bold uppercase text-slate-950 shadow-[0_16px_32px_rgba(0,0,0,0.5)] transition-transform active:scale-95 md:w-auto hover:scale-105"
               >
-                <span className="text-base md:text-lg uppercase tracking-tight">Aplicar a LeadFlow ahora</span>
+                <span className="text-base md:text-lg uppercase tracking-tight">Conocer LeadFlow ahora</span>
                 <span className="text-[10px] font-medium uppercase tracking-[0.1em] opacity-90 md:hidden">
                   Solo 5 equipos este mes
                 </span>
