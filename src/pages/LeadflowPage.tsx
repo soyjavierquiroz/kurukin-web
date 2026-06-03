@@ -4,7 +4,7 @@ import { KurukinPlayer } from 'kurukin-video-player';
 import LeadflowApplicationForm from '../components/LeadflowApplicationForm';
 import { trackPageView } from '../lib/analytics';
 
-const VSL_REVEAL_SECONDS = 10; // Cambiar este valor para ajustar el tiempo de aparición del botón y contenido
+const LEADFLOW_CTA_REVEAL_SECONDS = 10; // Cambiar este valor para ajustar el tiempo de aparición del botón y contenido
 const LEADFLOW_VIDEO_URL = 'https://vz-febf8c0d-fb8.b-cdn.net/82f82aa1-a2a3-43f9-862b-f60fadc0fdc0/playlist.m3u8';
 
 const ctaBaseClassName = [
@@ -150,7 +150,7 @@ export default function LeadflowPage() {
                     resumePlayback={true}
                     vslProgressBarColor="#dc2626"
                     onTimeUpdate={(currentTime) => {
-                      if (currentTime >= VSL_REVEAL_SECONDS && !isContentRevealed) setIsContentRevealed(true);
+                      if (currentTime >= LEADFLOW_CTA_REVEAL_SECONDS && !isContentRevealed) setIsContentRevealed(true);
                     }}
                     smartPoster={{
                       eyebrow: 'Mensaje Urgente',

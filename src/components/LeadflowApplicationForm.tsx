@@ -8,6 +8,8 @@ import { captureClientIp, createAnalyticsEventId, getAnalyticsContext, trackQual
 const TOTAL_STEPS = 7;
 const FIRST_FORM_STEP = 1;
 const EVALUATION_MIN_DURATION_MS = 5000;
+const WHATSAPP_AUTO_OPEN_DELAY_SECONDS = 30;
+const WHATSAPP_BLOCKED_FALLBACK_DELAY_MS = 800;
 const MIN_COMPANY_TEXT_LENGTH = 4;
 const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
 const FALLBACK_COUNTRY: Country = 'US';
@@ -17,8 +19,13 @@ const LEADFLOW_LOCAL_DISCARD_API_URL = '/api/leadflow/capture-local-discard';
 const SITE_ID = import.meta.env.VITE_SITE_ID || 'kurukinleadflow';
 const LEADFLOW_WHATSAPP_NUMBER =
   import.meta.env.VITE_LEADFLOW_WHATSAPP_NUMBER || import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873';
+const DISCARD_PUBLIC_TITLE = 'Tenemos una ruta más simple para ti';
 const DISCARD_PUBLIC_TEXT =
-  'Por tus respuestas, parece que LeadFlow todavía no es el siguiente movimiento principal para tu etapa actual. Eso no significa que estés fuera; significa que primero conviene identificar el paso más simple para aumentar volumen, equipo o cierre antes de implementar una infraestructura completa. Escríbenos por WhatsApp con tu código y te orientamos.';
+  [
+    'Tu evaluación nos muestra que hay una oportunidad clara para avanzar, pero el siguiente paso no tiene que ser más complejo: tiene que ser más preciso.',
+    'Antes de pensar en una infraestructura completa, conviene identificar qué palanca puede ayudarte a generar más conversaciones, ordenar mejor a tu equipo y avanzar con menos fricción.',
+    'Escríbenos por WhatsApp con tu código y te orientamos con el siguiente movimiento más inteligente para tu etapa actual.',
+  ].join('\n\n');
 const EVALUATION_MESSAGES = [
   '🤖 Inicializando motor de evaluación de estructuras...',
   '📊 Analizando métricas de duplicación y retención...',
@@ -540,7 +547,11 @@ function openWhatsApp(result: LeadflowEvaluationResponse): void {
   }
 
   const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-  if (!opened) window.location.href = whatsappUrl;
+  if (!opened) {
+    window.setTimeout(() => {
+      window.location.href = whatsappUrl;
+    }, WHATSAPP_BLOCKED_FALLBACK_DELAY_MS);
+  }
 }
 
 function isQualifiedTier(status: LeadflowTier): boolean {
@@ -645,11 +656,17 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<LeadflowEvaluationResponse | null>(null);
   const [isQualified, setIsQualified] = useState(false);
-  const [countdown, setCountdown] = useState(30);
+  const [countdown, setCountdown] = useState(WHATSAPP_AUTO_OPEN_DELAY_SECONDS);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const qualifiedLeadTrackedEventRef = useRef<string | null>(null);
+  const hasAutoOpenedWhatsappRef = useRef(false);
+  const shouldShowResult = Boolean(lastPayload && evaluationResult);
+  const whatsappHref = evaluationResult ? getWhatsAppUrl(evaluationResult) : '';
+  const canOpenWhatsApp = Boolean(whatsappHref && (evaluationResult?.whatsappMessage || evaluationResult?.tierCode));
+  const shouldAutoOpenWhatsApp = Boolean(shouldShowResult && canOpenWhatsApp);
+  const qualifiedFinalState = Boolean(shouldShowResult && isQualified);
 
   const redirectToWhatsApp = useCallback(() => {
     if (!evaluationResult?.whatsappMessage && !evaluationResult?.tierCode) return;
@@ -722,16 +739,15 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     }
   }, [isEvaluating]);
 
-  const successState = Boolean(lastPayload && isQualified);
+  useEffect(() => {
+    if (!shouldAutoOpenWhatsApp) return;
+
+    setCountdown(WHATSAPP_AUTO_OPEN_DELAY_SECONDS);
+    hasAutoOpenedWhatsappRef.current = false;
+  }, [evaluationResult?.tierCode, shouldAutoOpenWhatsApp]);
 
   useEffect(() => {
-    if (successState) {
-      setCountdown(30);
-    }
-  }, [successState]);
-
-  useEffect(() => {
-    if (!successState) return;
+    if (!shouldAutoOpenWhatsApp) return;
 
     const timer = window.setInterval(() => {
       setCountdown((prev) => Math.max(prev - 1, 0));
@@ -740,13 +756,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     return () => {
       window.clearInterval(timer);
     };
-  }, [successState]);
+  }, [shouldAutoOpenWhatsApp]);
 
   useEffect(() => {
-    if (!successState || countdown > 0) return;
+    if (!shouldAutoOpenWhatsApp || countdown > 0 || hasAutoOpenedWhatsappRef.current) return;
 
+    hasAutoOpenedWhatsappRef.current = true;
     redirectToWhatsApp();
-  }, [countdown, redirectToWhatsApp, successState]);
+  }, [countdown, redirectToWhatsApp, shouldAutoOpenWhatsApp]);
 
   useEffect(() => {
     if (!isEvaluating) {
@@ -897,6 +914,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     setIsQualified(false);
     setLastPayload(null);
     qualifiedLeadTrackedEventRef.current = null;
+    hasAutoOpenedWhatsappRef.current = false;
 
     try {
       await new Promise<void>((resolve) => {
@@ -1170,7 +1188,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     }
   };
 
-  const shouldShowResult = Boolean(lastPayload && evaluationResult);
   const shouldShowFooter = !isEvaluating && !shouldShowResult && currentStep > FIRST_FORM_STEP;
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 3, 4, 5, 6].includes(currentStep);
@@ -1183,7 +1200,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       ? '🔥 Tu evaluación fue aprobada'
       : resultStatus === 'PLATA'
         ? '⚡ Tu evaluación requiere validación'
-        : '📍 Tenemos un siguiente paso para ti';
+        : DISCARD_PUBLIC_TITLE;
   const resultCtaLabel =
     resultStatus === 'ORO'
       ? '🟢 ENVIAR WHATSAPP CON MI CÓDIGO'
@@ -1191,8 +1208,8 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         ? '🟢 VALIDAR MI CASO POR WHATSAPP'
         : '🟡 CONSULTAR SIGUIENTE PASO POR WHATSAPP';
   const ResultIcon = resultStatus === 'ORO' ? ShieldCheck : resultStatus === 'PLATA' ? Zap : MapPin;
-  const whatsappHref = evaluationResult ? getWhatsAppUrl(evaluationResult) : '';
-  const canOpenWhatsApp = Boolean(evaluationResult?.whatsappMessage || evaluationResult?.tierCode);
+  const resultBodyText = resultStatus === 'DESCARTE' ? DISCARD_PUBLIC_TEXT : aiConsultingText;
+  const resultBodyParagraphs = resultBodyText.split(/\n{2,}/).filter(Boolean);
   const handleWhatsAppClick = () => {
     if (!import.meta.env.DEV || !whatsappHref) return;
     console.log('[LeadflowApplicationForm] WhatsApp click', getWhatsAppLogUrl(whatsappHref));
@@ -1221,8 +1238,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
         <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
           <div
             className={[
-              'h-full rounded-full transition-all duration-500 ease-out',
-              isEvaluating ? 'bg-red-600' : 'bg-zinc-300',
+              'h-full rounded-full bg-red-500 transition-all duration-500 ease-out',
             ].join(' ')}
             style={{ width: `${isEvaluating || shouldShowResult ? 100 : progressPercentage}%` }}
           />
@@ -1272,7 +1288,11 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
             </h2>
 
             <div className="mt-4 max-h-[40svh] w-full overflow-y-auto rounded-xl border border-amber-500/30 bg-zinc-900 p-4 text-left text-sm font-semibold leading-relaxed text-white shadow-[0_18px_36px_rgba(0,0,0,0.32)] md:mt-5 md:max-h-none md:p-5 md:text-base">
-              <p>{aiConsultingText}</p>
+              <div className="space-y-3">
+                {resultBodyParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
               <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-amber-400">
                 Código: {evaluationResult.tierCode}
               </p>
@@ -1283,7 +1303,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
                 <p className="text-center text-sm font-semibold">
                   Escríbenos por WhatsApp con tu código para continuar.
                 </p>
-                {isQualified ? (
+                {qualifiedFinalState ? (
                   <p className="mt-2 rounded-lg border border-amber-500/30 bg-red-500/10 px-3 py-2 text-center text-xs font-black leading-snug text-red-200 ring-1 ring-red-400/30 md:text-sm">
                     Tu prioridad de agenda se mantiene por{' '}
                     <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
