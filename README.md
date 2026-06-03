@@ -19,37 +19,192 @@ Ambos demos consumen la API premium del reproductor con `vslMode`, `resumePlayba
 - `npm run build`
 - `npm run typecheck`
 
-## Integración CAPI por Handover
+## Arquitectura LeadFlow actual
 
-La web usa un modelo de handover para el tracking CAPI de Leadflow. El cliente no llama directamente al relay interno de Docker Swarm; solo captura el contexto de analítica, envía la aplicación al webhook de evaluación de n8n y dispara los píxeles de navegador cuando n8n confirma `es_valido: true`.
+LeadFlow esta operativo sin Prisma ni DB local en el flujo vivo. Prisma y los endpoints antiguos pueden seguir en el repo como capa legacy temporal, pero no forman parte del runtime comercial actual.
 
-Flujo actual:
+```text
+React LeadFlow
+-> /api/leadflow/evaluate en kurukin_api
+-> FluentCRM initial upsert
+-> n8n scoring sincrono
+-> FluentCRM final upsert
+-> React resultado
+-> WhatsApp
+-> Meta CAPI solo para ORO/PLATA desde n8n
+```
 
-- `src/lib/analytics.ts` genera un `eventId` UUID persistido por sesión y captura `fbp`, `fbc` y `ttclid`.
-- `src/components/LeadflowApplicationForm.tsx` incluye `analytics` dentro del payload enviado a `https://webhooks.kuruk.in/webhook/leadflow-eval`.
-- n8n valida el lead y, si corresponde, usa ese contexto para hablar con `kurukin-relay` dentro de la red interna.
-- El navegador solo completa la deduplicación disparando Meta `fbq` y TikTok `ttq` con el mismo `eventId`.
+Para descarte por guillotina local, React llama `POST /api/leadflow/capture-local-discard`; el backend registra el contacto como descarte local en FluentCRM y no llama a n8n ni dispara conversion publicitaria.
 
-## Infraestructura de Tracking
+## Servicios Docker Swarm
 
-Variable de sitio:
+```text
+kurukin-web_kurukin_web = Nginx estatico React + proxy /api
+kurukin-web_kurukin_api = Node/tsx backend API
+n8n_n8n_v2_webhook = webhook interno n8n
+crm.kurukin.com = WordPress + FluentCRM externo
+```
+
+`kurukin_web` sirve el build React por Nginx y proxyea `/api/` hacia `kurukin_api:3001`. `kurukin_api` corre dentro de Docker Swarm y llama al webhook interno de n8n.
+
+## Redes Docker
+
+```text
+kurukin_api y n8n comparten general_network
+kurukin_web usa traefik_public + general_network
+URL interna n8n: http://n8n_v2_webhook:5678/webhook/leadflow-eval
+```
+
+## Endpoints vivos
+
+```text
+POST /api/leadflow/evaluate
+POST /api/leadflow/capture-local-discard
+```
+
+`POST /api/leadflow/evaluate` recibe el payload completo del formulario, valida contacto y `analytics.eventId`, hace upsert inicial en FluentCRM, llama a n8n, normaliza la respuesta, hace upsert final y responde al frontend.
+
+`POST /api/leadflow/capture-local-discard` recibe el payload completo del formulario, no llama a n8n, guarda/actualiza el contacto en FluentCRM como descarte local y devuelve resultado publico `DESCARTE` con WhatsApp.
+
+## Endpoints legacy
+
+```text
+POST /api/leads
+GET /api/leads/:id/status
+PATCH /api/leads/:id/status
+```
+
+Estos endpoints estan deprecated y no forman parte del runtime LeadFlow actual. El frontend LeadFlow no debe llamarlos. Quedan pendientes de limpieza fisica posterior junto con Prisma/local DB.
+
+## Variables de entorno server-side
+
+No commitear valores reales, hashes ni secretos. Documentar siempre con placeholders.
 
 ```env
+FLUENTCRM_CONTACT_WEBHOOK_URL="https://crm.kurukin.com/?fluentcrm=1&route=contact&hash=..."
+FLUENTCRM_WEBHOOK_PAYLOAD_MODE="hybrid"
+N8N_LEADFLOW_EVALUATE_WEBHOOK_URL="http://n8n_v2_webhook:5678/webhook/leadflow-eval"
+PORT="3001"
+NODE_ENV="production"
+```
+
+## Variables frontend
+
+```env
+VITE_LEADFLOW_WHATSAPP_NUMBER="591..."
+VITE_WHATSAPP_NUMBER="591..."
 VITE_SITE_ID="kurukinleadflow"
 ```
 
-`VITE_SITE_ID` identifica el flujo de tracking que n8n debe entregar al relay interno. Si la variable no está definida, la web usa `kurukinleadflow` como valor por defecto.
+Deuda pendiente: el codigo actual conserva referencias/fallbacks a `KURUKIN` para `VITE_SITE_ID`. Estandarizarlo a `kurukinleadflow` en una limpieza posterior, validando que n8n y el relay mantengan la misma llave.
 
-El objeto `analytics` enviado a n8n tiene esta forma:
+## FluentCRM
 
-```ts
-{
-  eventId: string;
-  siteId: string;
-  fbp: string | null;
-  fbc: string | null;
-  ttclid: string | null;
-}
+Lista oficial:
+
+```text
+LeadFlow Leads
 ```
 
-El `eventId` es la llave de deduplicación entre el evento de navegador y el evento server-side que n8n envía al relay. El relay conserva la responsabilidad de normalizar, limpiar y hashear datos sensibles antes de enviarlos a las APIs de conversión.
+Tags oficiales:
+
+```text
+leadflow
+leadflow-meta
+leadflow-oro
+leadflow-plata
+leadflow-descarte
+leadflow-ai-evaluated
+```
+
+Custom fields oficiales:
+
+```text
+leadflow_codigo_evaluacio
+leadflow_clasificacion
+leadflow_compania
+leadflow_tamano_equipo
+leadflow_freno_duplicacio
+leadflow_origen_leads
+leadflow_financiacion
+leadflow_toma_decision
+leadflow_event_id
+leadflow_fbp
+leadflow_fbc
+leadflow_ttclid
+leadflow_ttp
+leadflow_ai_diagnostico
+leadflow_dolor_psicologic
+leadflow_estrategia_cierr
+leadflow_estado_venta
+leadflow_fecha_evaluacion
+leadflow_evaluado_por
+leadflow_descarte_motivo
+```
+
+Algunos slugs estan truncados intencionalmente por FluentCRM y no deben corregirse ni completarse en codigo o documentacion: `leadflow_codigo_evaluacio`, `leadflow_freno_duplicacio`, `leadflow_dolor_psicologic`, `leadflow_estrategia_cierr`.
+
+Pais, ciudad, estado, ZIP, telefono, email y nombre van como campos nativos de FluentCRM. Los custom fields guardan solo datos especificos de LeadFlow.
+
+## Codigos de evaluacion
+
+```text
+ORO = KLF-A-XXXXXXXX
+PLATA = KLF-B-XXXXXXXX
+DESCARTE = KLF-C-XXXXXXXX
+```
+
+Reglas runtime:
+
+- El backend valida codigos con `/^KLF-[ABC]-[A-Z0-9]{6,12}$/`.
+- El backend regenera el codigo si n8n manda uno invalido.
+- No se permiten sufijos `MANUAL`, `DEV`, `TEST`, `LEADFLOW` ni `MOCK`.
+
+## Tracking
+
+- Browser tracking dispara conversion solo para `ORO` y `PLATA`.
+- Meta CAPI corre en n8n para `ORO` y `PLATA`.
+- `DESCARTE` y guillotina local no deben generar conversion.
+- `eventId` es la llave de deduplicacion entre browser tracking y CAPI.
+
+El navegador captura `fbp`, `fbc`, `ttclid`, `ttp` y `eventId`; el backend los preserva para FluentCRM/n8n. n8n conserva la responsabilidad de enviar Meta CAPI y de evitar conversiones para descartes.
+
+## DNS / Origin
+
+```text
+kurukin.com debe apuntar solo al servidor Docker/Traefik.
+crm.kurukin.com apunta al servidor WordPress/LiteSpeed.
+No debe existir A record de kurukin.com hacia el servidor CRM.
+```
+
+`kurukin.com` ya no debe resolver al origin LiteSpeed del CRM. Ese servidor queda reservado para `crm.kurukin.com` y FluentCRM.
+
+## Publicacion y verificacion
+
+Build local:
+
+```bash
+npm run typecheck
+npx tsc --noEmit -p tsconfig.node.json
+npm run build
+```
+
+Comandos correctos de publicacion cuando se requiera redeploy:
+
+```bash
+rsync -a --delete dist/ /opt/webs/kurukin.com/public_html/
+docker service update --force kurukin-web_kurukin_web
+docker service update --force kurukin-web_kurukin_api
+```
+
+Checklist rapido post-deploy:
+
+```bash
+grep -R "/api/leads" -n /opt/webs/kurukin.com/public_html | head
+grep -R "/api/leadflow/evaluate" -n /opt/webs/kurukin.com/public_html | head
+grep -R "/api/leadflow/capture-local-discard" -n /opt/webs/kurukin.com/public_html | head
+
+curl -sL "https://kurukin.com/leadflow?cb=$(date +%s)" | grep -o 'assets/index-[^"]*\.js'
+
+docker service logs kurukin-web_kurukin_api --since 5m | grep -Ei "leadflow|fluent|n8n|upsert|final|suspicious"
+```

@@ -1,5 +1,5 @@
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, ShieldCheck, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, MapPin, ShieldCheck, Zap } from 'lucide-react';
 import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
@@ -12,19 +12,27 @@ const MIN_COMPANY_TEXT_LENGTH = 4;
 const COMPANY_TEXT_WARNING = 'Escribe al menos 4 caracteres para identificar tu compañía o producto.';
 const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LEADS_API_URL = '/api/leads';
-const LEAD_STATUS_POLL_INTERVAL_MS = 2000;
-const LEAD_STATUS_MAX_ATTEMPTS = 45;
+const LEADFLOW_EVALUATE_API_URL = '/api/leadflow/evaluate';
+const LEADFLOW_LOCAL_DISCARD_API_URL = '/api/leadflow/capture-local-discard';
 const SITE_ID = 'KURUKIN';
-const LEADFLOW_DOWNSELL_URL = import.meta.env.VITE_LEADFLOW_DOWNSELL_URL || 'URL_DEL_DOWNSELL';
-const WHATSAPP_SUCCESS_MESSAGE =
-  'Hola Javier, acabo de completar el diagnóstico de viabilidad para mi equipo MLM y obtuve Luz Verde. Quiero agendar una reunión para conocer LeadFlow a la brevedad.';
-const WHATSAPP_ENCODED_MESSAGE = encodeURIComponent(WHATSAPP_SUCCESS_MESSAGE);
+const LEADFLOW_WHATSAPP_NUMBER =
+  import.meta.env.VITE_LEADFLOW_WHATSAPP_NUMBER || import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873';
+const DISCARD_PUBLIC_TEXT =
+  'Por tus respuestas, parece que LeadFlow todavía no es el siguiente movimiento principal para tu etapa actual. Eso no significa que estés fuera; significa que primero conviene identificar el paso más simple para aumentar volumen, equipo o cierre antes de implementar una infraestructura completa. Escríbenos por WhatsApp con tu código y te orientamos.';
 const EVALUATION_MESSAGES = [
   '🤖 Inicializando motor de evaluación de estructuras...',
   '📊 Analizando métricas de duplicación y retención...',
   '⚙️ Verificando viabilidad de infraestructura financiera...',
   '🔒 Generando diagnóstico final de escala...',
+] as const;
+const FORBIDDEN_PUBLIC_RESULT_TERMS = [
+  /troll/gi,
+  /basura/gi,
+  /descartad[oa]/gi,
+  /descarte/gi,
+  /rechazad[oa]/gi,
+  /no\s+viable/gi,
+  /acceso\s+denegado/gi,
 ] as const;
 
 const SUPPORTED_COUNTRIES = new Set<Country>(getCountries() as Country[]);
@@ -202,6 +210,12 @@ export interface LeadflowPayload {
   ttclid: string | null;
   ttc: string | null;
   analytics: AnalyticsPayloadContext;
+  visitor: {
+    city: string;
+    region: string;
+    country_name: string;
+    country_code: string;
+  } | null;
   respuestas: {
     tamano_equipo: Option | null;
     compania_producto: string;
@@ -228,37 +242,21 @@ interface LeadflowApplicationFormProps {
   onPayloadReady?: (payload: LeadflowPayload) => Promise<void> | void;
 }
 
-type LeadStatus = 'PENDIENTE' | 'ORO' | 'PLATA' | 'TROLL' | 'BASURA';
+type LeadflowTier = 'ORO' | 'PLATA' | 'DESCARTE';
 
-interface LocalLeadPayload {
-  nombre: string;
-  telefono: string;
-  email: string;
-  pais?: string;
-  compania?: string;
-  tamanoEquipo?: string;
-  origenLeadsRaw?: string;
-  frenoDuplicacionRaw?: string;
-  financiacion?: string;
-  tomaDecision?: string;
-  eventId?: string;
-  fbc?: string;
-  fbp?: string;
-  clientIp?: string;
-  userAgent?: string;
-}
-
-interface LocalLeadCreateResponse {
+interface LeadflowEvaluationResponse {
   success: boolean;
-  localLeadId: string;
-}
-
-interface LocalLeadStatusResponse {
-  success: boolean;
-  status: LeadStatus;
-  aiConsultingText?: string | null;
+  status: LeadflowTier;
+  rawStatus?: string;
+  isQualified: boolean;
+  tierCode: string;
+  aiConsultingText: string;
+  publicResultText: string;
   dolorPsicologico?: string | null;
   estrategiaCierre?: string | null;
+  crmContactId?: string | null;
+  whatsappMessage: string;
+  whatsappUrl?: string;
 }
 
 interface OptionButtonProps {
@@ -339,6 +337,25 @@ function buildUserData(answers: Answers) {
   };
 }
 
+function isLocalGuillotine(answers: Answers): boolean {
+  return (
+    answers.teamSize?.value === 'less_than_15' ||
+    answers.mainProblem === 'Recién empiezo, aún no tengo equipo.' ||
+    answers.investmentPosition?.value === 'no_budget'
+  );
+}
+
+function sanitizePublicResultText(value?: string): string {
+  const rawText = value?.trim() || DISCARD_PUBLIC_TEXT;
+
+  return FORBIDDEN_PUBLIC_RESULT_TERMS.reduce(
+    (text, pattern) => text.replace(pattern, 'requiere una revisión más cuidadosa'),
+    rawText,
+  )
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function buildPayload({
   answers,
   visitorData,
@@ -367,6 +384,14 @@ function buildPayload({
     ttclid: analytics.ttclid,
     ttc: analytics.ttclid,
     analytics,
+    visitor: visitorData
+      ? {
+          city: visitorData.city,
+          region: visitorData.region,
+          country_name: visitorData.country_name,
+          country_code: visitorData.country_code,
+        }
+      : null,
     respuestas: {
       tamano_equipo: answers.teamSize
         ? { value: answers.teamSize.value, label: answers.teamSize.shortLabel ?? answers.teamSize.label }
@@ -403,39 +428,8 @@ function buildPayload({
   };
 }
 
-function stringifyOption(option: Option | null): string | undefined {
-  return option ? JSON.stringify({ value: option.value, label: option.label }) : undefined;
-}
-
-function buildLocalLeadPayload(payload: LeadflowPayload): LocalLeadPayload {
-  return {
-    nombre: payload.nombre_completo,
-    telefono: payload.telefono,
-    email: payload.email,
-    pais: payload.respuestas.contacto.pais.label || payload.respuestas.contacto.pais.code || undefined,
-    compania: payload.respuestas.compania_producto || undefined,
-    tamanoEquipo:
-      payload.respuestas.tamano_equipo?.label ?? payload.respuestas.tamano_equipo?.value ?? undefined,
-    origenLeadsRaw: stringifyOption(payload.respuestas.inversion_ads),
-    frenoDuplicacionRaw: payload.respuestas.principal_problema || undefined,
-    financiacion: stringifyOption(payload.respuestas.posicion_frente_a_inversion),
-    tomaDecision: stringifyOption(payload.respuestas.decision_de_compra),
-    eventId: payload.analytics.eventId,
-    fbc: payload.fbc || undefined,
-    fbp: payload.fbp || undefined,
-    clientIp: payload.analytics.client_ip || undefined,
-    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-  };
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
-
-async function createLocalLead(payload: LocalLeadPayload): Promise<string> {
-  const response = await fetch(LEADS_API_URL, {
+async function submitLeadflowEvaluation(payload: LeadflowPayload): Promise<LeadflowEvaluationResponse> {
+  const response = await fetch(LEADFLOW_EVALUATE_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -444,55 +438,112 @@ async function createLocalLead(payload: LocalLeadPayload): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error(`Local lead creation failed with status ${response.status}`);
+    throw new Error(`Leadflow evaluation failed with status ${response.status}`);
   }
 
-  const result = (await response.json()) as LocalLeadCreateResponse;
+  return (await response.json()) as LeadflowEvaluationResponse;
+}
 
-  if (!result.success || !result.localLeadId) {
-    throw new Error('Local lead creation did not return localLeadId.');
+async function submitLocalDiscard(payload: LeadflowPayload): Promise<LeadflowEvaluationResponse> {
+  const response = await fetch(LEADFLOW_LOCAL_DISCARD_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Leadflow local discard capture failed with status ${response.status}`);
   }
 
-  return result.localLeadId;
+  return (await response.json()) as LeadflowEvaluationResponse;
 }
 
-async function waitForLeadDiagnosis(localLeadId: string): Promise<LocalLeadStatusResponse> {
-  for (let attempt = 0; attempt < LEAD_STATUS_MAX_ATTEMPTS; attempt += 1) {
-    if (attempt > 0) {
-      await delay(LEAD_STATUS_POLL_INTERVAL_MS);
-    }
+function buildTierCode(tier: LeadflowTier): string {
+  const prefixByTier: Record<LeadflowTier, string> = {
+    ORO: 'KLF-A',
+    PLATA: 'KLF-B',
+    DESCARTE: 'KLF-C',
+  };
 
-    const response = await fetch(`${LEADS_API_URL}/${encodeURIComponent(localLeadId)}/status`);
+  return `${prefixByTier[tier]}-${getRandomCodeSuffix()}`;
+}
 
-    if (!response.ok) {
-      throw new Error(`Lead status polling failed with status ${response.status}`);
-    }
+function buildFallbackWhatsAppMessage(payload: LeadflowPayload, tierCode: string): string {
+  const nombre = payload.nombre_completo || 'Javier';
+  const compania = payload.respuestas.compania_producto || 'mi compañía';
 
-    const result = (await response.json()) as LocalLeadStatusResponse;
+  return [
+    `Hola, soy ${nombre}. Vengo de la evaluación LeadFlow para mi organización de multinivel en ${compania}.`,
+    '',
+    'Quiero saber cuál es el siguiente paso recomendado para mi etapa actual.',
+    '',
+    `Mi código de evaluación es: ${tierCode}`,
+  ].join('\n');
+}
 
-    if (result.success && result.status !== 'PENDIENTE') {
-      return result;
-    }
+function getRandomCodeSuffix(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = new Uint8Array(4);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes)
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase();
   }
 
-  throw new Error('Lead diagnosis polling timed out.');
+  return Math.random().toString(36).replace(/[^a-z0-9]/gi, '').slice(2, 10).toUpperCase().padEnd(6, '0');
 }
 
-function buildAiResponseText(result: LocalLeadStatusResponse): string | null {
-  return result.aiConsultingText?.trim() || null;
+function buildFallbackEvaluation(payload: LeadflowPayload): LeadflowEvaluationResponse {
+  const tierCode = buildTierCode('DESCARTE');
+
+  return {
+    success: true,
+    status: 'DESCARTE',
+    rawStatus: 'FALLBACK_REVIEW',
+    isQualified: false,
+    tierCode,
+    aiConsultingText: '',
+    publicResultText: DISCARD_PUBLIC_TEXT,
+    dolorPsicologico: null,
+    estrategiaCierre: null,
+    crmContactId: null,
+    whatsappMessage: buildFallbackWhatsAppMessage(payload, tierCode),
+  };
 }
 
-function getWhatsAppSuccessUrl(): string {
-  const isMobile =
-    typeof navigator !== 'undefined' &&
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
-  const baseUrl = isMobile ? 'whatsapp://send' : 'https://web.whatsapp.com/send';
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873';
-
-  return `${baseUrl}?phone=${whatsappNumber}&text=${WHATSAPP_ENCODED_MESSAGE}`;
+function buildWhatsAppUrl(message: string): string {
+  return `https://api.whatsapp.com/send?phone=${LEADFLOW_WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
 }
 
-function isApprovedLeadStatus(status: LeadStatus): boolean {
+function getWhatsAppUrl(result: LeadflowEvaluationResponse): string {
+  if (result.whatsappUrl) return result.whatsappUrl;
+
+  const message =
+    result.whatsappMessage ||
+    `Hola, vengo de la evaluación LeadFlow. Mi código de evaluación es: ${result.tierCode}`;
+
+  return buildWhatsAppUrl(message);
+}
+
+function getWhatsAppLogUrl(whatsappUrl: string): string {
+  return whatsappUrl.split('?')[0];
+}
+
+function openWhatsApp(result: LeadflowEvaluationResponse): void {
+  const whatsappUrl = getWhatsAppUrl(result);
+
+  if (import.meta.env.DEV) {
+    console.log('[LeadflowApplicationForm] WhatsApp click', getWhatsAppLogUrl(whatsappUrl));
+  }
+
+  const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  if (!opened) window.location.href = whatsappUrl;
+}
+
+function isQualifiedTier(status: LeadflowTier): boolean {
   return status === 'ORO' || status === 'PLATA';
 }
 
@@ -592,16 +643,18 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
   const [evaluationMessageIndex, setEvaluationMessageIndex] = useState(0);
   const [submissionError, setSubmissionError] = useState('');
   const [lastPayload, setLastPayload] = useState<LeadflowPayload | null>(null);
-  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [evaluationResult, setEvaluationResult] = useState<LeadflowEvaluationResponse | null>(null);
   const [isQualified, setIsQualified] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const hasManualCountrySelectionRef = useRef(false);
   const analyticsRef = useRef<AnalyticsPayloadContext | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const qualifiedLeadTrackedEventRef = useRef<string | null>(null);
 
   const redirectToWhatsApp = useCallback(() => {
-    window.location.href = getWhatsAppSuccessUrl();
-  }, []);
+    if (!evaluationResult?.whatsappMessage && !evaluationResult?.tierCode) return;
+    openWhatsApp(evaluationResult);
+  }, [evaluationResult]);
 
   useEffect(() => {
     analyticsRef.current = {
@@ -713,7 +766,7 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     if (lastPayload) return 100;
     return Math.round((currentStep / TOTAL_STEPS) * 100);
   }, [currentStep, lastPayload]);
-  const aiConsultingText = aiResponse?.trim() || '';
+  const aiConsultingText = sanitizePublicResultText(evaluationResult?.publicResultText);
   const currentStepKey = getCurrentStepKey(currentStep);
 
   const updateAnswer = <K extends AnswerKey,>(key: K, value: Answers[K]) => {
@@ -816,28 +869,6 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       return;
     }
 
-    const teamSize = answers.teamSize ? JSON.stringify(answers.teamSize) : '';
-    const mainProblem = answers.mainProblem;
-    const investmentPosition = answers.investmentPosition ? JSON.stringify(answers.investmentPosition) : '';
-
-    // REGLAS DE GUILLOTINA A PRUEBA DE BALAS
-    const isDisqualified =
-      String(teamSize).includes('Menos de 15') ||
-      String(mainProblem).includes('Recién empiezo') ||
-      String(investmentPosition).includes('No cuento con más de $100') ||
-      String(investmentPosition).includes('no_budget');
-
-    if (isDisqualified) {
-      // Congelamos la interfaz y simulamos procesamiento cognitivo antes del downsell.
-      setIsSubmitting(true);
-
-      window.setTimeout(() => {
-        window.location.href = LEADFLOW_DOWNSELL_URL || 'URL_DEL_DOWNSELL';
-      }, 3000);
-
-      return;
-    }
-
     const clientIp = await captureClientIp();
     const analyticsContext = {
       ...getAnalyticsContext(),
@@ -855,12 +886,14 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       analyticsContext,
     });
     const userData = buildUserData(answers);
+    const isDisqualified = isLocalGuillotine(answers);
 
     setIsSubmitting(true);
     setSubmissionError('');
-    setAiResponse(null);
+    setEvaluationResult(null);
     setIsQualified(false);
     setLastPayload(null);
+    qualifiedLeadTrackedEventRef.current = null;
 
     try {
       await new Promise<void>((resolve) => {
@@ -870,22 +903,20 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       const minimumEvaluationDelay = new Promise((resolve) => {
         window.setTimeout(resolve, EVALUATION_MIN_DURATION_MS);
       });
-      const localLeadPayload = buildLocalLeadPayload(payload);
-      const localLeadId = await createLocalLead(localLeadPayload);
-      const evaluation = await waitForLeadDiagnosis(localLeadId);
+      const evaluation = isDisqualified ? await submitLocalDiscard(payload) : await submitLeadflowEvaluation(payload);
 
       await minimumEvaluationDelay;
 
-      const noBudget = payload.respuestas.posicion_frente_a_inversion?.value === 'no_budget';
-      const approved = !noBudget && isApprovedLeadStatus(evaluation.status);
+      const approved = !isDisqualified && isQualifiedTier(evaluation.status);
       const classification = evaluation.status;
       const finalPayload: LeadflowPayload = {
         ...payload,
-        autoreject_triggered: noBudget,
+        autoreject_triggered: isDisqualified || !approved,
         final_status: approved ? 'calificado_llamada' : 'rechazado',
       };
 
-      if (approved) {
+      if (approved && qualifiedLeadTrackedEventRef.current !== payload.analytics.eventId) {
+        qualifiedLeadTrackedEventRef.current = payload.analytics.eventId;
         void trackQualifiedLead(payload.analytics.eventId, userData, classification).catch((error) => {
           console.error('[LeadflowApplicationForm] QualifiedLead tracking failed', error);
         });
@@ -901,11 +932,26 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
       }
 
       setLastPayload(finalPayload);
-      setAiResponse(buildAiResponseText(evaluation));
+      setEvaluationResult(evaluation);
     } catch (error) {
       console.error('[LeadflowApplicationForm] submission failed', error);
-      setSubmissionError('No pudimos procesar la auditoría en este momento. Inténtalo de nuevo en unos segundos.');
-      setCurrentStep(7);
+      const fallbackEvaluation = buildFallbackEvaluation(payload);
+      const finalPayload: LeadflowPayload = {
+        ...payload,
+        autoreject_triggered: true,
+        final_status: 'rechazado',
+      };
+
+      setIsQualified(false);
+      setLastPayload(finalPayload);
+      setEvaluationResult(fallbackEvaluation);
+      setSubmissionError('');
+
+      try {
+        await onPayloadReady?.(finalPayload);
+      } catch (onPayloadReadyError) {
+        console.error('[LeadflowApplicationForm] onPayloadReady failed', onPayloadReadyError);
+      }
     } finally {
       setIsEvaluating(false);
       setIsSubmitting(false);
@@ -1121,13 +1167,33 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     }
   };
 
-  const shouldShowResult = Boolean(lastPayload);
+  const shouldShowResult = Boolean(lastPayload && evaluationResult);
   const shouldShowFooter = !isEvaluating && !shouldShowResult && currentStep > FIRST_FORM_STEP;
   const isFinalStep = currentStep === TOTAL_STEPS;
   const isChoiceStep = [1, 3, 4, 5, 6].includes(currentStep);
   const isCurrentTextInvalid =
     currentStep === 2 && !isValidCompanyText(answers.companyProduct);
   const shouldShowContinue = !isChoiceStep && !isFinalStep;
+  const resultStatus = evaluationResult?.status ?? 'DESCARTE';
+  const resultTitle =
+    resultStatus === 'ORO'
+      ? '🔥 Tu evaluación fue aprobada'
+      : resultStatus === 'PLATA'
+        ? '⚡ Tu evaluación requiere validación'
+        : '📍 Tenemos un siguiente paso para ti';
+  const resultCtaLabel =
+    resultStatus === 'ORO'
+      ? '🟢 ENVIAR WHATSAPP CON MI CÓDIGO'
+      : resultStatus === 'PLATA'
+        ? '🟢 VALIDAR MI CASO POR WHATSAPP'
+        : '🟡 CONSULTAR SIGUIENTE PASO POR WHATSAPP';
+  const ResultIcon = resultStatus === 'ORO' ? ShieldCheck : resultStatus === 'PLATA' ? Zap : MapPin;
+  const whatsappHref = evaluationResult ? getWhatsAppUrl(evaluationResult) : '';
+  const canOpenWhatsApp = Boolean(evaluationResult?.whatsappMessage || evaluationResult?.tierCode);
+  const handleWhatsAppClick = () => {
+    if (!import.meta.env.DEV || !whatsappHref) return;
+    console.log('[LeadflowApplicationForm] WhatsApp click', getWhatsAppLogUrl(whatsappHref));
+  };
 
   return (
     <section
@@ -1188,74 +1254,52 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
               <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-400 [animation-delay:300ms]" />
             </div>
           </div>
-        ) : shouldShowResult && lastPayload ? (
+        ) : shouldShowResult && lastPayload && evaluationResult ? (
           <div
             className={[
               'mx-auto flex w-full max-w-xl flex-col items-center pt-4 text-center md:pt-8',
-              isQualified ? 'pb-56 md:pb-52' : 'pb-8',
+              'pb-56 md:pb-52',
             ].join(' ')}
           >
-            {isQualified ? (
-              <>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-amber-400 shadow-[0_14px_28px_rgba(0,0,0,0.42)] md:h-14 md:w-14">
-                  <ShieldCheck className="h-6 w-6 md:h-7 md:w-7" />
-                </div>
-                <h2 className="mt-3 text-2xl font-black leading-tight text-white md:mt-4 md:text-3xl">
-                  🔥 Tu equipo ha sido aprobado.
-                </h2>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 text-amber-400 shadow-[0_14px_28px_rgba(0,0,0,0.42)] md:h-14 md:w-14">
+              <ResultIcon className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <h2 className="mt-3 text-2xl font-black leading-tight text-white md:mt-4 md:text-3xl">
+              {resultTitle}
+            </h2>
 
-                <div className="mt-4 max-h-[32svh] w-full overflow-y-auto rounded-xl border border-amber-500/30 bg-zinc-900 p-4 text-left text-sm font-semibold leading-relaxed text-white shadow-[0_18px_36px_rgba(0,0,0,0.32)] md:mt-5 md:max-h-none md:p-5 md:text-base">
-                  <p>
-                    <strong className="text-amber-400">Tu diagnóstico es crudo: </strong> {aiConsultingText}
-                  </p>
-                </div>
+            <div className="mt-4 max-h-[40svh] w-full overflow-y-auto rounded-xl border border-amber-500/30 bg-zinc-900 p-4 text-left text-sm font-semibold leading-relaxed text-white shadow-[0_18px_36px_rgba(0,0,0,0.32)] md:mt-5 md:max-h-none md:p-5 md:text-base">
+              <p>{aiConsultingText}</p>
+              <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-amber-400">
+                Código: {evaluationResult.tierCode}
+              </p>
+            </div>
 
-                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/95 p-3 backdrop-blur-md md:p-4">
-                  <div className="mx-auto w-full max-w-xl">
-                    <p className="text-sm font-semibold text-center mb-2">
-                      A continuación tienes que agendar tu sesión para conocer LeadFlow.
-                    </p>
-                    <p className="rounded-lg border border-amber-500/30 bg-red-500/10 px-3 py-2 text-center text-xs font-black leading-snug text-red-200 ring-1 ring-red-400/30 md:text-sm">
-                      ⚠️ ATENCIÓN: Tu lugar expira en{' '}
-                      <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
-                        {countdown}s
-                      </span>
-                      .<br /> Si esta página se cierra, cederemos tu cupo a otro líder.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={redirectToWhatsApp}
-                      className="mt-2 inline-flex min-h-[54px] w-full items-center justify-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 text-sm font-black uppercase leading-tight text-slate-950 shadow-[0_16px_30px_rgba(0,0,0,0.46)] transition hover:scale-[1.01] active:scale-[0.99] md:mt-3 md:min-h-[62px] md:text-lg"
-                    >
-                      🟢 RECLAMAR MI LUGAR Y AGENDAR AHORA
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-amber-400">
-                  <XCircle className="h-8 w-8" />
-                </div>
-                <h2 className="mt-6 text-2xl font-black leading-tight text-white md:text-4xl">
-                  ❌ EVALUACIÓN FINAL: PERFIL NO VIABLE
-                </h2>
-                <p className="mt-5 text-sm font-medium leading-relaxed text-white md:text-lg">
-                  Tras procesar los datos operativos de tu organización, el sistema determinamos que tu estructura actual
-                  no cuenta con la masa crítica o el flujo de caja mínimo indispensable para garantizar la duplicación con
-                  la infraestructura de LeadFlow en este momento. Agradecemos tu interés.
+            <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-950/95 p-3 backdrop-blur-md md:p-4">
+              <div className="mx-auto w-full max-w-xl">
+                <p className="text-center text-sm font-semibold">
+                  Escríbenos por WhatsApp con tu código para continuar.
                 </p>
-              </>
-            )}
-
-            {import.meta.env.DEV ? (
-              <details className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
-                <summary className="cursor-pointer text-sm font-semibold text-slate-300">Payload de desarrollo</summary>
-                <pre className="mt-4 max-h-80 overflow-auto text-xs leading-relaxed text-slate-400">
-                  {JSON.stringify(lastPayload, null, 2)}
-                </pre>
-              </details>
-            ) : null}
+                {isQualified ? (
+                  <p className="mt-2 rounded-lg border border-amber-500/30 bg-red-500/10 px-3 py-2 text-center text-xs font-black leading-snug text-red-200 ring-1 ring-red-400/30 md:text-sm">
+                    Tu prioridad de agenda se mantiene por{' '}
+                    <span className="inline-flex min-w-10 justify-center rounded-md bg-red-500 px-2 py-0.5 text-white">
+                      {countdown}s
+                    </span>
+                    .
+                  </p>
+                ) : null}
+                <a
+                  href={canOpenWhatsApp ? whatsappHref : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleWhatsAppClick}
+                  className="mt-2 inline-flex min-h-[54px] w-full items-center justify-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 px-4 py-3 text-sm font-black uppercase leading-tight text-slate-950 shadow-[0_16px_30px_rgba(0,0,0,0.46)] transition hover:scale-[1.01] active:scale-[0.99] md:mt-3 md:min-h-[62px] md:text-lg"
+                >
+                  {resultCtaLabel}
+                </a>
+              </div>
+            </div>
           </div>
         ) : (
           renderStepContent()
