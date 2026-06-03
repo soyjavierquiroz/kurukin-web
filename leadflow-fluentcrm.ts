@@ -147,12 +147,15 @@ function extractPayloadFields(payload: JsonObject) {
     fbc: asString(payload.fbc) ?? asString(analytics?.fbc),
     ttclid: asString(payload.ttclid) ?? asString(payload.ttc) ?? asString(analytics?.ttclid),
     ttp: asString(analytics?.ttp),
+    trafficType: asString(analytics?.trafficType),
+    paidConfirmed: analytics?.paidConfirmed === true || asString(analytics?.paidConfirmed) === 'true',
+    paidPlatform: asString(analytics?.paidPlatform),
   };
 }
 
 function getTrafficTag(fields: ReturnType<typeof extractPayloadFields>): string {
-  if (fields.fbc || fields.fbp) return 'leadflow-meta';
-  if (fields.ttclid || fields.ttp) return 'leadflow-tiktok';
+  if (fields.paidConfirmed && (fields.paidPlatform === 'meta' || fields.trafficType === 'meta_paid')) return 'leadflow-meta';
+  if (fields.paidConfirmed && (fields.paidPlatform === 'tiktok' || fields.trafficType === 'tiktok_paid')) return 'leadflow-tiktok';
 
   return 'leadflow-organico';
 }
@@ -395,8 +398,7 @@ function buildFluentCrmLeadflowBodyWithDiagnostics(input: FluentCrmUpsertInput):
   const customFields = buildCustomFields(input, fields);
   const resolvedTags = resolveTags(getStatusTags(input, fields));
   const resolvedLists = resolveLists();
-  // TODO: Si se necesita guardar IP en FluentCRM, crear un custom field oficial
-  // tipo `leadflow_client_ip` y mapear analytics.clientIp aqui.
+  // Politica actual: la IP del visitante no se guarda en FluentCRM.
 
   const baseBody: JsonObject = {
     source: 'leadflow',

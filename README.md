@@ -96,7 +96,7 @@ VITE_WHATSAPP_NUMBER="591..."
 VITE_SITE_ID="kurukinleadflow"
 ```
 
-Deuda pendiente: el codigo actual conserva referencias/fallbacks a `KURUKIN` para `VITE_SITE_ID`. Estandarizarlo a `kurukinleadflow` en una limpieza posterior, validando que n8n y el relay mantengan la misma llave.
+El fallback de codigo para `VITE_SITE_ID` es `kurukinleadflow`. Alinear `.env`, n8n y cualquier relay con esa llave cuando corresponda.
 
 ## FluentCRM
 
@@ -162,12 +162,12 @@ Reglas runtime:
 
 ## Tracking
 
-- Browser tracking dispara conversion solo para `ORO` y `PLATA`.
+- Browser tracking dispara conversion solo para `ORO` y `PLATA`, y solo cuando la visita actual esta clasificada como paid confirmado para la plataforma correspondiente.
 - Meta CAPI corre en n8n para `ORO` y `PLATA`.
 - `DESCARTE` y guillotina local no deben generar conversion.
-- `eventId` es la llave de deduplicacion entre browser tracking y CAPI.
+- `eventId` del payload LeadFlow representa el evento logico `Lead_Calificado`; `sessionId` queda separado.
 
-El navegador captura `fbp`, `fbc`, `ttclid`, `ttp` y `eventId`; el backend los preserva para FluentCRM/n8n. n8n conserva la responsabilidad de enviar Meta CAPI y de evitar conversiones para descartes.
+El navegador captura atribucion actual, UTMs, `fbp`, `fbc`, `ttclid`, `ttp`, `eventId` y `sessionId`; el backend los preserva para FluentCRM/n8n. n8n conserva la responsabilidad de enviar Meta CAPI y de evitar conversiones para descartes. El relay CAPI desde navegador queda apagado por defecto salvo `VITE_ENABLE_BROWSER_RELAY=true`.
 
 ## DNS / Origin
 

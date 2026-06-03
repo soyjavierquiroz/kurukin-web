@@ -1,10 +1,13 @@
-// src/lib/analytics.ts
+import { captureCurrentAttribution, type AttributionTouch, type PaidPlatform, type PaidSignal, type TrafficType } from './attribution';
 
 const CAPI_RELAY_URL = import.meta.env.VITE_CAPI_RELAY_URL || 'https://relay.kuruk.in/v1/events';
-const SITE_ID = import.meta.env.VITE_SITE_ID || 'KURUKIN';
+const ENABLE_BROWSER_RELAY = import.meta.env.VITE_ENABLE_BROWSER_RELAY === 'true';
+const SITE_ID = import.meta.env.VITE_SITE_ID || 'kurukinleadflow';
 const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
 const TIKTOK_PIXEL_ID = import.meta.env.VITE_TIKTOK_PIXEL_ID;
 const CLIENT_IP_LOOKUP_URL = 'https://api.ipify.org?format=json';
+const SESSION_STORAGE_KEY = 'kurukin_analytics_session_id';
+const LEGACY_SESSION_STORAGE_KEY = 'kurukin_analytics_event_id';
 
 type FbqFunction = {
   (...args: any[]): void;
@@ -40,37 +43,78 @@ declare global {
   }
 }
 
-// Helper para extraer cookies de Meta/TikTok del navegador
-const getCookie = (name: string): string | null => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
-
-const setTrackingCookie = (name: string, value: string): void => {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=7776000; SameSite=Lax`;
-};
-
-const extractFbclidFromFbc = (fbc: string | null): string | null => {
-  if (!fbc) return null;
-
-  const parts = fbc.split('.');
-  return parts.length >= 4 ? parts.slice(3).join('.') || null : null;
-};
-
-interface PaidTrafficSignals {
+export interface AnalyticsContext {
+  eventId: string;
+  sessionId: string;
+  siteId: string;
+  trafficType: TrafficType;
+  paidConfirmed: boolean;
+  paidPlatform: PaidPlatform;
+  paidSignal: PaidSignal;
+  paidIntent: boolean;
+  currentUrl: string;
+  landingUrl: string;
+  pagePath: string;
+  referrer: string | null;
+  timestamp: string;
   fbclid: string | null;
-  fbclidParam: string | null;
   fbp: string | null;
   fbc: string | null;
   ttclid: string | null;
-  ttclidParam: string | null;
   ttp: string | null;
+  ttclidCookie: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
+  client_ip: string | null;
+  clientIp: string | null;
+  userAgent: string | null;
+  hasMetaSignal: boolean;
+  hasTikTokSignal: boolean;
+  firstTouch: AttributionTouch;
+  lastTouch: AttributionTouch;
 }
 
 let cachedClientIp: string | null = null;
 let clientIpPromise: Promise<string | null> | null = null;
+let browserRelayDisabledLogged = false;
+const sentTikTokPageViewsByPath = new Set<string>();
+
+const isBrowserEnvironment = (): boolean =>
+  typeof window !== 'undefined' && typeof document !== 'undefined';
+
+const devLog = (message: string): void => {
+  if (import.meta.env.DEV) {
+    console.log(message);
+  }
+};
+
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `evt_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+};
+
+const getSessionId = (): string => {
+  if (!isBrowserEnvironment()) return generateUUID();
+
+  let sessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
+  if (!sessionId) {
+    sessionId = sessionStorage.getItem(LEGACY_SESSION_STORAGE_KEY) || generateUUID();
+    sessionStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+  }
+
+  return sessionId;
+};
+
+export function createAnalyticsEventId(eventName: string): string {
+  const safeEventName = eventName.replace(/[^a-z0-9_]+/gi, '_').replace(/^_+|_+$/g, '') || 'event';
+  return `${safeEventName}_${generateUUID()}`;
+}
 
 export async function captureClientIp(timeoutMs = 1500): Promise<string | null> {
   if (cachedClientIp) return cachedClientIp;
@@ -97,7 +141,9 @@ export async function captureClientIp(timeoutMs = 1500): Promise<string | null> 
       cachedClientIp = ip || null;
       return cachedClientIp;
     } catch (error) {
-      console.warn('[Analytics] No se pudo capturar client_ip desde el navegador.', error);
+      if (import.meta.env.DEV) {
+        console.warn('[Analytics] No se pudo capturar client_ip desde el navegador.', error);
+      }
       return null;
     } finally {
       window.clearTimeout(timeout);
@@ -108,62 +154,20 @@ export async function captureClientIp(timeoutMs = 1500): Promise<string | null> 
   return clientIpPromise;
 }
 
-const getPaidTrafficSignals = (): PaidTrafficSignals => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const fbclidParam = urlParams.get('fbclid');
-  const ttclidParam = urlParams.get('ttclid');
-  const fbp = getCookie('_fbp');
-  let fbc = getCookie('_fbc');
+const canUseMetaBrowserPixel = (context: Pick<AnalyticsContext, 'paidPlatform' | 'paidConfirmed'>): boolean =>
+  context.paidPlatform === 'meta' && context.paidConfirmed;
 
-  if (!fbc && fbclidParam) {
-    fbc = `fb.1.${Date.now()}.${fbclidParam}`;
-    setTrackingCookie('_fbc', fbc);
-  }
-
-  if (ttclidParam) {
-    setTrackingCookie('ttclid', ttclidParam);
-  }
-
-  return {
-    fbclid: fbclidParam || extractFbclidFromFbc(fbc),
-    fbclidParam,
-    fbp,
-    fbc,
-    ttclid: ttclidParam || getCookie('ttclid') || getCookie('_ttclid'),
-    ttclidParam,
-    ttp: getCookie('_ttp')
-  };
-};
-
-// Generador de UUID para persistir el eventId por sesión
-const generateUUID = (): string => {
-  return crypto.randomUUID();
-};
-
-// Guardar un único eventId en el sessionStorage para asegurar consistencia
-const getSessionEventId = (): string => {
-  let eventId = sessionStorage.getItem('kurukin_analytics_event_id');
-  if (!eventId) {
-    eventId = generateUUID();
-    sessionStorage.setItem('kurukin_analytics_event_id', eventId);
-  }
-  return eventId;
-};
-
-interface AnalyticsContext {
-  eventId: string;
-  siteId: string;
-  client_ip: string | null;
-  fbclid: string | null;
-  fbp: string | null;
-  fbc: string | null;
-  ttclid: string | null;
-  ttp: string | null;
-  hasMetaSignal: boolean;
-  hasTikTokSignal: boolean;
-}
+const canUseTikTokBrowserPixel = (context: Pick<AnalyticsContext, 'paidPlatform' | 'paidConfirmed'>): boolean =>
+  context.paidPlatform === 'tiktok' && context.paidConfirmed;
 
 const initMetaPixel = (): void => {
+  if (!META_PIXEL_ID) {
+    if (import.meta.env.DEV) {
+      console.warn('[Analytics] VITE_META_PIXEL_ID no está configurado. Meta Pixel no será inicializado.');
+    }
+    return;
+  }
+
   if (!window.fbq) {
     const fbq = function (...args: any[]) {
       if (fbq.callMethod) {
@@ -191,12 +195,15 @@ const initMetaPixel = (): void => {
   if (!window.__kurukinMetaPixelInitialized) {
     window.fbq('init', META_PIXEL_ID);
     window.__kurukinMetaPixelInitialized = true;
+    devLog('[Analytics] Meta Pixel initialized');
   }
 };
 
 const initTikTokPixel = (): void => {
   if (!TIKTOK_PIXEL_ID) {
-    console.warn('[Analytics] VITE_TIKTOK_PIXEL_ID no está configurado. TikTok Pixel no será inicializado.');
+    if (import.meta.env.DEV) {
+      console.warn('[Analytics] VITE_TIKTOK_PIXEL_ID no está configurado. TikTok Pixel no será inicializado.');
+    }
     return;
   }
 
@@ -266,181 +273,250 @@ const initTikTokPixel = (): void => {
 
   if (!window.__kurukinTikTokPixelInitialized) {
     window.ttq.load?.(TIKTOK_PIXEL_ID);
-    window.ttq.page?.();
     window.__kurukinTikTokPixelInitialized = true;
+    devLog('[Analytics] TikTok Pixel initialized');
   }
 };
 
-// 1. Inicialización híbrida con filtro de pago: Browser Pixels + CAPI Relay
 export async function initPixels(): Promise<void> {
   void captureClientIp();
 
-  const signals = getPaidTrafficSignals();
+  const context = getAnalyticsContext('PageView', createAnalyticsEventId('PageView'));
 
-  if (!signals.fbclid && !signals.ttclid) {
-    console.log('[Analytics] Tráfico Orgánico detected. Píxeles de Meta y TikTok desactivados para proteger algoritmos.');
+  devLog(
+    `[Attribution] trafficType=${context.trafficType} paidSignal=${context.paidSignal ?? 'none'} paidConfirmed=${context.paidConfirmed}`,
+  );
+
+  if (!context.paidConfirmed || context.paidPlatform === null || context.paidPlatform === 'unknown') {
+    devLog('[Attribution] organic/direct detected, pixels disabled');
     return Promise.resolve();
   }
 
-  if (signals.fbclid) {
-    if (META_PIXEL_ID) {
-      initMetaPixel();
-    } else {
-      console.warn('[Analytics] VITE_META_PIXEL_ID no está configurado. Meta Pixel no será inicializado.');
-    }
+  if (canUseMetaBrowserPixel(context)) {
+    initMetaPixel();
   }
 
-  if (signals.ttclid) {
+  if (canUseTikTokBrowserPixel(context)) {
     initTikTokPixel();
   }
 
-  console.log(`[Analytics] Sistema inicializado en modo Anti-Curiosos bi-plataforma para el tenant: ${SITE_ID}`);
   return Promise.resolve();
 }
 
-// 2. Captura y persistencia de contexto analítico para n8n/formularios
-export function getAnalyticsContext(): AnalyticsContext {
-  const signals = getPaidTrafficSignals();
+export function getAnalyticsContext(eventName = 'Lead_Calificado', eventId = createAnalyticsEventId(eventName)): AnalyticsContext {
+  const attribution = captureCurrentAttribution();
+  const currentTouch = attribution.currentTouch;
+  const ttclidForPayload = currentTouch.ttclid ?? currentTouch.ttclidCookie;
+  const userAgent = isBrowserEnvironment() ? window.navigator.userAgent : null;
+  const hasMetaSignal = canUseMetaBrowserPixel(currentTouch);
+  const hasTikTokSignal = canUseTikTokBrowserPixel(currentTouch);
 
   return {
-    eventId: getSessionEventId(),
+    eventId,
+    sessionId: getSessionId(),
     siteId: SITE_ID,
+    trafficType: currentTouch.trafficType,
+    paidConfirmed: currentTouch.paidConfirmed,
+    paidPlatform: currentTouch.paidPlatform,
+    paidSignal: currentTouch.paidSignal,
+    paidIntent: currentTouch.paidIntent,
+    currentUrl: currentTouch.currentUrl,
+    landingUrl: currentTouch.landingUrl,
+    pagePath: currentTouch.pagePath,
+    referrer: currentTouch.referrer,
+    timestamp: currentTouch.timestamp,
+    fbclid: currentTouch.fbclid,
+    fbp: currentTouch.fbp,
+    fbc: currentTouch.fbc,
+    ttclid: ttclidForPayload,
+    ttp: currentTouch.ttp,
+    ttclidCookie: currentTouch.ttclidCookie,
+    utm_source: currentTouch.utm_source,
+    utm_medium: currentTouch.utm_medium,
+    utm_campaign: currentTouch.utm_campaign,
+    utm_content: currentTouch.utm_content,
+    utm_term: currentTouch.utm_term,
     client_ip: cachedClientIp,
-    fbclid: signals.fbclid,
-    fbp: signals.fbp,
-    fbc: signals.fbc,
-    ttclid: signals.ttclid,
-    ttp: signals.ttp,
-    hasMetaSignal: Boolean(signals.fbclid),
-    hasTikTokSignal: Boolean(signals.ttclid)
+    clientIp: cachedClientIp,
+    userAgent,
+    hasMetaSignal,
+    hasTikTokSignal,
+    firstTouch: attribution.firstTouch,
+    lastTouch: attribution.lastTouch,
   };
 }
 
-// 3. Despachador maestro hacia el kurukin-relay
-export async function trackEvent(
-  eventName: string, 
-  customEventId?: string, 
-  userData: Record<string, any> = {}, 
-  customData: Record<string, any> = {}
+async function sendBrowserRelay(
+  eventName: string,
+  eventId: string,
+  context: AnalyticsContext,
+  userData: Record<string, any>,
+  customData: Record<string, any>,
 ): Promise<void> {
-  const context = getAnalyticsContext();
-  const finalEventId = customEventId || context.eventId;
-  const metaEventName = eventName;
-  const tiktokEventName = metaEventName === 'Lead_Calificado' ? 'CompleteRegistration' : metaEventName;
-
-  if (!context.hasMetaSignal && !context.hasTikTokSignal) {
-    console.log(`[Analytics] Evento '${metaEventName}' bloqueado: no hay señal pagada fbclid/ttclid.`);
-    return Promise.resolve();
+  if (!ENABLE_BROWSER_RELAY) {
+    if (!browserRelayDisabledLogged) {
+      browserRelayDisabledLogged = true;
+      devLog('[Analytics] Browser relay disabled for LeadFlow');
+    }
+    return;
   }
 
-  const browserTasks: Promise<void>[] = [];
-
-  if (metaEventName === 'Lead_Calificado' && context.hasMetaSignal) {
-    browserTasks.push(Promise.resolve().then(() => {
-      window.fbq?.('trackCustom', 'Lead_Calificado', customData, { eventID: finalEventId });
-    }));
-  } else if (context.hasMetaSignal) {
-    browserTasks.push(Promise.resolve().then(() => {
-      window.fbq?.('track', metaEventName, customData, { eventID: finalEventId });
-    }));
-  }
-
-  if (metaEventName === 'Lead_Calificado' && context.hasTikTokSignal) {
-    browserTasks.push(Promise.resolve().then(() => {
-      window.ttq?.track?.('CompleteRegistration', { ...customData }, { event_id: finalEventId });
-    }));
-  } else if (context.hasTikTokSignal && metaEventName === 'PageView') {
-    browserTasks.push(Promise.resolve().then(() => {
-      window.ttq?.page?.();
-    }));
-  }
-
+  const tiktokEventName = eventName === 'Lead_Calificado' ? 'CompleteRegistration' : eventName;
   const payload = {
     siteId: SITE_ID,
-    event_name: metaEventName,
-    event_id: finalEventId,
+    event_name: eventName,
+    event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
-    event_source_url: window.location.href,
+    event_source_url: context.currentUrl,
     action_source: 'website',
     user_data: {
       client_ip: context.client_ip,
+      client_user_agent: context.userAgent,
       fbclid: context.fbclid,
       fbp: context.fbp,
       fbc: context.fbc,
       ttclid: context.ttclid,
       ttp: context.ttp,
-      ...userData
+      ...userData,
     },
     custom_data: {
-      ...customData
+      ...customData,
+      trafficType: context.trafficType,
+      paidConfirmed: context.paidConfirmed,
+      paidPlatform: context.paidPlatform,
+      paidSignal: context.paidSignal,
     },
     platforms: {
       meta: context.hasMetaSignal
         ? {
             pixel_id: META_PIXEL_ID || null,
-            event_name: metaEventName,
-            event_id: finalEventId,
+            event_name: eventName,
+            event_id: eventId,
             fbclid: context.fbclid,
             fbp: context.fbp,
-            fbc: context.fbc
+            fbc: context.fbc,
           }
         : null,
       tiktok: context.hasTikTokSignal
         ? {
             pixel_id: TIKTOK_PIXEL_ID || null,
             event_name: tiktokEventName,
-            event_id: finalEventId,
+            event_id: eventId,
             ttclid: context.ttclid,
-            ttp: context.ttp
+            ttp: context.ttp,
           }
-        : null
-    }
+        : null,
+    },
   };
 
-  const relayTask = (async () => {
-    const response = await fetch(CAPI_RELAY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Origin': 'https://kurukin.com' // Validado por CORS en el microservicio
-      },
-      body: JSON.stringify(payload)
-    });
+  const response = await fetch(CAPI_RELAY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: 'https://kurukin.com',
+    },
+    body: JSON.stringify(payload),
+  });
 
-    if (response.status === 202 || response.ok) {
-      console.log(`[CAPI Server-Side] Evento '${metaEventName}' enviado con éxito al Relay.`);
-    } else {
-      console.warn(`[CAPI Server-Side] El Relay rechazó el evento '${metaEventName}' con estatus: ${response.status}`);
-    }
-  })();
-
-  try {
-    await Promise.all([...browserTasks, relayTask]);
-  } catch (error) {
-    console.error(`[Analytics] Error al disparar el evento '${metaEventName}':`, error);
+  if (response.status === 202 || response.ok) {
+    devLog(`[CAPI Server-Side] Evento '${eventName}' enviado con éxito al Relay.`);
+  } else if (import.meta.env.DEV) {
+    console.warn(`[CAPI Server-Side] El Relay rechazó el evento '${eventName}' con estatus: ${response.status}`);
   }
 }
 
-// 4. Mapeo de funciones heredadas (Mantienen la compatibilidad con el resto de la App)
+export async function trackEvent(
+  eventName: string,
+  customEventId?: string,
+  userData: Record<string, any> = {},
+  customData: Record<string, any> = {},
+): Promise<void> {
+  const finalEventId = customEventId || createAnalyticsEventId(eventName);
+  const context = getAnalyticsContext(eventName, finalEventId);
+  const browserTasks: Promise<void>[] = [];
+
+  if (eventName === 'Lead_Calificado' && !customData.clasificacion) {
+    devLog('[Analytics] Lead_Calificado blocked: not qualified');
+    return Promise.resolve();
+  }
+
+  if (!context.paidConfirmed || context.paidPlatform === null || context.paidPlatform === 'unknown') {
+    devLog(`[Analytics] ${eventName} blocked: not paid confirmed`);
+    return Promise.resolve();
+  }
+
+  if (canUseMetaBrowserPixel(context)) {
+    initMetaPixel();
+    if (eventName === 'Lead_Calificado') {
+      browserTasks.push(Promise.resolve().then(() => {
+        window.fbq?.('trackCustom', 'Lead_Calificado', customData, { eventID: finalEventId });
+      }));
+    } else {
+      browserTasks.push(Promise.resolve().then(() => {
+        window.fbq?.('track', eventName, customData, { eventID: finalEventId });
+      }));
+    }
+  }
+
+  if (canUseTikTokBrowserPixel(context)) {
+    initTikTokPixel();
+    if (eventName === 'Lead_Calificado') {
+      browserTasks.push(Promise.resolve().then(() => {
+        window.ttq?.track?.('CompleteRegistration', { ...customData }, { event_id: finalEventId });
+      }));
+    } else if (eventName === 'PageView') {
+      const pageViewKey = context.pagePath || context.currentUrl;
+      if (!sentTikTokPageViewsByPath.has(pageViewKey)) {
+        sentTikTokPageViewsByPath.add(pageViewKey);
+        browserTasks.push(Promise.resolve().then(() => {
+          window.ttq?.page?.();
+        }));
+      } else {
+        devLog(`[Analytics] TikTok PageView skipped: already sent for ${pageViewKey}`);
+      }
+    }
+  }
+
+  browserTasks.push(sendBrowserRelay(eventName, finalEventId, context, userData, customData));
+
+  try {
+    await Promise.all(browserTasks);
+    if (eventName === 'Lead_Calificado') {
+      devLog('[Analytics] Lead_Calificado browser sent');
+    }
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error(`[Analytics] Error al disparar el evento '${eventName}':`, error);
+    }
+  }
+}
+
 export async function trackPageView(): Promise<void> {
-  return trackEvent('PageView');
+  return trackEvent('PageView', createAnalyticsEventId('PageView'));
 }
 
 export async function trackSubmitForm(customEventId?: string, userData?: Record<string, any>): Promise<void> {
-  // Mantiene compatibilidad sin convertir formularios enviados en leads calificados.
   return trackEvent('SubmitForm', customEventId, userData);
 }
 
-export async function trackQualifiedLead(customEventId?: string, userData?: Record<string, any>, classification?: string): Promise<void> {
+export async function trackQualifiedLead(
+  customEventId?: string,
+  userData?: Record<string, any>,
+  classification?: string,
+): Promise<void> {
+  if (classification !== 'ORO' && classification !== 'PLATA') {
+    devLog('[Analytics] Lead_Calificado blocked: not qualified');
+    return Promise.resolve();
+  }
+
   return trackEvent('Lead_Calificado', customEventId, userData, {
     content_name: 'qualified_lead',
     value: 10,
     currency: 'USD',
-    clasificacion: classification || 'Aprobado'
+    clasificacion: classification,
   });
 }
 
-// Fallback por si algún componente antiguo llama a trackLead
 export async function trackLead(customEventId?: string, userData?: Record<string, any>): Promise<void> {
   return trackEvent('Lead', customEventId, userData);
 }

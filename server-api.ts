@@ -1,6 +1,7 @@
 import express, { type NextFunction, type Request, type RequestHandler, type Response } from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { isIP } from 'node:net';
 import { LeadStatus, Prisma, PrismaClient } from '@prisma/client';
 import leadsHandler from './api/leads.ts';
 import { upsertLeadflowContact } from './leadflow-fluentcrm.ts';
@@ -31,6 +32,7 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express();
 
 app.disable('x-powered-by');
+app.set('trust proxy', true);
 app.use(express.json({ limit: '1mb' }));
 
 function runHandler(handler: ApiHandler): RequestHandler {
@@ -86,6 +88,87 @@ function asString(value: unknown): string | undefined {
   }
 
   return undefined;
+}
+
+function normalizeIp(value: unknown): string | undefined {
+  const raw = asString(value);
+  if (!raw) return undefined;
+
+  let candidate = raw.trim().replace(/^"|"$/g, '');
+  if (candidate.startsWith('::ffff:')) candidate = candidate.slice('::ffff:'.length);
+  if (candidate.startsWith('[')) candidate = candidate.slice(1, candidate.indexOf(']') > 0 ? candidate.indexOf(']') : undefined);
+  if (isIP(candidate)) return candidate;
+
+  const ipv4WithPort = candidate.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+  if (ipv4WithPort && isIP(ipv4WithPort[1])) return ipv4WithPort[1];
+
+  return undefined;
+}
+
+function isPublicIpv4(ip: string): boolean {
+  const octets = ip.split('.').map((part) => Number(part));
+  if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) return false;
+
+  const [a, b] = octets;
+  if (a === 0 || a === 10 || a === 127 || a >= 224) return false;
+  if (a === 100 && b >= 64 && b <= 127) return false;
+  if (a === 169 && b === 254) return false;
+  if (a === 172 && b >= 16 && b <= 31) return false;
+  if (a === 192 && (b === 0 || b === 168)) return false;
+  if (a === 198 && (b === 18 || b === 19)) return false;
+  if (a === 192 && b === 0 && octets[2] === 2) return false;
+  if (a === 198 && b === 51 && octets[2] === 100) return false;
+  if (a === 203 && b === 0 && octets[2] === 113) return false;
+
+  return true;
+}
+
+function isPublicIpv6(ip: string): boolean {
+  const normalized = ip.toLowerCase();
+  if (normalized === '::' || normalized === '::1') return false;
+
+  const firstSegment = parseInt(normalized.split(':')[0] || '0', 16);
+  if (!Number.isFinite(firstSegment)) return false;
+  if ((firstSegment & 0xfe00) === 0xfc00) return false;
+  if ((firstSegment & 0xffc0) === 0xfe80) return false;
+  if ((firstSegment & 0xff00) === 0xff00) return false;
+  if (normalized.startsWith('2001:db8:') || normalized === '2001:db8::') return false;
+
+  return true;
+}
+
+function isPublicIp(ip: string): boolean {
+  const version = isIP(ip);
+  if (version === 4) return isPublicIpv4(ip);
+  if (version === 6) return isPublicIpv6(ip);
+
+  return false;
+}
+
+function getHeaderIp(request: Request, headerName: string): string | undefined {
+  return normalizeIp(request.get(headerName));
+}
+
+function getFirstPublicForwardedIp(request: Request): string | undefined {
+  const forwardedFor = request.get('x-forwarded-for');
+  if (!forwardedFor) return undefined;
+
+  for (const item of forwardedFor.split(',')) {
+    const ip = normalizeIp(item);
+    if (ip && isPublicIp(ip)) return ip;
+  }
+
+  return undefined;
+}
+
+function getClientIp(request: Request): string | null {
+  const cloudflareIp = getHeaderIp(request, 'cf-connecting-ip');
+  if (cloudflareIp) return cloudflareIp;
+
+  const forwardedIp = getFirstPublicForwardedIp(request);
+  if (forwardedIp) return forwardedIp;
+
+  return getHeaderIp(request, 'x-real-ip') ?? normalizeIp(request.ip) ?? normalizeIp(request.socket.remoteAddress) ?? null;
 }
 
 function getObject(value: unknown): JsonObject | undefined {
@@ -357,8 +440,11 @@ function validateLeadflowPayload(payload: unknown, strict = true) {
 
 function buildTrafficTag(payload: JsonObject) {
   const analytics = getObject(payload.analytics);
-  const hasMetaSignal = Boolean(asString(payload.fbc) || asString(payload.fbp) || asString(analytics?.fbc) || asString(analytics?.fbp));
-  const hasTikTokSignal = Boolean(asString(payload.ttclid) || asString(payload.ttc) || asString(analytics?.ttclid) || asString(analytics?.ttp));
+  const paidConfirmed = analytics?.paidConfirmed === true || asString(analytics?.paidConfirmed) === 'true';
+  const paidPlatform = asString(analytics?.paidPlatform);
+  const trafficType = asString(analytics?.trafficType);
+  const hasMetaSignal = paidConfirmed && (paidPlatform === 'meta' || trafficType === 'meta_paid');
+  const hasTikTokSignal = paidConfirmed && (paidPlatform === 'tiktok' || trafficType === 'tiktok_paid');
 
   return hasMetaSignal ? 'leadflow-meta' : hasTikTokSignal ? 'leadflow-tiktok' : 'leadflow-organico';
 }
@@ -498,7 +584,7 @@ function didN8nWorkflowSucceed(value: unknown): boolean {
   return asBoolean(result.success) !== false;
 }
 
-function buildN8nPayload(payload: JsonObject, tier?: LeadflowTier) {
+function buildN8nPayload(payload: JsonObject, tier?: LeadflowTier): JsonObject {
   const lead = extractLeadflowHumanFields(payload);
   const respuestas = getObject(payload.respuestas);
 
@@ -527,6 +613,19 @@ function buildN8nPayload(payload: JsonObject, tier?: LeadflowTier) {
       source: 'leadflow',
       status: tier,
       tags: tier ? buildLeadflowTags(payload, tier) : ['leadflow', buildTrafficTag(payload)],
+    },
+  };
+}
+
+function withAnalyticsClientIp(payload: JsonObject, clientIp: string | null): JsonObject {
+  const analytics = getObject(payload.analytics) ?? {};
+
+  return {
+    ...payload,
+    analytics: {
+      ...analytics,
+      clientIp,
+      client_ip: clientIp,
     },
   };
 }
@@ -671,16 +770,25 @@ async function evaluateLeadflow(request: Request, response: Response, next: Next
     };
 
     const webhookUrl = process.env.N8N_LEADFLOW_EVALUATE_WEBHOOK_URL;
-    const n8nPayload = buildN8nPayload({
-      ...payload,
-      crmContactId: pendingCrmUpsert.crmContactId,
-      tierCode: pendingTierCode,
-    });
+    const clientIp = getClientIp(request);
+    const n8nPayload = buildN8nPayload(
+      withAnalyticsClientIp(
+        {
+          ...payload,
+          crmContactId: pendingCrmUpsert.crmContactId,
+          tierCode: pendingTierCode,
+        },
+        clientIp,
+      ),
+    );
 
     leadflowLog('[leadflow-evaluate] sending to n8n', {
       n8nConfigured: Boolean(webhookUrl),
       leadKeys: Object.keys(extractLeadflowHumanFields(payload)),
       lead: extractLeadflowHumanFields(n8nPayload),
+      clientIpCaptured: Boolean(clientIp),
+      clientIpVersion: clientIp ? isIP(clientIp) : null,
+      analyticsClientIpForwarded: Boolean(getObject(n8nPayload.analytics)?.clientIp || getObject(n8nPayload.analytics)?.client_ip),
     });
 
     if (!webhookUrl) {

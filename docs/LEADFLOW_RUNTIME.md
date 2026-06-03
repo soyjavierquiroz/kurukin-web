@@ -85,7 +85,7 @@ VITE_WHATSAPP_NUMBER="591..."
 VITE_SITE_ID="kurukinleadflow"
 ```
 
-Deuda pendiente: el codigo actual conserva referencias/fallbacks a `KURUKIN` para `VITE_SITE_ID`. Estandarizar a `kurukinleadflow` en una limpieza posterior coordinada con n8n/relay.
+El fallback de codigo para `VITE_SITE_ID` es `kurukinleadflow`. Alinear `.env`, n8n y cualquier relay con esa llave cuando corresponda.
 
 ## FluentCRM
 

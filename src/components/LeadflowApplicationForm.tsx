@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, MapPin, ShieldCheck, Zap 
 import { getCountries, isValidPhoneNumber, type Country } from 'react-phone-number-input';
 import SmartPhoneInput from './SmartPhoneInput';
 import { useVisitor, type VisitorData } from '../context/VisitorContext';
-import { captureClientIp, getAnalyticsContext, trackQualifiedLead } from '../lib/analytics';
+import { captureClientIp, createAnalyticsEventId, getAnalyticsContext, trackQualifiedLead } from '../lib/analytics';
 
 const TOTAL_STEPS = 7;
 const FIRST_FORM_STEP = 1;
@@ -14,7 +14,7 @@ const FALLBACK_COUNTRY: Country = 'US';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LEADFLOW_EVALUATE_API_URL = '/api/leadflow/evaluate';
 const LEADFLOW_LOCAL_DISCARD_API_URL = '/api/leadflow/capture-local-discard';
-const SITE_ID = 'KURUKIN';
+const SITE_ID = import.meta.env.VITE_SITE_ID || 'kurukinleadflow';
 const LEADFLOW_WHATSAPP_NUMBER =
   import.meta.env.VITE_LEADFLOW_WHATSAPP_NUMBER || import.meta.env.VITE_WHATSAPP_NUMBER || '59179790873';
 const DISCARD_PUBLIC_TEXT =
@@ -658,15 +658,16 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
 
   useEffect(() => {
     analyticsRef.current = {
-      ...getAnalyticsContext(),
+      ...getAnalyticsContext('Lead_Calificado', createAnalyticsEventId('Lead_Calificado')),
       siteId: SITE_ID,
     };
 
     void captureClientIp().then((clientIp) => {
       analyticsRef.current = {
-        ...getAnalyticsContext(),
+        ...getAnalyticsContext('Lead_Calificado', analyticsRef.current?.eventId),
         siteId: SITE_ID,
         client_ip: clientIp,
+        clientIp,
       };
     });
   }, []);
@@ -870,10 +871,12 @@ export function LeadflowApplicationForm({ className = '', onPayloadReady }: Lead
     }
 
     const clientIp = await captureClientIp();
+    const leadQualifiedEventId = createAnalyticsEventId('Lead_Calificado');
     const analyticsContext = {
-      ...getAnalyticsContext(),
+      ...getAnalyticsContext('Lead_Calificado', leadQualifiedEventId),
       siteId: SITE_ID,
       client_ip: clientIp,
+      clientIp,
     };
     analyticsRef.current = analyticsContext;
 
